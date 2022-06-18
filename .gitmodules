@@ -1,0 +1,3 @@
+[submodule "hardware/libs/AudioJacks"]
+	path = hardware/libs/AudioJacks
+	url = https://github.com/clacktronics/AudioJacks

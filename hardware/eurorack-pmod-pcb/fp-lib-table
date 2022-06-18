@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "AudioJacks")(type "KiCad")(uri "${KIPRJMOD}/../libs/AudioJacks/AudioJacks.pretty")(options "")(descr ""))
+)
