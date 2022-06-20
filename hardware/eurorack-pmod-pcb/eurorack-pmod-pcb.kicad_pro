@@ -414,6 +414,22 @@
     [
       "d1469efb-590b-4a61-a37b-5bbc286936ba",
       ""
+    ],
+    [
+      "ffd79913-d69b-48e3-a2e5-4374ac43aecb",
+      "dual_mono_inputs1"
+    ],
+    [
+      "80bb62a8-5986-4ea5-878a-5910e72a047d",
+      "dual_mono_inputs2"
+    ],
+    [
+      "ee8a9905-d244-4108-aba7-f2ec5b742432",
+      "dual_mono_outputs1"
+    ],
+    [
+      "b7b34fe6-4887-4f93-961b-a00dcfb8024d",
+      "dual_mono_outputs2"
     ]
   ],
   "text_variables": {}
