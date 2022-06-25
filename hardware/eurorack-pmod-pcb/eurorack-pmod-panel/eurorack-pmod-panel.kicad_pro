@@ -33,9 +33,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.3,
-          "height": 0.5,
-          "width": 0.5
+          "drill": 3.2,
+          "height": 3.2,
+          "width": 3.2
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -48,13 +48,7 @@
           "min_clearance": 0.508
         }
       },
-      "diff_pair_dimensions": [
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        }
-      ],
+      "diff_pair_dimensions": [],
       "drc_exclusions": [],
       "meta": {
         "version": 2
@@ -103,7 +97,7 @@
         "allow_blind_buried_vias": false,
         "allow_microvias": false,
         "max_error": 0.005,
-        "min_clearance": 0.15239999999999998,
+        "min_clearance": 0.0,
         "min_copper_edge_clearance": 0.0,
         "min_hole_clearance": 0.25,
         "min_hole_to_hole": 0.25,
@@ -118,16 +112,8 @@
         "solder_mask_min_width": 0.0,
         "use_height_for_length_calcs": true
       },
-      "track_widths": [
-        0.0,
-        0.254
-      ],
-      "via_dimensions": [
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        }
-      ],
+      "track_widths": [],
+      "via_dimensions": [],
       "zones_allow_external_fillets": false,
       "zones_use_no_outline": true
     },
@@ -137,217 +123,12 @@
   "cvpcb": {
     "equivalence_files": []
   },
-  "erc": {
-    "erc_exclusions": [],
-    "meta": {
-      "version": 0
-    },
-    "pin_map": [
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        2
-      ],
-      [
-        0,
-        2,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        2,
-        2,
-        2,
-        2
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        1,
-        0,
-        1,
-        2
-      ],
-      [
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        2,
-        1,
-        1,
-        2
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        2
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        2
-      ],
-      [
-        1,
-        1,
-        1,
-        1,
-        1,
-        0,
-        1,
-        1,
-        1,
-        1,
-        1,
-        2
-      ],
-      [
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        2
-      ],
-      [
-        0,
-        2,
-        1,
-        2,
-        0,
-        0,
-        1,
-        0,
-        2,
-        2,
-        2,
-        2
-      ],
-      [
-        0,
-        2,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        2,
-        0,
-        0,
-        2
-      ],
-      [
-        0,
-        2,
-        1,
-        1,
-        0,
-        0,
-        1,
-        0,
-        2,
-        0,
-        0,
-        2
-      ],
-      [
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2
-      ]
-    ],
-    "rule_severities": {
-      "bus_definition_conflict": "error",
-      "bus_entry_needed": "error",
-      "bus_label_syntax": "error",
-      "bus_to_bus_conflict": "error",
-      "bus_to_net_conflict": "error",
-      "different_unit_footprint": "error",
-      "different_unit_net": "error",
-      "duplicate_reference": "error",
-      "duplicate_sheet_names": "error",
-      "extra_units": "error",
-      "global_label_dangling": "warning",
-      "hier_label_mismatch": "error",
-      "label_dangling": "error",
-      "lib_symbol_issues": "warning",
-      "multiple_net_names": "warning",
-      "net_not_bus_member": "warning",
-      "no_connect_connected": "warning",
-      "no_connect_dangling": "warning",
-      "pin_not_connected": "error",
-      "pin_not_driven": "error",
-      "pin_to_pin": "warning",
-      "power_pin_not_driven": "error",
-      "similar_labels": "warning",
-      "unannotated": "error",
-      "unit_value_mismatch": "error",
-      "unresolved_variable": "error",
-      "wire_dangling": "error"
-    }
-  },
   "libraries": {
     "pinned_footprint_libs": [],
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "eurorack-pmod-pcb.kicad_pro",
+    "filename": "eurorack-pmod-panel.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -381,70 +162,15 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "eurorack-pmod-pcb.step",
+      "step": "",
       "vrml": ""
     },
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 0,
-    "drawing": {
-      "default_line_thickness": 6.0,
-      "default_text_size": 50.0,
-      "field_names": [],
-      "intersheets_ref_own_page": false,
-      "intersheets_ref_prefix": "",
-      "intersheets_ref_short": false,
-      "intersheets_ref_show": false,
-      "intersheets_ref_suffix": "",
-      "junction_size_choice": 3,
-      "label_size_ratio": 0.375,
-      "pin_symbol_size": 25.0,
-      "text_offset_ratio": 0.15
-    },
     "legacy_lib_dir": "",
-    "legacy_lib_list": [],
-    "meta": {
-      "version": 1
-    },
-    "net_format_name": "",
-    "ngspice": {
-      "fix_include_paths": true,
-      "fix_passive_vals": false,
-      "meta": {
-        "version": 0
-      },
-      "model_mode": 0,
-      "workbook_filename": ""
-    },
-    "page_layout_descr_file": "",
-    "plot_directory": "",
-    "spice_adjust_passive_values": false,
-    "spice_external_command": "spice \"%I\"",
-    "subpart_first_id": 65,
-    "subpart_id_separator": 0
+    "legacy_lib_list": []
   },
-  "sheets": [
-    [
-      "d1469efb-590b-4a61-a37b-5bbc286936ba",
-      ""
-    ],
-    [
-      "ffd79913-d69b-48e3-a2e5-4374ac43aecb",
-      "dual_mono_inputs1"
-    ],
-    [
-      "80bb62a8-5986-4ea5-878a-5910e72a047d",
-      "dual_mono_inputs2"
-    ],
-    [
-      "ee8a9905-d244-4108-aba7-f2ec5b742432",
-      "dual_mono_outputs1"
-    ],
-    [
-      "b7b34fe6-4887-4f93-961b-a00dcfb8024d",
-      "dual_mono_outputs2"
-    ]
-  ],
+  "sheets": [],
   "text_variables": {}
 }

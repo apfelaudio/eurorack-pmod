@@ -1,0 +1,26 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,(6.0.5)*%
+%TF.CreationDate,2022-06-21T23:16:54+02:00*%
+%TF.ProjectId,eurorack-pmod-pcb,6575726f-7261-4636-9b2d-706d6f642d70,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW (6.0.5)) date 2022-06-21 23:16:54*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.100000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X0Y0D02*
+X0Y-110000000D01*
+X30000000Y0D02*
+X0Y0D01*
+X30000000Y0D02*
+X30000000Y-110000000D01*
+X0Y-110000000D02*
+X30000000Y-110000000D01*
+M02*
