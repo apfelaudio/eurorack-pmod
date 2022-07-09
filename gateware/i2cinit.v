@@ -52,7 +52,8 @@ always @(posedge clk_sda) begin
             i2cinit_state <= I2CINIT_START;
         end
     end
-    if (i2cinit_state == I2CINIT_WRITE) begin
+    if (i2cinit_state == I2CINIT_WRITE ||
+        i2cinit_state == I2CINIT_START) begin
         cur_shift <= cur_shift + 1;
         if (cur_shift == 3'd7) begin
             cur_byte <= cur_byte + 1;
@@ -80,8 +81,7 @@ end
 always @(negedge clk_sda) begin
     if (i2cinit_state == I2CINIT_START) begin
         sda_startstop = 1'b0;
-    end
-    if (i2cinit_state == I2CINIT_STOP) begin
+    end else begin
         sda_startstop = 1'b1;
     end
 end
