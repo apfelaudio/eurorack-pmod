@@ -2,9 +2,12 @@
 #include <stdint.h>
 
 
-#define N_REGS 0x15
+#define I2C_N_BYTES 0x17
 
-const uint8_t reg_default_values[N_REGS] = {
+const uint8_t reg_default_values[I2C_N_BYTES] = {
+    0x10, // I2C slave address and RW bit (W=0).
+    0x00, // Register address to start at.
+
     0x00, // 0x00 Power Management
     0x0C, // 0x01 Audio I/F Format
     0x0C, // 0x02 Audio I/F Format
@@ -32,7 +35,7 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "Generating register dump.\n");
 
-	for (int i = 0; i != N_REGS; i++) {
+	for (int i = 0; i != I2C_N_BYTES; i++) {
 		if ((i % 8) == 0) {
 			printf("@%08x", i);
 		}

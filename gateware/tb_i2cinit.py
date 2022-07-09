@@ -16,8 +16,8 @@ async def test_i2c_write(dut):
 
     await RisingEdge(clock.signal)
 
-    for i in range(N_REGS):
+    for i in range(300):
 
         await RisingEdge(clock.signal)
 
-        dut._log.info(f"{hex(dut.cur_reg_counter.value)} - {hex(dut.cur_reg_value.value)}")
+        #dut._log.info(f"{hex(dut.cur_reg_counter.value)} - {hex(dut.cur_reg_value.value)}")
