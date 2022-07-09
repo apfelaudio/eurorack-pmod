@@ -35,10 +35,10 @@ always @(posedge clk) begin
 end
 
 reg scl_en = 1'b1;
-reg sda_en = 1'b1;
-reg sda_value = 1'b1;
+reg sda_wr = 1'b1;
+reg sda_startstop = 1'b1;
 assign scl = clk_scl && scl_en;
-assign sda = sda_value || ~sda_en; // If sda is not enabled, output high
+assign sda = ~(~sda_wr || ~sda_startstop);
 
 reg [15:0] wait_cycles = 16'd0;
 reg [7:0] cur_byte  = 8'd0;
@@ -53,30 +53,36 @@ always @(posedge clk_sda) begin
         end
     end
     if (i2cinit_state == I2CINIT_WRITE) begin
-        sda_en <= 1'b1;
         cur_shift <= cur_shift + 1;
         if (cur_shift == 3'd7) begin
             cur_byte <= cur_byte + 1;
             i2cinit_state <= I2CINIT_ACK;
         end
-        sda_value <= 1'b1 & (i2c_bytes[cur_byte] >> (7-cur_shift));
+        sda_wr <= 1'b1 & (i2c_bytes[cur_byte] >> (7-cur_shift));
         cur_byte_value <= i2c_bytes[cur_byte];
     end
     if (i2cinit_state == I2CINIT_ACK) begin
-        sda_en <= 1'b0;
+        sda_wr <= 1'b1;
+        if (cur_byte == N_BYTES) begin
+            i2cinit_state <= I2CINIT_STOP;
+        end else begin
+            i2cinit_state <= I2CINIT_WRITE;
+        end
+    end
+    if (i2cinit_state == I2CINIT_START) begin
         i2cinit_state <= I2CINIT_WRITE;
+    end
+    if (i2cinit_state == I2CINIT_STOP) begin
+        i2cinit_state <= I2CINIT_DONE;
     end
 end
 
 always @(negedge clk_sda) begin
     if (i2cinit_state == I2CINIT_START) begin
-        sda_en <= 1'b1;
-        sda_value <= 1'b0;
-        i2cinit_state <= I2CINIT_WRITE;
+        sda_startstop = 1'b0;
     end
     if (i2cinit_state == I2CINIT_STOP) begin
-        sda_en <= 1'b0;
-        i2cinit_state <= I2CINIT_DONE;
+        sda_startstop = 1'b1;
     end
 end
 
