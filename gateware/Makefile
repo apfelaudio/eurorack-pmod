@@ -1,6 +1,10 @@
-SIM ?= icarus
-TOPLEVEL_LANG ?= verilog
-VERILOG_SOURCES = i2cinit.v
-MODULE = tb_i2cinit
+PROJ = top
+ADD_SRC = i2cinit.v
 
-include $(shell cocotb-config --makefiles)/Makefile.sim
+PIN_DEF = icebreaker.pcf
+DEVICE = up5k
+PACKAGE = sg48
+
+prog: iceprog
+
+include ./main.mk

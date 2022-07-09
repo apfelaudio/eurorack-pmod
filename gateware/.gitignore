@@ -1,4 +1,8 @@
 *.vcd
 __pycache__/
 *.xml
+*.asc
+*.bin
+*.json
+*.log
 sim_build
