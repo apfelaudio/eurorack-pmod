@@ -1,7 +1,7 @@
 module i2cinit (
-    input    clk,
-    inout    sda,
-    output   scl
+    input     clk, // 2x i2c clock
+    output    scl,
+    inout     sda
 );
 
 parameter N_BYTES = 6'h17;

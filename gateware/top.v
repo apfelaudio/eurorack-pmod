@@ -5,16 +5,19 @@ module top (
 );
 
 reg [7:0] clkdiv;
-wire clk_i2c_x2 = clkdiv & 8'b10000000;
+reg clk_i2c_x2 = 1'b0;
 
 always @(posedge CLK) begin
     clkdiv <= clkdiv + 1;
+    if (clkdiv == 0) begin
+        clk_i2c_x2 <= ~clk_i2c_x2;
+    end
 end
 
 i2cinit i2cinit_instance (
-    clk_i2c_x2,
-    P2_1,
-    P2_2
+    .clk (clk_i2c_x2),
+    .scl (P2_1),
+    .sda (P2_2)
 );
 
 endmodule
