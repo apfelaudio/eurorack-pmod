@@ -1,7 +1,7 @@
 module top (
     input CLK,   // 12mhz
     output P2_1, // scl
-    output P2_2  // sda
+    inout P2_2  // sda
 );
 
 reg [7:0] clkdiv;
@@ -14,10 +14,17 @@ always @(posedge CLK) begin
     end
 end
 
+wire scl;
+wire sda_out;
+wire sda_in = 1'b1;
+assign P2_1 = scl ? 1'bz : 1'b0;
+assign P2_2 = sda_out ? 1'bz : 1'b0;
+
 i2cinit i2cinit_instance (
     .clk (clk_i2c_x2),
-    .scl (P2_1),
-    .sda (P2_2)
+    .scl (scl),
+    .sda_out (sda_out),
+    .sda_in (P2_2)
 );
 
 endmodule

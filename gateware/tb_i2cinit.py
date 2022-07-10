@@ -16,7 +16,7 @@ async def test_i2c_write(dut):
 
     await RisingEdge(clock.signal)
 
-    for i in range(300):
+    for i in range(1000):
 
         await RisingEdge(clock.signal)
 

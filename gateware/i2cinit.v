@@ -1,7 +1,8 @@
 module i2cinit (
     input     clk, // 2x i2c clock
-    output    scl,
-    inout     sda
+    output    scl, // Both outputs not tristated on HI
+    output    sda_out,
+    input     sda_in
 );
 
 parameter N_BYTES = 6'h17;
@@ -34,16 +35,15 @@ always @(posedge clk) begin
     end
 end
 
-reg scl_en = 1'b1;
+reg scl_en = 1'b0;
 reg sda_wr = 1'b1;
 reg sda_startstop = 1'b1;
-assign scl = clk_scl && scl_en;
-assign sda = ~(~sda_wr || ~sda_startstop);
+assign scl = scl_en ? clk_scl : 1'b1;
+assign sda_out = ~(~sda_wr || ~sda_startstop);
 
 reg [15:0] wait_cycles = 16'd0;
 reg [7:0] cur_byte  = 8'd0;
 reg [2:0] cur_shift = 3'd0;
-reg [7:0] cur_byte_value = 8'd0;
 always @(posedge clk_sda) begin
     if (i2cinit_state == I2CINIT_WAIT) begin
         // TODO: when to start scl_en?
@@ -60,7 +60,6 @@ always @(posedge clk_sda) begin
             i2cinit_state <= I2CINIT_ACK;
         end
         sda_wr <= 1'b1 & (i2c_bytes[cur_byte] >> (7-cur_shift));
-        cur_byte_value <= i2c_bytes[cur_byte];
     end
     if (i2cinit_state == I2CINIT_ACK) begin
         sda_wr <= 1'b1;
@@ -75,14 +74,22 @@ always @(posedge clk_sda) begin
     end
     if (i2cinit_state == I2CINIT_STOP) begin
         i2cinit_state <= I2CINIT_DONE;
+        sda_startstop <= 1'b0;
     end
 end
 
 always @(negedge clk_sda) begin
     if (i2cinit_state == I2CINIT_START) begin
-        sda_startstop = 1'b0;
+        scl_en <= 1'b1;
+        sda_startstop <= 1'b0;
     end else begin
-        sda_startstop = 1'b1;
+        sda_startstop <= 1'b1;
+    end
+end
+
+always @(posedge clk_scl) begin
+    if (i2cinit_state == I2CINIT_DONE) begin
+        scl_en <= 1'b0;
     end
 end
 
