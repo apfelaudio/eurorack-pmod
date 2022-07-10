@@ -18,6 +18,8 @@ wire sda_out_i2cinit;
 assign i2c_scl = scl_i2cinit ? 1'bz : 1'b0;
 assign i2c_sda = sda_out_i2cinit ? 1'bz : 1'b0;
 
+//assign sdout1 = 1'b1;
+
 
 reg [7:0] clkdiv = 8'd0;
 always @(posedge clk) begin
@@ -28,18 +30,29 @@ assign bick = clkdiv[1];
 assign lrck = clkdiv[7];
 
 reg [15:0] dac_out_word = 16'hAF00;
+reg [15:0] adc_word  = 16'h0;
 
 always @(posedge lrck) begin
-    dac_out_word <= dac_out_word + 4'h8;
+    dac_out_word <= adc_word;
 end
 
 wire [5:0] bit_counter = clkdiv[7:2];
 always @(posedge bick) begin
     if (bit_counter <= 4'hF) begin
         sdin1 <= dac_out_word[4'hF - bit_counter];
+        if (bit_counter == 6'd1) begin
+            adc_word <= 16'h0;
+        end else begin
+            adc_word[(4'hF - bit_counter) + 2] <= sdout1_latched;
+        end
     end else begin
         sdin1 <= 0;
     end
+end
+
+reg sdout1_latched = 1'b0;
+always @(negedge bick) begin
+    sdout1_latched <= sdout1;
 end
 
 i2cinit i2cinit_instance (
