@@ -5,7 +5,7 @@
 #define I2C_N_BYTES 0x17
 
 const uint8_t reg_default_values[I2C_N_BYTES] = {
-    0x10, // I2C slave address and RW bit (W=0).
+    0x20, // I2C slave address and RW bit (W=0).
     0x00, // Register address to start at.
 
     0x00, // 0x00 Power Management
