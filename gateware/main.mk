@@ -48,7 +48,7 @@ sudo-dfuprog: $(PROJ).bin
 	sudo dfu-util$(if $(DFU_DEVICE), -d $(DFU_DEVICE))$(if $(DFU_SERIAL), -S $(DFU_SERIAL)) -a 0 -D $< -R
 
 clean:
-	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).bin $(PROJ).json $(PROJ).log $(ADD_CLEAN)
+	rm -rf $(PROJ).blif $(PROJ).asc $(PROJ).bin $(PROJ).json $(PROJ).log results.xml sim_build/ __pycache__ *.vcd $(ADD_CLEAN)
 
 .SECONDARY:
 .PHONY: all prog clean
