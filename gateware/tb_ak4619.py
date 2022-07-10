@@ -2,10 +2,6 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 
-ADDR_TEST_VALUE = 0x65
-DATA_TEST_VALUE = 0xAB
-
-N_REGS = 0x15
 
 @cocotb.test()
 async def test_i2c_write(dut):
@@ -16,7 +12,7 @@ async def test_i2c_write(dut):
 
     await RisingEdge(clock.signal)
 
-    for i in range(1000):
+    for i in range(100000):
 
         await RisingEdge(clock.signal)
 

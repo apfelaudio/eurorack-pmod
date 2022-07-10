@@ -1,8 +1,10 @@
 module i2cinit (
     input     clk, // 2x i2c clock
-    output    scl, // Both outputs not tristated on HI
-    output    sda_out,
-    input     sda_in
+
+    // Note: outputs are NOT tristated on HI, this should be handled
+    // in a parent module depending on the output pin topology.
+    output    scl,
+    output    sda_out
 );
 
 parameter N_BYTES = 6'h17;
@@ -98,11 +100,4 @@ always @(posedge clk) begin
     end
 end
 
-`ifdef COCOTB_SIM
-initial begin
-  $dumpfile ("i2cinit.vcd");
-  $dumpvars;
-  #1;
-end
-`endif
 endmodule
