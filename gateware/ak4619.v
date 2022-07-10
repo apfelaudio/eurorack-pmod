@@ -31,19 +31,29 @@ assign lrck = clkdiv[7];
 
 reg [15:0] dac_out_word = 16'hAF00;
 reg [15:0] adc_word  = 16'h0;
+reg [15:0] adc_word2 = 16'h0;
 
 always @(posedge lrck) begin
-    dac_out_word <= adc_word;
+    dac_out_word <= adc_word + adc_word2;
 end
 
-wire [5:0] bit_counter = clkdiv[7:2];
+wire [4:0] bit_counter = clkdiv[6:2];
+wire ch_ix = clkdiv[7];
 always @(posedge bick) begin
     if (bit_counter <= 4'hF) begin
-        sdin1 <= dac_out_word[4'hF - bit_counter];
-        if (bit_counter == 6'd1) begin
-            adc_word <= 16'h0;
+        if (ch_ix == 0) begin
+            sdin1 <= dac_out_word[4'hF - bit_counter];
+            if (bit_counter == 6'd1) begin
+                adc_word <= 16'h0;
+            end else begin
+                adc_word[(4'hF - bit_counter) + 2] <= sdout1_latched;
+            end
         end else begin
-            adc_word[(4'hF - bit_counter) + 2] <= sdout1_latched;
+            if (bit_counter == 6'd1) begin
+                adc_word2 <= 16'h0;
+            end else begin
+                adc_word2[(4'hF - bit_counter) + 2] <= sdout1_latched;
+            end
         end
     end else begin
         sdin1 <= 0;
