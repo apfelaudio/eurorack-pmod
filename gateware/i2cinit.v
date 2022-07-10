@@ -79,6 +79,13 @@ always @(posedge clk) begin
                     i2cinit_state <= I2CINIT_DONE;
                     sda_startstop <= 1'b0;
                 end
+                I2CINIT_DONE: begin
+                    // TODO: Stop re-sending on success?
+                    wait_cycles <= 0;
+                    cur_byte    <= 8'd0;
+                    cur_shift   <= 3'd0;
+                    i2cinit_state <= I2CINIT_WAIT;
+                end
             endcase
         end else begin
             if (i2cinit_state == I2CINIT_START) begin
