@@ -18,50 +18,41 @@ wire sda_out_i2cinit;
 assign i2c_scl = scl_i2cinit ? 1'bz : 1'b0;
 assign i2c_sda = sda_out_i2cinit ? 1'bz : 1'b0;
 
-//assign sdout1 = 1'b1;
-
 
 reg [7:0] clkdiv = 8'd0;
 always @(posedge clk) begin
     clkdiv <= clkdiv + 1;
 end
 
-assign bick = clkdiv[1];
-assign lrck = clkdiv[7];
+assign bick = clkdiv[1]; // 12MHz >> 2 == 3MHz
+assign lrck = clkdiv[7]; // 12MHz >> 8 == 46.875KHz
 
-reg [15:0] dac_out_word = 16'hAF00;
-reg [15:0] adc_word  = 16'h0;
-reg [15:0] adc_word2 = 16'h0;
+reg [15:0] dac_words [0:1];
+reg [15:0] adc_words [0:1];
 
 always @(posedge lrck) begin
-    dac_out_word <= adc_word + adc_word2;
+    dac_words[0] <= adc_words[0];
+    dac_words[1] <= adc_words[1];
 end
 
-wire [4:0] bit_counter = clkdiv[6:2];
-wire ch_ix = clkdiv[7];
-always @(posedge bick) begin
-    if (bit_counter <= 4'hF) begin
-        if (ch_ix == 0) begin
-            sdin1 <= dac_out_word[4'hF - bit_counter];
-            if (bit_counter == 6'd1) begin
-                adc_word <= 16'h0;
-            end else begin
-                adc_word[(4'hF - bit_counter) + 2] <= sdout1_latched;
-            end
-        end else begin
-            if (bit_counter == 6'd1) begin
-                adc_word2 <= 16'h0;
-            end else begin
-                adc_word2[(4'hF - bit_counter) + 2] <= sdout1_latched;
-            end
-        end
-    end else begin
+wire channel = lrck; // 0 == L (Ch0), 1 == R (Ch1)
+reg [4:0] bit_counter = 8'h0;
+always @(negedge bick) begin
+    bit_counter <= bit_counter + 1;
+    if (bit_counter > 5'hF) begin
         sdin1 <= 0;
+    end else begin
+        sdin1 <= dac_words[channel][5'hF - bit_counter];
+        if (bit_counter == 5'h0) begin
+            adc_words[channel] <= {sdout1_latched, 15'h0};
+        end else begin
+            adc_words[channel][(5'hF - bit_counter) + 1] <= sdout1_latched;
+        end
     end
 end
 
 reg sdout1_latched = 1'b0;
-always @(negedge bick) begin
+always @(posedge bick) begin
     sdout1_latched <= sdout1;
 end
 
