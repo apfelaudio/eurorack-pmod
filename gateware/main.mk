@@ -2,7 +2,7 @@
 all: $(PROJ).bin
 
 %.json: %.v $(ADD_SRC) $(ADD_DEPS)
-	yosys -ql $*.log -p 'synth_ice40 -top top -json $@' $< $(ADD_SRC)
+	yosys -ql $*.log -p 'synth_ice40 -dsp -top top -json $@' $< $(ADD_SRC)
 
 %.asc: $(PIN_DEF) %.json
 	nextpnr-ice40 --$(DEVICE) \
