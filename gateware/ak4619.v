@@ -27,8 +27,8 @@ end
 assign bick = clkdiv[1]; // 12MHz >> 2 == 3MHz
 assign lrck = clkdiv[7]; // 12MHz >> 8 == 46.875KHz
 
-reg [15:0] dac_words [0:1];
-reg [15:0] adc_words [0:1];
+reg signed [15:0] dac_words [0:1];
+reg signed [15:0] adc_words [0:1];
 
 always @(posedge lrck) begin
     dac_words[0] <= adc_words[0];
@@ -36,18 +36,21 @@ always @(posedge lrck) begin
 end
 
 wire channel = lrck; // 0 == L (Ch0), 1 == R (Ch1)
-reg [4:0] bit_counter = 8'h0;
+reg [4:0] bit_counter = 5'h0;
 always @(negedge bick) begin
     bit_counter <= bit_counter + 1;
-    if (bit_counter > 5'hF) begin
-        sdin1 <= 0;
-    end else begin
+    // Clock out 16 bits
+    if (bit_counter <= 5'hF) begin
         sdin1 <= dac_words[channel][5'hF - bit_counter];
-        if (bit_counter == 5'h0) begin
-            adc_words[channel] <= {sdout1_latched, 15'h0};
-        end else begin
-            adc_words[channel][(5'hF - bit_counter) + 1] <= sdout1_latched;
-        end
+    end else begin
+        sdin1 <= 0;
+    end
+    // Clock in 16 bits
+    if (bit_counter == 5'h0) begin
+        adc_words[channel] <= 16'h0;
+    end
+    if (bit_counter <= 5'h10) begin
+        adc_words[channel][5'h10 - bit_counter] <= sdout1_latched;
     end
 end
 
