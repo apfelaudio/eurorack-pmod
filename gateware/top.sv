@@ -13,6 +13,16 @@ module top (
 wire sample_clk;
 wire [15:0] sample_out0;
 wire [15:0] sample_out1;
+wire [15:0] sample_in0;
+wire [15:0] sample_in1;
+
+sample sample_instance (
+    .sample_clk  (sample_clk),
+    .sample_in0 (sample_out0),
+    .sample_in1 (sample_out1),
+    .sample_out0 (sample_in0),
+    .sample_out1 (sample_in1)
+);
 
 ak4619 ak4619_instance (
     .clk     (CLK),
@@ -27,8 +37,8 @@ ak4619 ak4619_instance (
     .sample_clk  (sample_clk),
     .sample_out0 (sample_out0),
     .sample_out1 (sample_out1),
-    .sample_in0 (sample_out0),
-    .sample_in1 (sample_out1)
+    .sample_in0 (sample_in0),
+    .sample_in1 (sample_in1)
 );
 
 endmodule
