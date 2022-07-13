@@ -10,6 +10,10 @@ module top (
     output  P2_10
 );
 
+wire sample_clk;
+wire [15:0] sample_out0;
+wire [15:0] sample_out1;
+
 ak4619 ak4619_instance (
     .clk     (CLK),
     .pdn     (P2_3),
@@ -19,7 +23,12 @@ ak4619 ak4619_instance (
     .sdin1   (P2_7),
     .sdout1  (P2_8),
     .i2c_scl (P2_1),
-    .i2c_sda (P2_2)
+    .i2c_sda (P2_2),
+    .sample_clk  (sample_clk),
+    .sample_out0 (sample_out0),
+    .sample_out1 (sample_out1),
+    .sample_in0 (sample_out0),
+    .sample_in1 (sample_out1)
 );
 
 endmodule

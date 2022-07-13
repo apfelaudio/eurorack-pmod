@@ -1,5 +1,5 @@
 PROJ = top
-ADD_SRC = i2cinit.v ak4619.v
+ADD_SRC = i2cinit.sv ak4619.sv
 
 PIN_DEF = icebreaker.pcf
 DEVICE = up5k

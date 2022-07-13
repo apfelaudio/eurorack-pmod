@@ -19,13 +19,14 @@ async def clock_in_word(dut):
 @cocotb.test()
 async def test_adc_dac(dut):
 
-    clock = Clock(dut.clk, 20, units='ns')
+    clock = Clock(dut.CLK, 20, units='ns')
     cocotb.start_soon(clock.start())
-
-    dut.sdout1.value = 0
 
     TEST_L = 0xC0F0
     TEST_R = 0xAD0F
+
+    top = dut
+    dut = dut.ak4619_instance
 
     await FallingEdge(dut.lrck)
 
@@ -34,6 +35,8 @@ async def test_adc_dac(dut):
     await RisingEdge(dut.lrck)
 
     await clock_out_word(dut, TEST_R)
+
+    await RisingEdge(top.sample_clk)
 
     await FallingEdge(dut.lrck)
 

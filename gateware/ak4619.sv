@@ -7,7 +7,13 @@ module ak4619 (
     output reg sdin1,
     input  sdout1,
     output i2c_scl,
-    inout  i2c_sda
+    inout  i2c_sda,
+
+    output reg sample_clk,
+    output signed [15:0] sample_out0,
+    output signed [15:0] sample_out1,
+    input signed [15:0] sample_in0,
+    input signed [15:0] sample_in1
 );
 
 assign pdn = 1'b1;
@@ -29,11 +35,8 @@ assign lrck = clkdiv[7]; // 12MHz >> 8 == 46.875KHz
 
 reg signed [15:0] dac_words [0:1];
 reg signed [15:0] adc_words [0:1];
-
-always @(posedge lrck) begin
-    dac_words[0] <= adc_words[0];
-    dac_words[1] <= adc_words[1];
-end
+assign sample_out0 = adc_words[0];
+assign sample_out1 = adc_words[1];
 
 wire channel = lrck; // 0 == L (Ch0), 1 == R (Ch1)
 reg [4:0] bit_counter = 5'h0;
@@ -51,6 +54,17 @@ always @(negedge bick) begin
     end
     if (bit_counter <= 5'h10) begin
         adc_words[channel][5'h10 - bit_counter] <= sdout1_latched;
+    end
+    if (bit_counter == 5'h11) begin
+        if(channel == 0) begin
+            dac_words[0] <= sample_in0;
+            dac_words[1] <= sample_in1;
+            sample_clk <= 0;
+        end
+        if(channel == 1) begin
+            // Here is where samples should be clocked in/out.
+            sample_clk <= 1;
+        end
     end
 end
 
