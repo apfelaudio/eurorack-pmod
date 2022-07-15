@@ -54,7 +54,7 @@ always @(posedge clk) begin
             case (i2cinit_state)
                 I2CINIT_WAIT: begin
                     wait_cycles = wait_cycles + 1;
-                    if (wait_cycles == 16'd20) begin
+                    if (wait_cycles == 16'hFF) begin
                         i2cinit_state <= I2CINIT_START;
                     end
                 end

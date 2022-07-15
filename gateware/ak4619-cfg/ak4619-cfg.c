@@ -8,10 +8,10 @@ const uint8_t reg_default_values[I2C_N_BYTES] = {
     0x20, // I2C slave address and RW bit (W=0).
     0x00, // Register address to start at.
 
-    0x17, // 0x00 Power Management
-    0x0C, // 0x01 Audio I/F Format
-    0x0C, // 0x02 Audio I/F Format
-    0x00, // 0x03 System Clock Setting
+    0x37, // 0x00 Power Management
+    0xAC, // 0x01 Audio I/F Format
+    0x1C, // 0x02 Audio I/F Format
+    0x04, // 0x03 System Clock Setting
     0x22, // 0x04 MIC AMP Gain
     0x22, // 0x05 MIC AMP Gain
     0x30, // 0x06 ADC1 Lch Digital Volume
