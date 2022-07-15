@@ -9,7 +9,7 @@ module ak4619 (
     output i2c_scl,
     inout  i2c_sda,
 
-    output reg sample_clk,
+    output sample_clk,
     output signed [15:0] sample_out0,
     output signed [15:0] sample_out1,
     output signed [15:0] sample_out2,
@@ -31,6 +31,7 @@ assign i2c_sda = sda_out_i2cinit ? 1'bz : 1'b0;
 assign bick = clk;
 assign mclk = clk;
 assign lrck = clkdiv[6]; // 12MHz >> 7 == 93.75KHz
+assign sample_clk = lrck;
 
 
 reg signed [15:0] dac_words [0:3];
@@ -40,6 +41,12 @@ assign sample_out1 = adc_words[1];
 assign sample_out2 = adc_words[2];
 assign sample_out3 = adc_words[3];
 
+always @(negedge lrck) begin
+    dac_words[0] <= sample_in0;
+    dac_words[1] <= sample_in1;
+    dac_words[2] <= sample_in2;
+    dac_words[3] <= sample_in3;
+end
 
 reg [7:0] clkdiv = 8'd0;
 wire [1:0] channel = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
@@ -58,17 +65,6 @@ always @(negedge bick) begin
     end
     if (bit_counter <= 5'h10) begin
         adc_words[channel][5'h10 - bit_counter] <= sdout1_latched;
-    end
-    if (bit_counter == 5'h11 && channel == 2'h3) begin
-        dac_words[0] <= sample_in0;
-        dac_words[1] <= sample_in1;
-        dac_words[2] <= sample_in2;
-        dac_words[3] <= sample_in3;
-        sample_clk <= 0;
-    end
-    if (bit_counter == 5'h11 && channel == 2'h1) begin
-        // Here is where samples should be clocked in/out.
-        sample_clk <= 1;
     end
 end
 
