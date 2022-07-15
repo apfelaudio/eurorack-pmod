@@ -22,10 +22,12 @@ wire [15:0] sample_in3;
 
 sample sample_instance (
     .sample_clk  (sample_clk),
-    .sample_in0 (sample_out0),
-    .sample_in1 (sample_out1),
-    .sample_in2 (sample_out2),
-    .sample_in3 (sample_out3),
+    // Note: inputs samples are inverted by analog frontend
+    // Should add +1 for precise 2s complement sign change
+    .sample_in0 (~sample_out0),
+    .sample_in1 (~sample_out1),
+    .sample_in2 (~sample_out2),
+    .sample_in3 (~sample_out3),
     .sample_out0 (sample_in0),
     .sample_out1 (sample_in1),
     .sample_out2 (sample_in2),
@@ -47,11 +49,10 @@ ak4619 ak4619_instance (
     .sample_out1 (sample_out1),
     .sample_out2 (sample_out2),
     .sample_out3 (sample_out3),
-    // Note: outputs are inverting
-    .sample_in0 (~sample_in0),
-    .sample_in1 (~sample_in1),
-    .sample_in2 (~sample_in2),
-    .sample_in3 (~sample_in3)
+    .sample_in0 (sample_in0),
+    .sample_in1 (sample_in1),
+    .sample_in2 (sample_in2),
+    .sample_in3 (sample_in3)
 );
 
 endmodule
