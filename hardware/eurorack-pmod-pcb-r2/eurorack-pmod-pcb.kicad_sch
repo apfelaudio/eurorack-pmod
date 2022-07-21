@@ -2330,8 +2330,13 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 27a728f5-a422-4b56-bf9d-3a6066b6bd3d)
   )
-  (text "Power for TVDD / IOVDD from PMOD.\nVDD = 1V8 to 3V3 (dictates IO level)"
-    (at 240.157 55.88 0)
+  (text "Analog VDD only, Digital VDD comes from PMOD\n(even though they are both 3V3)"
+    (at 15.748 55.245 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 2f175aad-ee99-4a9c-a3c9-26ed6a0273a3)
+  )
+  (text "Power for TVDD / IOVDD comes from PMOD.\nVDD assumed 3V3 (dictates IO level)\n1V8 not enough for I2C IO expander or LEDs"
+    (at 230.124 58.166 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid c5354fb2-41ad-4b36-9832-9a9a4d84e060)
   )
@@ -3996,7 +4001,7 @@
     (property "Value" "PEC12R-3220F-S0024" (id 1) (at 44.196 181.102 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Footprint" "" (id 2) (at 50.546 170.18 0)
+    (property "Footprint" "BournsEncoders:PEC12R-3220F-S0024" (id 2) (at 50.546 170.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/PEC12R.pdf" (id 3) (at 48.006 166.37 0)
@@ -5355,7 +5360,7 @@
       (reference "RN11") (unit 4) (value "100K") (footprint "")
     )
     (path "/bdb40ef8-12bf-4250-a86c-49f4996c9290"
-      (reference "SW1") (unit 1) (value "PEC12R-3220F-S0024") (footprint "")
+      (reference "SW1") (unit 1) (value "PEC12R-3220F-S0024") (footprint "BournsEncoders:PEC12R-3220F-S0024")
     )
     (path "/63be1cec-5a41-4ded-888e-b17a7d9ed93d"
       (reference "U1") (unit 1) (value "LM1117-3.3") (footprint "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
