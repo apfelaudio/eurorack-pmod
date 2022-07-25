@@ -4775,7 +4775,7 @@
     (property "Reference" "SW1" (id 0) (at 57.658 160.274 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "PEC12R-3220F-S0024" (id 1) (at 44.196 181.102 90)
+    (property "Value" "PEC12R-3225F-S0024" (id 1) (at 44.196 181.102 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "BournsEncoders:PEC12R-3220F-S0024" (id 2) (at 50.546 170.18 0)
@@ -4784,7 +4784,7 @@
     (property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/PEC12R.pdf" (id 3) (at 48.006 166.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "mfg#" "PEC12R-3220F-S0024" (id 4) (at 54.61 166.37 90)
+    (property "mfg#" "PEC12R-3225F-S0024" (id 4) (at 54.61 166.37 90)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "dig#" "PEC12R-3220F-S0024-ND" (id 5) (at 54.61 166.37 90)
@@ -6281,7 +6281,7 @@
       (reference "RN14") (unit 4) (value "100K") (footprint "Resistor_SMD:R_Cat16-4")
     )
     (path "/bdb40ef8-12bf-4250-a86c-49f4996c9290"
-      (reference "SW1") (unit 1) (value "PEC12R-3220F-S0024") (footprint "BournsEncoders:PEC12R-3220F-S0024")
+      (reference "SW1") (unit 1) (value "PEC12R-3225F-S0024") (footprint "BournsEncoders:PEC12R-3220F-S0024")
     )
     (path "/63be1cec-5a41-4ded-888e-b17a7d9ed93d"
       (reference "U1") (unit 1) (value "LM1117-3.3") (footprint "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
