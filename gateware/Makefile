@@ -1,5 +1,5 @@
 PROJ = top
-ADD_SRC = i2cinit.sv ak4619.sv sample.sv
+ADD_SRC = i2cinit.sv ak4619.sv sample.sv uart_baud_tick_gen.v uart_tx.v
 
 PIN_DEF = icebreaker.pcf
 DEVICE = up5k
