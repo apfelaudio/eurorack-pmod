@@ -1,4 +1,4 @@
-#/bin/python3
+#!/bin/python3
 
 import serial
 import os
@@ -11,7 +11,7 @@ def twos_comp(val, bits):
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
 
-# Readings at output for -5V/+5Vin
+# [OUT OF DATE] Readings at output for -5V/+5Vin
 # 0: -4.588 -> 5.088
 # 1: -4.587 -> 5.035
 # 2: -4.564 -> 5.078
@@ -22,16 +22,16 @@ def channel_to_cal(ch, val):
         return ((-v) + (n5v+p5v)/2) / ((n5v-p5v) / 10.)
     out = 0
     if ch == 0:
-        out = cal2val(16625, -17940, val)
+        out = cal2val(14928, -23173, val)
     if ch == 1:
-        out = cal2val(16565, -18063, val)
+        out = cal2val(14644, -23393, val)
     if ch == 2:
-        out = cal2val(16517, -17988, val)
+        out = cal2val(14666, -23440, val)
     if ch == 3:
-        out = cal2val(16508, -17891, val)
+        out = cal2val(14565, -23475, val)
     return round(out, 4)
 
-ser = serial.Serial('/dev/ttyUSB2', 115200)
+ser = serial.Serial('/dev/ttyUSB1', 115200)
 
 while True:
     ser.flushInput()
