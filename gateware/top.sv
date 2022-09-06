@@ -17,28 +17,47 @@ localparam clk_freq = 12_000_000;
 localparam baud = 115200;
 
 wire sample_clk;
-wire [15:0] sample_out0;
-wire [15:0] sample_out1;
-wire [15:0] sample_out2;
-wire [15:0] sample_out3;
-wire [15:0] sample_in0;
-wire [15:0] sample_in1;
-wire [15:0] sample_in2;
-wire [15:0] sample_in3;
+wire [15:0] sample_adc0;
+wire [15:0] sample_adc1;
+wire [15:0] sample_adc2;
+wire [15:0] sample_adc3;
+wire [15:0] sample_dac0;
+wire [15:0] sample_dac1;
+wire [15:0] sample_dac2;
+wire [15:0] sample_dac3;
+wire [15:0] cal_in0;
+wire [15:0] cal_in1;
+wire [15:0] cal_in2;
+wire [15:0] cal_in3;
+
+input_cal input_cal_instance (
+    .clk     (CLK),
+    .sample_clk  (sample_clk),
+    // Note: inputs samples are inverted by analog frontend
+    // Should add +1 for precise 2s complement sign change
+    .uncal_in0 (~sample_adc0),
+    .uncal_in1 (~sample_adc1),
+    .uncal_in2 (~sample_adc2),
+    .uncal_in3 (~sample_adc3),
+    .cal_in0 (cal_in0),
+    .cal_in1 (cal_in1),
+    .cal_in2 (cal_in2),
+    .cal_in3 (cal_in3)
+);
 
 sample sample_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
-    .sample_in0 (~sample_out0),
-    .sample_in1 (~sample_out1),
-    .sample_in2 (~sample_out2),
-    .sample_in3 (~sample_out3),
-    .sample_out0 (sample_in0),
-    .sample_out1 (sample_in1),
-    .sample_out2 (sample_in2),
-    .sample_out3 (sample_in3)
+    .sample_in0 (cal_in0),
+    .sample_in1 (cal_in1),
+    .sample_in2 (cal_in2),
+    .sample_in3 (cal_in3),
+    .sample_out0 (sample_dac0),
+    .sample_out1 (sample_dac1),
+    .sample_out2 (sample_dac2),
+    .sample_out3 (sample_dac3)
 );
 
 ak4619 ak4619_instance (
@@ -52,14 +71,14 @@ ak4619 ak4619_instance (
     .i2c_scl (P2_1),
     .i2c_sda (P2_2),
     .sample_clk  (sample_clk),
-    .sample_out0 (sample_out0),
-    .sample_out1 (sample_out1),
-    .sample_out2 (sample_out2),
-    .sample_out3 (sample_out3),
-    .sample_in0 (sample_in0),
-    .sample_in1 (sample_in1),
-    .sample_in2 (sample_in2),
-    .sample_in3 (sample_in3)
+    .sample_out0 (sample_adc0),
+    .sample_out1 (sample_adc1),
+    .sample_out2 (sample_adc2),
+    .sample_out3 (sample_adc3),
+    .sample_in0 (sample_dac0),
+    .sample_in1 (sample_dac1),
+    .sample_in2 (sample_dac2),
+    .sample_in3 (sample_dac3)
 );
 
 reg tx1_start;
@@ -94,10 +113,10 @@ reg signed [15:0] adc_word_out = 16'h0;
 always @(posedge CLK) begin
     if (sample_clk && ~last_sample_clk && state == CH_ID) begin
         case (cur_ch)
-            2'h0: adc_word_out <= sample_in0;
-            2'h1: adc_word_out <= sample_in1;
-            2'h2: adc_word_out <= sample_in2;
-            2'h3: adc_word_out <= sample_in3;
+            2'h0: adc_word_out <= cal_in0;
+            2'h1: adc_word_out <= cal_in1;
+            2'h2: adc_word_out <= cal_in2;
+            2'h3: adc_word_out <= cal_in3;
         endcase
         led1_toggle <= ~led1_toggle;
     end

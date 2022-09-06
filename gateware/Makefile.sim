@@ -1,6 +1,6 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
-VERILOG_SOURCES = top.sv ak4619.sv i2cinit.sv sample.sv uart_tx.v uart_baud_tick_gen.v
+VERILOG_SOURCES = top.sv ak4619.sv i2cinit.sv sample.sv uart_tx.v uart_baud_tick_gen.v input_cal.sv
 MODULE = tb_ak4619
 
 include $(shell cocotb-config --makefiles)/Makefile.sim

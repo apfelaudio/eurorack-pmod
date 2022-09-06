@@ -74,11 +74,11 @@ async def test_adc_dac(dut):
     await FallingEdge(dut.lrck)
 
 @cocotb.test()
-async def test_sample(dut):
+async def test_input_cal(dut):
 
-    clock = Clock(dut.sample_instance.sample_clk, 5, units='us')
+    clock = Clock(dut.input_cal_instance.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
-    clock = Clock(dut.sample_instance.clk, 83, units='ns')
+    clock = Clock(dut.input_cal_instance.clk, 83, units='ns')
     cocotb.start_soon(clock.start())
 
     test_values = [
@@ -89,10 +89,10 @@ async def test_sample(dut):
     ]
 
     for value in test_values:
-        dut.sample_instance.sample_in0.value = value
+        dut.input_cal_instance.uncal_in0.value = value
         print(f"Stimulus: {hex(value)} {int(value)} (twos comp: {int(bit_not(value) + 1)})")
-        await RisingEdge(dut.sample_instance.sample_clk)
-        await RisingEdge(dut.sample_instance.sample_clk)
-        output = dut.sample_instance.sample_out0.value
+        await RisingEdge(dut.input_cal_instance.sample_clk)
+        await RisingEdge(dut.input_cal_instance.sample_clk)
+        output = dut.input_cal_instance.cal_in0.value
         print(f"Response: {hex(output)} {int(output)} (twos comp: {int(bit_not(output) + 1)})")
         print("---")
