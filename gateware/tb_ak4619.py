@@ -76,7 +76,9 @@ async def test_adc_dac(dut):
 @cocotb.test()
 async def test_sample(dut):
 
-    clock = Clock(dut.sample_instance.sample_clk, 83, units='ns')
+    clock = Clock(dut.sample_instance.sample_clk, 5, units='us')
+    cocotb.start_soon(clock.start())
+    clock = Clock(dut.sample_instance.clk, 83, units='ns')
     cocotb.start_soon(clock.start())
 
     test_values = [

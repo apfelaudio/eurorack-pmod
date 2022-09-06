@@ -27,6 +27,7 @@ wire [15:0] sample_in2;
 wire [15:0] sample_in3;
 
 sample sample_instance (
+    .clk     (CLK),
     .sample_clk  (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
