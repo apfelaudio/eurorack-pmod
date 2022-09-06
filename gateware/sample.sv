@@ -10,7 +10,21 @@ module sample (
     output signed [15:0] sample_out3
 );
 
-assign sample_out0 = sample_in0;
+// Clamp inputs to +/- 6.5V (26/4)
+localparam CLAMP_HI = 26000;
+localparam CLAMP_LO = -26000;
+
+reg [15:0] in0 = 16'h8000;
+wire [31:0] in0_unclamped = ((sample_in0 - 16'sd4122) * 32'sd269) >>> 8;
+
+always @(posedge sample_clk) begin
+    if (CLAMP_HI < in0_unclamped && in0_unclamped < 16'h8000) in0 <= CLAMP_HI;
+    else if (16'h8000 <= in0_unclamped && in0_unclamped < CLAMP_LO) in0 <= CLAMP_LO;
+    else in0 <= in0_unclamped;
+end
+
+
+assign sample_out0 = in0;
 assign sample_out1 = sample_in1;
 assign sample_out2 = sample_in2;
 assign sample_out3 = sample_in3;

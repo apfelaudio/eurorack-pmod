@@ -72,3 +72,25 @@ async def test_adc_dac(dut):
     assert result_r1 == bit_not(TEST_R1)
 
     await FallingEdge(dut.lrck)
+
+@cocotb.test()
+async def test_sample(dut):
+
+    clock = Clock(dut.sample_instance.sample_clk, 83, units='ns')
+    cocotb.start_soon(clock.start())
+
+    test_values = [
+            23173,
+            bit_not(14928)+1,
+            30000,
+            bit_not(30000)+1
+    ]
+
+    for value in test_values:
+        dut.sample_instance.sample_in0.value = value
+        print(f"Stimulus: {hex(value)} {int(value)} (twos comp: {int(bit_not(value) + 1)})")
+        await RisingEdge(dut.sample_instance.sample_clk)
+        await RisingEdge(dut.sample_instance.sample_clk)
+        output = dut.sample_instance.sample_out0.value
+        print(f"Response: {hex(output)} {int(output)} (twos comp: {int(bit_not(output) + 1)})")
+        print("---")
