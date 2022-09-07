@@ -32,8 +32,8 @@ end
 // Source signal of calibration pipeline below so we only need 1 multiply
 // for all 4 channels during 1 sample_clk.
 wire signed [31:0] cal_unclamped = (
-    (uncal_in_latched[cur_channel] - cal_mem[cur_channel << 1])
-     * cal_mem[(cur_channel << 1)+1]) >>> 8;
+    (uncal_in_latched[cur_channel] - cal_mem[{cur_channel, 1'b0}])
+     * cal_mem[{cur_channel, 1'b1}]) >>> 8;
 
 reg [1:0] cur_channel = 2'd0;
 reg signed [15:0] cal_in [0:3];

@@ -48,8 +48,6 @@ input_cal input_cal_instance (
 sample sample_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
-    // Note: inputs samples are inverted by analog frontend
-    // Should add +1 for precise 2s complement sign change
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
     .sample_in2 (cal_in2),
