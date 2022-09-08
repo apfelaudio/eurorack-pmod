@@ -128,10 +128,10 @@ reg signed [15:0] adc_word_out = 16'h0;
 always @(posedge CLK) begin
     if (sample_clk && ~last_sample_clk && state == CH_ID) begin
         case (cur_ch)
-            2'h0: adc_word_out <= cal_in0;
-            2'h1: adc_word_out <= cal_in1;
-            2'h2: adc_word_out <= cal_in2;
-            2'h3: adc_word_out <= cal_in3;
+            2'h0: adc_word_out <= sample_adc0;
+            2'h1: adc_word_out <= sample_adc1;
+            2'h2: adc_word_out <= sample_adc2;
+            2'h3: adc_word_out <= sample_adc3;
         endcase
         led1_toggle <= ~led1_toggle;
     end

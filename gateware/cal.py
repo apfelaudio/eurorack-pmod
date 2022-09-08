@@ -43,6 +43,7 @@ while True:
     raw = raw[raw.find(b'CH0'):]
 
     ix = 0
+    ch_tc_values = np.zeros(4)
     while ix < len(raw):
         item = raw[ix:ix+5]
         if not item.startswith(b'CH') or ix > 15:
@@ -56,6 +57,7 @@ while True:
         alpha = 0.1
         ch_avg[channel] = alpha*value_tc + (1-alpha)*ch_avg[channel]
         print(channel, hex(value), value_tc, int(ch_avg[channel]))
+        ch_tc_values[channel] = value_tc
         ix = ix + 5
 
     if keyboard.is_pressed('p'):
@@ -81,6 +83,12 @@ while True:
             cal_string = cal_string + hex(int(shift_constant[i])).replace('0x','') + ' '
             cal_string = cal_string + hex(int(mp_constant[i])).replace('0x','') + ' '
         print(cal_string)
+
+        print()
+        print("Back-calculated channel values:")
+        for i in range(4):
+            back_calc = int(int(mp_constant[i])*(-ch_tc_values[i]-int(shift_constant[i]))) >> 10
+            print(i, ch_tc_values[i], "->", back_calc, "(", back_calc/4000., "V )")
     else:
         cal_string = None
         print("Constants not finite, could not generate calibration string")
