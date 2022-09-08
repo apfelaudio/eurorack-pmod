@@ -23,7 +23,7 @@ async def clock_in_word(dut):
 def bit_not(n, numbits=16):
     return (1 << numbits) - 1 - n
 
-@cocotb.test()
+@cocotb.test(skip=True)
 async def test_adc_dac(dut):
 
     clock = Clock(dut.CLK, 83, units='ns')
@@ -89,7 +89,7 @@ async def test_input_cal(dut):
     ]
 
     for value in test_values:
-        dut.input_cal_instance.uncal_in0.value = value
+        dut.input_cal_instance.adc_in0.value = value
         print(f"Stimulus: {hex(value)} {int(value)} (twos comp: {int(bit_not(value) + 1)})")
         await RisingEdge(dut.input_cal_instance.sample_clk)
         await RisingEdge(dut.input_cal_instance.sample_clk)

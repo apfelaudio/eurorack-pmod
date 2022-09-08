@@ -29,16 +29,20 @@ wire [15:0] cal_in0;
 wire [15:0] cal_in1;
 wire [15:0] cal_in2;
 wire [15:0] cal_in3;
+wire [15:0] cal_out0;
+wire [15:0] cal_out1;
+wire [15:0] cal_out2;
+wire [15:0] cal_out3;
 
 input_cal input_cal_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
-    .uncal_in0 (~sample_adc0),
-    .uncal_in1 (~sample_adc1),
-    .uncal_in2 (~sample_adc2),
-    .uncal_in3 (~sample_adc3),
+    .adc_in0 (~sample_adc0),
+    .adc_in1 (~sample_adc1),
+    .adc_in2 (~sample_adc2),
+    .adc_in3 (~sample_adc3),
     .cal_in0 (cal_in0),
     .cal_in1 (cal_in1),
     .cal_in2 (cal_in2),
@@ -52,10 +56,23 @@ sample sample_instance (
     .sample_in1 (cal_in1),
     .sample_in2 (cal_in2),
     .sample_in3 (cal_in3),
-    .sample_out0 (sample_dac0),
-    .sample_out1 (sample_dac1),
-    .sample_out2 (sample_dac2),
-    .sample_out3 (sample_dac3)
+    .sample_out0 (cal_out0),
+    .sample_out1 (cal_out1),
+    .sample_out2 (cal_out2),
+    .sample_out3 (cal_out3)
+);
+
+output_cal output_cal_instance (
+    .clk     (CLK),
+    .sample_clk  (sample_clk),
+    .cal_out0 (cal_out0),
+    .cal_out1 (cal_out1),
+    .cal_out2 (cal_out2),
+    .cal_out3 (cal_out3),
+    .dac_out0 (sample_dac0),
+    .dac_out1 (sample_dac1),
+    .dac_out2 (sample_dac2),
+    .dac_out3 (sample_dac3)
 );
 
 ak4619 ak4619_instance (
