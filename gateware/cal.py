@@ -6,6 +6,13 @@ import time
 import numpy as np
 import keyboard
 
+SERIAL_PORT = '/dev/ttyUSB1'
+
+# Input calibration is aiming for N counts per volt
+COUNT_PER_VOLT = 4000
+
+# Number of bits in multiply constant for input calibration
+MP_N_BITS = 10
 
 def twos_comp(val, bits):
     """compute the 2's complement of int value val"""
@@ -13,25 +20,7 @@ def twos_comp(val, bits):
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
 
-# [OUT OF DATE] Readings at output for -20k/+20k
-# +20k: 5.950, broken, 6.034, 5.955
-# -20k: -4.159, broken, -4.093, -4.152
-
-def channel_to_cal(ch, val):
-    def cal2val(n5v, p5v, v):
-        return ((-v) + (n5v+p5v)/2) / ((n5v-p5v) / 10.)
-    out = 0
-    if ch == 0:
-        out = cal2val(14928, -23173, val)
-    if ch == 1:
-        out = cal2val(14644, -23393, val)
-    if ch == 2:
-        out = cal2val(14666, -23440, val)
-    if ch == 3:
-        out = cal2val(14565, -23475, val)
-    return round(out, 4)
-
-ser = serial.Serial('/dev/ttyUSB1', 115200)
+ser = serial.Serial(SERIAL_PORT, 115200)
 
 ch_avg = np.zeros(4)
 p5v_avg = np.zeros(4)
@@ -53,7 +42,6 @@ while True:
         lsb = item[4]
         value = (msb << 8) | lsb
         value_tc = twos_comp(value, 16)
-        #print(channel, hex(value), value_tc, channel_to_cal(channel, value_tc))
         alpha = 0.1
         ch_avg[channel] = alpha*value_tc + (1-alpha)*ch_avg[channel]
         print(channel, hex(value), value_tc, int(ch_avg[channel]))
@@ -70,8 +58,8 @@ while True:
     print("+5v captured:", p5v_avg)
     print("-5v captured:", n5v_avg)
 
-    shift_constant = -(n5v_avg+p5v_avg)/2.
-    mp_constant = 2**10*40000*1./(n5v_avg-p5v_avg)
+    shift_constant = -(n5v_avg + p5v_avg)/2.
+    mp_constant = 2**MP_N_BITS * COUNT_PER_VOLT * 10./(n5v_avg-p5v_avg)
     print("shift_constant:", shift_constant)
     print("mp_constant:", mp_constant)
 
@@ -87,8 +75,9 @@ while True:
         print()
         print("Back-calculated channel values:")
         for i in range(4):
-            back_calc = int(int(mp_constant[i])*(-ch_tc_values[i]-int(shift_constant[i]))) >> 10
-            print(i, ch_tc_values[i], "->", back_calc, "(", back_calc/4000., "V )")
+            back_calc = int(int(mp_constant[i])*
+                            (-ch_tc_values[i]-int(shift_constant[i]))) >> MP_N_BITS
+            print(i, ch_tc_values[i], "->", back_calc, "(", float(back_calc)/COUNT_PER_VOLT, "V )")
     else:
         cal_string = None
         print("Constants not finite, could not generate calibration string")
@@ -100,5 +89,3 @@ while True:
     time.sleep(0.1)
 
     os.system('clear')
-
-
