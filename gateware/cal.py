@@ -19,7 +19,7 @@
 #    - UART_SAMPLE_TRANSMITTER
 #    - OUTPUT_CALIBRATION
 #    - [important!] undef UART_SAMPLE_TRANSMIT_RAW_ADC (this step needs cal samples)
-# 2. Loop back all outputs to inputs
+# 2. Loop back all outputs to inputs (1->1, 2->2, ...)
 # 3. Run `sudo ./cal.py output`
 # 4. Wait for values to settle, hold 'p' to capture
 # 5. Hold uButton, wait for values to settle, hold 'n' to capture

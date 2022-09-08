@@ -1,5 +1,12 @@
+// Transmit CODEC samples over UART
 `define UART_SAMPLE_TRANSMITTER
+
+// Transmit raw CODEC samples, bypassing the input
+// calibration logic (necessary for calibrating inputs).
 //`define UART_SAMPLE_TRANSMIT_RAW_ADC
+
+// Force the output DAC to a specific value depending on
+// the position of the uButton (necessary for output cal).
 //`define OUTPUT_CALIBRATION
 
 module top (

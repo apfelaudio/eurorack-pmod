@@ -11,7 +11,7 @@ module input_cal (
     output signed [15:0] cal_in3
 );
 
-// Clamp al_out to +/- 7V (28/4)
+// Clamp cal_in to +/- 7V (28/4)
 localparam CLAMP_HI = 28000;
 localparam CLAMP_LO = -28000;
 
