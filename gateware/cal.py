@@ -1,5 +1,34 @@
 #!/bin/python3
 
+# I/O calibration utility for EURORACK-PMOD
+#
+# INPUT calibration process:
+# 1. Compile gateware and program FPGA with:
+#    - UART_SAMPLE_TRANSMITTER
+#    - UART_SAMPLE_TRANSMIT_RAW_ADC
+# 2. Connect +/- 5V source to all INPUTS
+# 3. Run `sudo ./cal.py input`
+# 4. Supply 5V,  wait for values to settle, hold 'p' to capture
+# 5. Supply -5V, wait for values to settle, hold 'n' to capture
+# 6. At this point you can try other voltages to make sure the calibration is good
+#    by looking at the 'back-calculated' values using the generated calibration.
+# 7. Press 'x', copy the calibration string to the input cal hex file.
+#
+# OUTPUT calibration process:
+# 1. Recompile gateware with input calibration (from above!) and program FPGA with:
+#    - UART_SAMPLE_TRANSMITTER
+#    - OUTPUT_CALIBRATION
+#    - [important!] undef UART_SAMPLE_TRANSMIT_RAW_ADC (this step needs cal samples)
+# 2. Loop back all outputs to inputs
+# 3. Run `sudo ./cal.py output`
+# 4. Wait for values to settle, hold 'p' to capture
+# 5. Hold uButton, wait for values to settle, hold 'n' to capture
+#    (the uButton switches between the output emitting +/- signals)
+# 7. Press 'x', copy the calibration string to the output cal hex file.
+#
+# Note: if you check the output calibration with a multimeter, make sure
+# to add a 100K load unless you calibrate with the CAL_OPEN_LOAD option below.
+
 import serial
 import sys
 import os
