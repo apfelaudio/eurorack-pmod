@@ -69,7 +69,7 @@ while True:
     print("-5v captured:", n5v_avg)
 
     shift_constant = -(n5v_avg+p5v_avg)/2.
-    mp_constant = 2**8*40000*1./(n5v_avg-p5v_avg)
+    mp_constant = 2**10*40000*1./(n5v_avg-p5v_avg)
     print("shift_constant:", shift_constant)
     print("mp_constant:", mp_constant)
 
