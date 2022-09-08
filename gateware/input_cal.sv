@@ -11,9 +11,9 @@ module input_cal (
     output signed [15:0] cal_in3
 );
 
-// Clamp al_out to +/- 6.5V (26/4)
-localparam CLAMP_HI = 26000;
-localparam CLAMP_LO = -26000;
+// Clamp al_out to +/- 7V (28/4)
+localparam CLAMP_HI = 28000;
+localparam CLAMP_LO = -28000;
 
 // Calibration memory for 4 channels stored as
 // 2 bytes shift, 2 bytes multiply * 4 channels.

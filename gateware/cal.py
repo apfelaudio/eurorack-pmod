@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import serial
+import sys
 import os
 import time
 import numpy as np
@@ -13,6 +14,14 @@ COUNT_PER_VOLT = 4000
 
 # Number of bits in multiply constant for input calibration
 MP_N_BITS = 10
+
+# Calibrate outputs such that they are correct if they are driving
+# an open load (i.e a multimeter). Normally, the 1K output impedance
+# should be driving a 100K input impedance causing a small droop.
+# Set this to False for the latter case.
+CAL_OPEN_LOAD = True
+
+INPUT_CAL = True if 'input' in sys.argv[1] else False
 
 def twos_comp(val, bits):
     """compute the 2's complement of int value val"""
@@ -30,6 +39,9 @@ while True:
     ser.flushInput()
     raw = ser.read(100)
     raw = raw[raw.find(b'CH0'):]
+
+    print("INPUT" if INPUT_CAL else "OUTPUT", "calibration")
+    print()
 
     ix = 0
     ch_tc_values = np.zeros(4)
@@ -58,10 +70,28 @@ while True:
     print("+5v captured:", p5v_avg)
     print("-5v captured:", n5v_avg)
 
-    shift_constant = -(n5v_avg + p5v_avg)/2.
-    mp_constant = 2**MP_N_BITS * COUNT_PER_VOLT * 10./(n5v_avg-p5v_avg)
-    print("shift_constant:", shift_constant)
-    print("mp_constant:", mp_constant)
+    shift_constant = None
+    mp_constant = None
+
+    if INPUT_CAL:
+        shift_constant = -(n5v_avg + p5v_avg)/2.
+        mp_constant = 2**MP_N_BITS * COUNT_PER_VOLT * 10./(n5v_avg-p5v_avg)
+        print("shift_constant:", shift_constant)
+        print("mp_constant:", mp_constant)
+    else:
+        range_constant = (p5v_avg - n5v_avg) / (COUNT_PER_VOLT * 10.)
+        if CAL_OPEN_LOAD:
+            # Tweak range constant to remove effect of 100K load impedance.
+            # (in all cases it is assumed the device is connected in loopback
+            # mode, all this does is tweak the constants emitted)
+            range_constant = range_constant * (101./100.)
+        print("range_constant:", range_constant)
+        mp_constant = 2**MP_N_BITS / range_constant
+        print("mp_constant:", mp_constant)
+        shift_constant = (n5v_avg + p5v_avg)/2.
+        shift_constant = shift_constant * range_constant
+        print("shift_constant:", shift_constant)
+
 
     print()
     cal_string = None

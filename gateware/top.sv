@@ -1,38 +1,53 @@
+`define UART_SAMPLE_TRANSMITTER
+//`define UART_SAMPLE_TRANSMIT_RAW_ADC
+//`define OUTPUT_CALIBRATION
+
 module top (
-    input   CLK,
-    output  P2_1,
-    inout   P2_2,
-    output  P2_3,
-    output  P2_4,
-    output  P2_7,
-    input   P2_8,
-    output  P2_9,
-    output  P2_10,
-  	output TX,
-    output LEDR_N,
-    output LEDG_N
+     input   CLK
+    ,output  P2_1
+    ,inout   P2_2
+    ,output  P2_3
+    ,output  P2_4
+    ,output  P2_7
+    ,input   P2_8
+    ,output  P2_9
+    ,output  P2_10
+`ifdef UART_SAMPLE_TRANSMITTER
+    // UART and LEDs for samples being transmitted.
+    ,output TX
+    ,output LEDR_N
+    ,output LEDG_N
+`endif
+`ifdef OUTPUT_CALIBRATION
+    // Button to toggle between +/- 5V output cal.
+    ,input   BTN_N
+`endif
 );
 
 localparam clk_freq = 12_000_000;
 localparam baud = 115200;
 
 wire sample_clk;
-wire [15:0] sample_adc0;
-wire [15:0] sample_adc1;
-wire [15:0] sample_adc2;
-wire [15:0] sample_adc3;
-wire [15:0] sample_dac0;
-wire [15:0] sample_dac1;
-wire [15:0] sample_dac2;
-wire [15:0] sample_dac3;
-wire [15:0] cal_in0;
-wire [15:0] cal_in1;
-wire [15:0] cal_in2;
-wire [15:0] cal_in3;
-wire [15:0] cal_out0;
-wire [15:0] cal_out1;
-wire [15:0] cal_out2;
-wire [15:0] cal_out3;
+
+// Raw samples to/from CODEC
+wire signed [15:0] sample_adc0;
+wire signed [15:0] sample_adc1;
+wire signed [15:0] sample_adc2;
+wire signed [15:0] sample_adc3;
+wire signed [15:0] sample_dac0;
+wire signed [15:0] sample_dac1;
+wire signed [15:0] sample_dac2;
+wire signed [15:0] sample_dac3;
+
+// Calibrated samples to/from CODEC
+wire signed [15:0] cal_in0;
+wire signed [15:0] cal_in1;
+wire signed [15:0] cal_in2;
+wire signed [15:0] cal_in3;
+wire signed [15:0] cal_out0;
+wire signed [15:0] cal_out1;
+wire signed [15:0] cal_out2;
+wire signed [15:0] cal_out3;
 
 input_cal input_cal_instance (
     .clk     (CLK),
@@ -62,18 +77,30 @@ sample sample_instance (
     .sample_out3 (cal_out3)
 );
 
+`ifdef OUTPUT_CALIBRATION
+
+wire signed [15:0] force_cal_output = BTN_N ? 20000 : -20000;
+assign sample_dac0 = force_cal_output;
+assign sample_dac1 = force_cal_output;
+assign sample_dac2 = force_cal_output;
+assign sample_dac3 = force_cal_output;
+
+`else
+
 output_cal output_cal_instance (
-    .clk     (CLK),
-    .sample_clk  (sample_clk),
-    .cal_out0 (cal_out0),
-    .cal_out1 (cal_out1),
-    .cal_out2 (cal_out2),
-    .cal_out3 (cal_out3),
-    .dac_out0 (sample_dac0),
-    .dac_out1 (sample_dac1),
-    .dac_out2 (sample_dac2),
-    .dac_out3 (sample_dac3)
+    .clk        (CLK),
+    .sample_clk (sample_clk),
+    .cal_out0   (cal_out0),
+    .cal_out1   (cal_out1),
+    .cal_out2   (cal_out2),
+    .cal_out3   (cal_out3),
+    .dac_out0   (sample_dac0),
+    .dac_out1   (sample_dac1),
+    .dac_out2   (sample_dac2),
+    .dac_out3   (sample_dac3)
 );
+
+`endif
 
 ak4619 ak4619_instance (
     .clk     (CLK),
@@ -95,6 +122,9 @@ ak4619 ak4619_instance (
     .sample_in2 (sample_dac2),
     .sample_in3 (sample_dac3)
 );
+
+
+`ifdef UART_SAMPLE_TRANSMITTER
 
 reg tx1_start;
 reg [7:0] tx1_data;
@@ -128,10 +158,18 @@ reg signed [15:0] adc_word_out = 16'h0;
 always @(posedge CLK) begin
     if (sample_clk && ~last_sample_clk && state == CH_ID) begin
         case (cur_ch)
+`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
+            // Used for calibrating the input channels
             2'h0: adc_word_out <= sample_adc0;
             2'h1: adc_word_out <= sample_adc1;
             2'h2: adc_word_out <= sample_adc2;
             2'h3: adc_word_out <= sample_adc3;
+`else
+            2'h0: adc_word_out <= cal_in0;
+            2'h1: adc_word_out <= cal_in1;
+            2'h2: adc_word_out <= cal_in2;
+            2'h3: adc_word_out <= cal_in3;
+`endif
         endcase
         led1_toggle <= ~led1_toggle;
     end
@@ -156,5 +194,7 @@ always @(posedge CLK) begin
         end
     end
 end
+
+`endif
 
 endmodule

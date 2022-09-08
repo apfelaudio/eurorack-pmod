@@ -33,7 +33,7 @@ end
 // for all 4 channels during 1 sample_clk.
 wire signed [31:0] dac_unclamped = (
     (cal_out_latched[cur_channel] - cal_mem[{cur_channel, 1'b0}])
-     * cal_mem[{cur_channel, 1'b1}]) >>> 8;
+     * cal_mem[{cur_channel, 1'b1}]) >>> 10;
 
 reg [1:0] cur_channel = 2'd0;
 reg signed [15:0] dac_out [0:3];
