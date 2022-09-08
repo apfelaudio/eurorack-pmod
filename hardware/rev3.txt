@@ -1,0 +1,5 @@
+- [done] Flip swapped op-amp inputs
+- Move LEDs closer to edge
+- Shrink LED brightness range to +/- 5V?
+    - Also make sure op-amps don't overheat!
+- Squash op-amp offset for LEDs
