@@ -1,8 +1,8 @@
-*.vcd
-__pycache__/
-*.xml
+sim/*.vcd
+sim/__pycache__/
+sim/*.xml
 *.asc
 *.bin
 *.json
 *.log
-sim_build
+sim/sim_build

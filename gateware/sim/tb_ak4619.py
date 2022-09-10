@@ -84,8 +84,8 @@ async def test_input_cal(dut):
     test_values = [
             23173,
             bit_not(14928)+1,
-            30000,
-            bit_not(30000)+1
+            32000,
+            bit_not(32000)+1
     ]
 
     for value in test_values:
