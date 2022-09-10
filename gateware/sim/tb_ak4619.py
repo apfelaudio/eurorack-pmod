@@ -1,6 +1,7 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
+from cocotb.handle import Force
 
 
 async def clock_out_word(dut, word):
@@ -23,7 +24,7 @@ async def clock_in_word(dut):
 def bit_not(n, numbits=16):
     return (1 << numbits) - 1 - n
 
-@cocotb.test(skip=True)
+@cocotb.test()
 async def test_adc_dac(dut):
 
     clock = Clock(dut.CLK, 83, units='ns')
@@ -53,6 +54,12 @@ async def test_adc_dac(dut):
     print(hex(dut.sample_out2.value))
     print(hex(dut.sample_out3.value))
 
+    dut.sample_in0.value = Force(TEST_L0)
+    dut.sample_in1.value = Force(TEST_R0)
+    dut.sample_in2.value = Force(TEST_L1)
+    dut.sample_in3.value = Force(TEST_R1)
+
+    await FallingEdge(dut.lrck)
     await FallingEdge(dut.lrck)
 
     result_l0 = await clock_in_word(dut)
@@ -66,10 +73,10 @@ async def test_adc_dac(dut):
     print(hex(result_l1), "(inverted: ", hex(bit_not(result_l1)), ")")
     print(hex(result_r1), "(inverted: ", hex(bit_not(result_r1)), ")")
 
-    assert result_l0 == bit_not(TEST_L0)
-    assert result_r0 == bit_not(TEST_R0)
-    assert result_l1 == bit_not(TEST_L1)
-    assert result_r1 == bit_not(TEST_R1)
+    assert result_l0 == TEST_L0
+    assert result_r0 == TEST_R0
+    assert result_l1 == TEST_L1
+    assert result_r1 == TEST_R1
 
     await FallingEdge(dut.lrck)
 
