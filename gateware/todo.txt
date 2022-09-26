@@ -1,0 +1,21 @@
+Gateware TODO:
+- Optimize gate usage of input/output calibration
+
+Utilities:
+- [done] IO Calibrator
+
+EXAMPLES in progress:
+- [done] LED panel visualizer
+- [done] Clock divider
+- [done] IO mirror
+- [started] Bitcrusher
+- Sample rate reducer
+- Adder
+- VCO
+- Configurable mult (1->2?)
+- Granular polyphonizer
+
+TODO before video:
+- Solve noise coupling (rev3?)
+- Calibration memory?
+- Bed of nails fixture for post-reflow
