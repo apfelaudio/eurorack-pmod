@@ -9,7 +9,9 @@
 // the position of the uButton (necessary for output cal).
 //`define OUTPUT_CALIBRATION
 
-`define CORE_CLKDIV
+`define CORE_SHIFTER
+//`define CORE_CLKDIV
+//`define CORE_MIRROR
 
 module top (
      input   CLK
@@ -74,10 +76,10 @@ input_cal input_cal_instance (
 );
 
 `ifdef CORE_MIRROR
-assign sample_out0 = sample_in0;
-assign sample_out1 = sample_in1;
-assign sample_out2 = sample_in2;
-assign sample_out3 = sample_in3;
+assign cal_out0 = cal_in0;
+assign cal_out1 = cal_in1;
+assign cal_out2 = cal_in2;
+assign cal_out3 = cal_in3;
 `endif
 
 `ifdef CORE_CLKDIV
@@ -97,6 +99,21 @@ clkdiv clkdiv_instance (
 
 `ifdef CORE_BITCRUSH
 bitcrush bitcrush_instance (
+    .clk     (CLK),
+    .sample_clk  (sample_clk),
+    .sample_in0 (cal_in0),
+    .sample_in1 (cal_in1),
+    .sample_in2 (cal_in2),
+    .sample_in3 (cal_in3),
+    .sample_out0 (cal_out0),
+    .sample_out1 (cal_out1),
+    .sample_out2 (cal_out2),
+    .sample_out3 (cal_out3)
+);
+`endif
+
+`ifdef CORE_SHIFTER
+shifter shifter_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
