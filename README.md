@@ -19,7 +19,12 @@ More photos can be found [below](#photos).
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 - Calibration process allows mV-level DC precision.
 
-# Overview
+## Gateware architecture
+![gateware architecture](docs/img/gateware-arch.png)
+
+Links to the most important modules depicted above are provided below.
+
+# Project structure
 The project is split into 2 directories, [`hardware`](hardware) for the PCB/panel and [`gateware`](gateware) for the FPGA source. Some interesting directories:
 - [`hardware/eurorack-pmod-pcb-flat`](hardware/eurorack-pmod-pcb-flat): KiCAD design files for PCB and front panel.
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
