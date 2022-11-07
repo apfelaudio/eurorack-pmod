@@ -13,6 +13,7 @@ More photos can be found [below](#photos).
 - PMOD connector compatible with most FPGA development boards.
 - 8 (4 in + 4 out) DC-coupled audio channels with analog LED indicators.
 - CODEC supports 192KHz / 32bit samples on all channels.
+- I/O clamps at +/- 6.5V max, wider is possible with a resistor change.
 
 ## Gateware details
 - Examples based on Icebreaker FPGA + open-source toolchain.
