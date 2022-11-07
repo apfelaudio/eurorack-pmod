@@ -48,14 +48,14 @@ set_io -nowarn P1B9       32
 set_io -nowarn P1B10      28
 
 # PMOD 2
-set_io -nowarn P2_1       27
-set_io -nowarn P2_2       25
-set_io -nowarn P2_3       21
-set_io -nowarn P2_4       19
-set_io -nowarn P2_7       26
-set_io -nowarn P2_8       23
-set_io -nowarn P2_9       20
-set_io -nowarn P2_10      18
+set_io -nowarn P2_7       27
+set_io -nowarn P2_8       25
+set_io -nowarn P2_9       21
+set_io -nowarn P2_10       19
+set_io -nowarn P2_1       26
+set_io -nowarn P2_2       23
+set_io -nowarn P2_3       20
+set_io -nowarn P2_4      18
 
 # LEDs and Buttons (PMOD 2)
 set_io -nowarn LED1       26
