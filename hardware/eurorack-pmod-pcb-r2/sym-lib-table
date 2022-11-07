@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name "ak_codec_ics")(type "KiCad")(uri "/home/seb/dev/eurorack-pmod/hardware/libs/custom/ak_codec_ics.kicad_sym")(options "")(descr ""))
-)

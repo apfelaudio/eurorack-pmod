@@ -1,3 +1,12 @@
+// Input calibrator module.
+//
+// Convert raw ADC samples into 'calibrated' samples by removing DC offset
+// and scaling such that the output is 4 counts / mV (i.e 14.2 fixed-point).
+//
+// The calibration memory is created by following the calibration process
+// documented in `cal.py`. This module only uses a single multiplier for
+// all channels such that there are plenty left over for user logic.
+
 module input_cal (
     input clk, // 12Mhz
     input sample_clk,

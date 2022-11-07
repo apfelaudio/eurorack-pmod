@@ -1,3 +1,8 @@
+// Super simple I2C transciever that can only clock out data.
+//
+// Currently only used for initializing the registers in the AK4619 on boot.
+
+
 module i2cinit (
     input     clk, // 2x i2c clock
 

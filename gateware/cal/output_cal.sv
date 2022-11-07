@@ -1,3 +1,6 @@
+// TODO: basically the same logic as the input calibrator.
+// See docs for input calibrator. It should be trivial to combine them.
+
 module output_cal (
     input clk, // 12Mhz
     input sample_clk,

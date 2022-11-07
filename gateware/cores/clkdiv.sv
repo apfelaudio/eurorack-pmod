@@ -1,3 +1,15 @@
+// Clock Divider
+//
+// Given an input clock source on input 0, produce divided output on Output 0 - 3.
+//
+// Mapping:
+// - Input 0: Clock input (Hi > 2V, Lo < 0.5V)
+// - Input 1-3: Not used
+// - Output 0: Clock * 1 (mirrored)
+// - Output 1: Clock / 2 (Hi == 5V, Lo == 0V)
+// - Output 2: Clock / 4
+// - Output 3: Clock / 8
+
 module clkdiv (
     input clk, // 12Mhz
     input sample_clk,

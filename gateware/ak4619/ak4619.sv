@@ -1,3 +1,11 @@
+// Driver for AK4619 ADC/DAC
+//
+// Currently assumes the device is configured in the audio
+// interface mode specified in ak4619-cfg.c.
+//
+// Currently 93.75KHz/16bit samples, but there is no reason
+// we can't go higher, just need to experiment.
+
 module ak4619 (
     input  clk,   // Assumed 12MHz
     output pdn,
