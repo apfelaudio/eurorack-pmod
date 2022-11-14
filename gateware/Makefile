@@ -8,7 +8,7 @@ ADD_SRC = ak4619/i2cinit.sv \
 		  cores/clkdiv.sv \
 		  cores/sampler.sv \
 		  cores/bitcrush.sv \
-		  cores/shifter.sv
+		  cores/vca.sv
 
 PIN_DEF = mk/icebreaker.pcf
 DEVICE = up5k

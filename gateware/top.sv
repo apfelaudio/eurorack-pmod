@@ -15,9 +15,9 @@
 //`define OUTPUT_CALIBRATION
 
 //`define CORE_CLKDIV
-`define CORE_SAMPLER
+//`define CORE_SAMPLER
 //`define CORE_MIRROR
-//`define CORE_SHIFTER
+`define CORE_VCA
 
 module top (
      input   CLK
@@ -133,8 +133,8 @@ bitcrush bitcrush_instance (
 );
 `endif
 
-`ifdef CORE_SHIFTER
-shifter shifter_instance (
+`ifdef CORE_VCA
+vca vca_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
