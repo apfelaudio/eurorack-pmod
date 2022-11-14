@@ -1,3 +1,14 @@
+// Bit Crusher
+//
+// Reduce number of bits on channels 1-3 according to the voltage
+// on channel 0.
+//
+// Mapping:
+// - Input 0: Bitcrusher mask setting (0-5V)
+// - Input 1-3: Audio inputs
+// - Output 0: Input 0 (mirrored)
+// - Output 1-3: Audio outputs (bitcrushed)
+
 module bitcrush (
     input clk, // 12Mhz
     input sample_clk,
@@ -11,7 +22,7 @@ module bitcrush (
     output signed [15:0] sample_out3
 );
 
-wire [15:0] mask;
+wire signed [15:0] mask;
 
 assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
               (sample_in0 > 4*4500) ? 16'b1111111111100000 :

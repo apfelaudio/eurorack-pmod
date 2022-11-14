@@ -18,6 +18,7 @@
 //`define CORE_SAMPLER
 //`define CORE_MIRROR
 `define CORE_VCA
+//`define CORE_BITCRUSH
 
 module top (
      input   CLK
