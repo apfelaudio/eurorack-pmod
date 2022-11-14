@@ -32,7 +32,7 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 - [`gateware/cal/cal.py`](gateware/cal/cal.py): tool used to calibrate the hardware after assembly, generating calibration memory.
 - [`gateware/top.sv`](gateware/top.sv): top-level gateware with defines for selecting features.
 - [`gateware/ak4619`](gateware/ak4619): driver for AK4619 ADC/DAC used on this board.
-- [`gateware/cores`](gateware/cores): example user core implementations (i.e clock divider, bitcrusher etc).
+- [`gateware/cores`](gateware/cores): example user core implementations (i.e clock divider, sampler, bitcrusher etc).
 
 # Manufacturing
 The current revision (2.2) works fine without any bodges or modifications after assembly according to the supplied gerbers and BOM.

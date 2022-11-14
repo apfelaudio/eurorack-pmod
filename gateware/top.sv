@@ -14,9 +14,10 @@
 // the position of the uButton (necessary for output cal).
 //`define OUTPUT_CALIBRATION
 
-`define CORE_SHIFTER
 //`define CORE_CLKDIV
+`define CORE_SAMPLER
 //`define CORE_MIRROR
+//`define CORE_SHIFTER
 
 module top (
      input   CLK
@@ -85,6 +86,21 @@ assign cal_out0 = cal_in0;
 assign cal_out1 = cal_in1;
 assign cal_out2 = cal_in2;
 assign cal_out3 = cal_in3;
+`endif
+
+`ifdef CORE_SAMPLER
+sampler sampler_instance (
+    .clk     (CLK),
+    .sample_clk  (sample_clk),
+    .sample_in0 (cal_in0),
+    .sample_in1 (cal_in1),
+    .sample_in2 (cal_in2),
+    .sample_in3 (cal_in3),
+    .sample_out0 (cal_out0),
+    .sample_out1 (cal_out1),
+    .sample_out2 (cal_out2),
+    .sample_out3 (cal_out3)
+);
 `endif
 
 `ifdef CORE_CLKDIV
