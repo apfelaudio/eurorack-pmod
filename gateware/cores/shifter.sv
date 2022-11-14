@@ -21,8 +21,8 @@ wire in0_div = sample_in0 >>> 7;
 wire in0_abs = in0_div > 0 ? in0_div : 0;
 
 always @(posedge sample_clk) begin
-    out_ch1 <= in0_abs * (sample_in1 >>> 8);
-    out_ch2 <= in0_abs * (sample_in2 >>> 8);
+    out_ch1 <= (in0_abs * sample_in1) >>> 8;
+    out_ch2 <= (in0_abs * sample_in2) >>> 8;
 end
 
 assign sample_out0 = sample_in0;
