@@ -2,7 +2,7 @@
 //
 // Mapping:
 // - Input 0: V/Oct input, C3 is +3V
-// - Output 0: VCO output (triangle wave)
+// - Output 0: VCO output (from wavetable)
 
 module vco (
     input clk, // 12Mhz
@@ -25,15 +25,22 @@ module vco (
 reg [15:0] v_oct_lut [0:511];
 initial $readmemh("vco/v_oct_lut.hex", v_oct_lut);
 
+reg [15:0] wavetable [0:255];
+initial $readmemh("vco/wavetable.hex", wavetable);
+
+// For < 0V input, clamp to bottom note.
+wire signed [15:0] lut_index = sample_in0 >>> 6;
+wire [9:0] lut_index_clamped = lut_index < 0 ? 0 : lut_index;
+
 reg [31:0] wavetable_pos = 16'h0;
 always @(posedge sample_clk) begin
-    // TODO: linear interpolation between frequencies and silence oscillator
+    // TODO: linear interpolation between frequencies, silence oscillator
     // whenever we are outside the LUT bounds.
-    wavetable_pos <= wavetable_pos + v_oct_lut[sample_in0>>>6];
+    wavetable_pos <= wavetable_pos + v_oct_lut[lut_index_clamped];
 end
 
-// Top 8 bits of the N.F representation are just used for a sawtooth.
-// TODO: Index into wavetable for nicer waveforms.
-assign sample_out0 = (wavetable_pos[17:10] - 64) <<< 6;
+// Top 8 bits of the N.F representation are index into wavetable.
+wire [7:0] wavetable_idx = wavetable_pos[17:10];
+assign sample_out0 = wavetable[wavetable_idx];
 
 endmodule

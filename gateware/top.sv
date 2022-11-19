@@ -17,8 +17,8 @@
 //`define CORE_CLKDIV
 //`define CORE_SAMPLER
 //`define CORE_MIRROR
-`define CORE_VCA
-//`define CORE_VCO
+//`define CORE_VCA
+`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 
