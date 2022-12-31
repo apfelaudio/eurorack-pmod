@@ -6,6 +6,7 @@ ADD_SRC = ak4619/i2cinit.sv \
 		  cal/input_cal.sv \
 		  cal/output_cal.sv \
 		  cores/clkdiv.sv \
+		  cores/seqswitch.sv \
 		  cores/sampler.sv \
 		  cores/bitcrush.sv \
 		  cores/vca.sv \

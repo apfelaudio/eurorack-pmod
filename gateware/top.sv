@@ -15,10 +15,11 @@
 //`define OUTPUT_CALIBRATION
 
 //`define CORE_CLKDIV
+`define CORE_SEQSWITCH
 //`define CORE_SAMPLER
 //`define CORE_MIRROR
 //`define CORE_VCA
-`define CORE_VCO
+//`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 
@@ -108,6 +109,21 @@ sampler sampler_instance (
 
 `ifdef CORE_CLKDIV
 clkdiv clkdiv_instance (
+    .clk     (CLK),
+    .sample_clk  (sample_clk),
+    .sample_in0 (cal_in0),
+    .sample_in1 (cal_in1),
+    .sample_in2 (cal_in2),
+    .sample_in3 (cal_in3),
+    .sample_out0 (cal_out0),
+    .sample_out1 (cal_out1),
+    .sample_out2 (cal_out2),
+    .sample_out3 (cal_out3)
+);
+`endif
+
+`ifdef CORE_SEQSWITCH
+seqswitch seqswitch_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
