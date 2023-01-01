@@ -1,0 +1,9 @@
+name: Build default bitstream
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: yosys --version
