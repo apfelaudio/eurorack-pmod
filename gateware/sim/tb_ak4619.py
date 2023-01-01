@@ -34,7 +34,7 @@ def twos_comp_to_signed(n, numbits=16):
         return n
 
 @cocotb.test()
-async def test_adc_dac(dut):
+async def test_ak4619_00(dut):
 
     clock = Clock(dut.CLK, 83, units='ns')
     cocotb.start_soon(clock.start())
@@ -100,7 +100,7 @@ async def test_adc_dac(dut):
     await FallingEdge(dut.lrck)
 
 @cocotb.test()
-async def test_cal(dut):
+async def test_cal_00(dut):
 
     clock = Clock(dut.cal_instance.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
@@ -151,3 +151,38 @@ async def test_cal(dut):
             assert output == expect
 
         channel = channel + 1
+
+async def i2c_clock_in_byte(sda, scl):
+    byte = 0x00
+    for i in range(8):
+        await RisingEdge(scl)
+        byte |= sda.value << (8-i)
+    await RisingEdge(scl)
+    # Make sure we are releasing the ack bit
+    assert sda.value == 1
+    return byte >> 1
+
+@cocotb.test()
+async def test_i2cinit_00(dut):
+
+    i2cinit = dut.ak4619_instance.i2cinit_instance
+
+    clock = Clock(i2cinit.clk, 83, units='ns')
+    cocotb.start_soon(clock.start())
+
+    await FallingEdge(i2cinit.sda_out)
+
+    # The first few bytes from a healthy 'ak4619-cfg.hex' (which are
+    # unlikely to change and as such this kind of also acts as a sanity
+    # check that the generated configuration is sane).
+    test_bytes = [
+            0x20, # Slave address and RW = 0
+            0x00, # Start at register 0
+            0x37, # 0x00 Power Management
+            0xAC  # 0x01 Audio I/F Format
+    ]
+
+    for i in range(4):
+        byte = await i2c_clock_in_byte(i2cinit.sda_out, i2cinit.scl)
+        print(f"i2cinit clocked out {hex(byte)}")
+        assert byte == test_bytes[i]
