@@ -3,8 +3,7 @@ ADD_SRC = ak4619/i2cinit.sv \
 		  ak4619/ak4619.sv \
 		  util/uart_baud_tick_gen.v \
 		  util/uart_tx.v \
-		  cal/input_cal.sv \
-		  cal/output_cal.sv \
+		  cal/cal.sv \
 		  cores/clkdiv.sv \
 		  cores/seqswitch.sv \
 		  cores/sampler.sv \

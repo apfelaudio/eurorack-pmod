@@ -1,7 +1,7 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
-from cocotb.handle import Force
+from cocotb.handle import Force, Release
 
 
 async def clock_out_word(dut, word):
@@ -92,14 +92,19 @@ async def test_adc_dac(dut):
     assert result_l1 == TEST_L1
     assert result_r1 == TEST_R1
 
+    dut.sample_in0.value = Release()
+    dut.sample_in1.value = Release()
+    dut.sample_in2.value = Release()
+    dut.sample_in3.value = Release()
+
     await FallingEdge(dut.lrck)
 
 @cocotb.test()
-async def test_input_cal(dut):
+async def test_cal(dut):
 
-    clock = Clock(dut.input_cal_instance.sample_clk, 5, units='us')
+    clock = Clock(dut.cal_instance.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
-    clock = Clock(dut.input_cal_instance.clk, 83, units='ns')
+    clock = Clock(dut.cal_instance.clk, 83, units='ns')
     cocotb.start_soon(clock.start())
 
     test_values = [
@@ -109,32 +114,40 @@ async def test_input_cal(dut):
             -32000
     ]
 
-    cal_inst = dut.input_cal_instance
+    cal_inst = dut.cal_instance
 
-    cal_mem = None
-    with open("input_cal_mem.hex", "r") as f_cal_mem:
-        f_cal = f_cal_mem.read().strip().split(' ')[1:]
-        cal_mem = [int(x, 16) for x in f_cal]
+    cal_mem = []
+    with open("cal_mem.hex", "r") as f_cal_mem:
+        for line in f_cal_mem.readlines():
+            values = line.strip().split(' ')[1:]
+            values = [int(x, 16) for x in values]
+            cal_mem = cal_mem + values
     print(f"calibration constants: {cal_mem}")
+    assert len(cal_mem) == 16
 
 
     channel = 0
-    for adc_inx, cal_inx in [(cal_inst.adc_in0, cal_inst.cal_in0),
-                             (cal_inst.adc_in1, cal_inst.cal_in1),
-                             (cal_inst.adc_in2, cal_inst.cal_in2),
-                             (cal_inst.adc_in3, cal_inst.cal_in3)]:
+    for cal_inx, cal_outx in [(cal_inst.in0, cal_inst.out0),
+                              (cal_inst.in1, cal_inst.out1),
+                              (cal_inst.in2, cal_inst.out2),
+                              (cal_inst.in3, cal_inst.out3),
+                              (cal_inst.in4, cal_inst.out4),
+                              (cal_inst.in5, cal_inst.out5),
+                              (cal_inst.in6, cal_inst.out6),
+                              (cal_inst.in7, cal_inst.out7)]:
 
         for value in test_values:
             expect = ((value - cal_mem[channel*2]) *
                       cal_mem[channel*2 + 1]) >> 10
             if expect > 28000: expect = 28000
             if expect < -28000: expect = -28000
-            adc_inx.value = signed_to_twos_comp(value)
+            cal_inx.value = Force(signed_to_twos_comp(value))
             print(f"ch={channel}\t{int(value):6d}\t", end="")
             await RisingEdge(cal_inst.sample_clk)
             await RisingEdge(cal_inst.sample_clk)
-            output = twos_comp_to_signed(cal_inx.value)
+            output = twos_comp_to_signed(cal_outx.value)
             print(f"=>\t{int(output):6d}\t(expect={expect})")
+            cal_inx.value = Release()
             assert output == expect
 
         channel = channel + 1

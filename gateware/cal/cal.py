@@ -12,7 +12,8 @@
 # 5. Supply -5V, wait for values to settle, hold 'n' to capture
 # 6. At this point you can try other voltages to make sure the calibration is good
 #    by looking at the 'back-calculated' values using the generated calibration.
-# 7. Press 'x', copy the calibration string to the input cal hex file.
+# 7. Press 'x', copy the calibration string to the cal hex file.
+#    (Input cal is first 8 values, output cal is last 8 values)
 #
 # OUTPUT calibration process:
 # 1. Recompile gateware with input calibration (from above!) and program FPGA with:
@@ -24,7 +25,8 @@
 # 4. Wait for values to settle, hold 'p' to capture
 # 5. Hold uButton, wait for values to settle, hold 'n' to capture
 #    (the uButton switches between the output emitting +/- signals)
-# 7. Press 'x', copy the calibration string to the output cal hex file.
+# 7. Press 'x', copy the calibration string to the cal hex file.
+#    (Input cal is first 8 values, output cal is last 8 values)
 #
 # Note: if you check the output calibration with a multimeter, make sure
 # to add a 100K load unless you calibrate with the CAL_OPEN_LOAD option below.
@@ -125,7 +127,7 @@ while True:
     print()
     cal_string = None
     if np.isfinite(shift_constant).all() and np.isfinite(mp_constant).all():
-        cal_string = "@00000000 "
+        cal_string = f"@0000000{'0' if INPUT_CAL else '8'} "
         for i in range(4):
             cal_string = cal_string + hex(int(shift_constant[i])).replace('0x','') + ' '
             cal_string = cal_string + hex(int(mp_constant[i])).replace('0x','') + ' '

@@ -27,12 +27,12 @@ Links to the most important modules depicted above are provided below.
 
 # Project structure
 The project is split into 2 directories, [`hardware`](hardware) for the PCB/panel and [`gateware`](gateware) for the FPGA source. Some interesting directories:
+- [`gateware/cores`](gateware/cores): example user core implementations (i.e sequential switch, bitcrusher, filter, vco, vca, sampler etc).
+- [`gateware/top.sv`](gateware/top.sv): top-level gateware with defines for selecting features.
+- [`gateware/cal/cal.py`](gateware/cal/cal.py): tool used to calibrate the hardware after assembly, generating calibration memory.
+- [`gateware/ak4619`](gateware/ak4619): driver for AK4619 ADC/DAC used on this board.
 - [`hardware/eurorack-pmod-pcb-flat`](hardware/eurorack-pmod-pcb-flat): KiCAD design files for PCB and front panel.
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
-- [`gateware/cal/cal.py`](gateware/cal/cal.py): tool used to calibrate the hardware after assembly, generating calibration memory.
-- [`gateware/top.sv`](gateware/top.sv): top-level gateware with defines for selecting features.
-- [`gateware/ak4619`](gateware/ak4619): driver for AK4619 ADC/DAC used on this board.
-- [`gateware/cores`](gateware/cores): example user core implementations (i.e clock divider, sampler, bitcrusher etc).
 
 # Manufacturing
 The current revision (2.2) works fine without any bodges or modifications after assembly according to the supplied gerbers and BOM.

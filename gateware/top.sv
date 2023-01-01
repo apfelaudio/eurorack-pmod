@@ -70,19 +70,40 @@ wire signed [15:0] cal_out1;
 wire signed [15:0] cal_out2;
 wire signed [15:0] cal_out3;
 
-input_cal input_cal_instance (
+`ifdef OUTPUT_CALIBRATION
+
+wire signed [15:0] force_cal_output = BTN_N ? 20000 : -20000;
+assign sample_dac0 = force_cal_output;
+assign sample_dac1 = force_cal_output;
+assign sample_dac2 = force_cal_output;
+assign sample_dac3 = force_cal_output;
+
+`endif
+
+cal cal_instance (
     .clk     (CLK),
     .sample_clk  (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
-    .adc_in0 (~sample_adc0),
-    .adc_in1 (~sample_adc1),
-    .adc_in2 (~sample_adc2),
-    .adc_in3 (~sample_adc3),
-    .cal_in0 (cal_in0),
-    .cal_in1 (cal_in1),
-    .cal_in2 (cal_in2),
-    .cal_in3 (cal_in3)
+    .in0 (~sample_adc0),
+    .in1 (~sample_adc1),
+    .in2 (~sample_adc2),
+    .in3 (~sample_adc3),
+    .in4 (cal_out0),
+    .in5 (cal_out1),
+    .in6 (cal_out2),
+    .in7 (cal_out3),
+    .out0 (cal_in0),
+    .out1 (cal_in1),
+    .out2 (cal_in2),
+    .out3 (cal_in3),
+`ifndef OUTPUT_CALIBRATION
+    // In output calibration mode these wires are forced.
+    .out4 (sample_dac0),
+    .out5 (sample_dac1),
+    .out6 (sample_dac2),
+    .out7 (sample_dac3)
+`endif
 );
 
 `ifdef CORE_MIRROR
@@ -195,31 +216,6 @@ vco vco_instance (
     .sample_out2 (cal_out2),
     .sample_out3 (cal_out3)
 );
-`endif
-
-`ifdef OUTPUT_CALIBRATION
-
-wire signed [15:0] force_cal_output = BTN_N ? 20000 : -20000;
-assign sample_dac0 = force_cal_output;
-assign sample_dac1 = force_cal_output;
-assign sample_dac2 = force_cal_output;
-assign sample_dac3 = force_cal_output;
-
-`else
-
-output_cal output_cal_instance (
-    .clk        (CLK),
-    .sample_clk (sample_clk),
-    .cal_out0   (cal_out0),
-    .cal_out1   (cal_out1),
-    .cal_out2   (cal_out2),
-    .cal_out3   (cal_out3),
-    .dac_out0   (sample_dac0),
-    .dac_out1   (sample_dac1),
-    .dac_out2   (sample_dac2),
-    .dac_out3   (sample_dac3)
-);
-
 `endif
 
 ak4619 ak4619_instance (
