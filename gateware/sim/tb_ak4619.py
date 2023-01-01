@@ -24,6 +24,15 @@ async def clock_in_word(dut):
 def bit_not(n, numbits=16):
     return (1 << numbits) - 1 - n
 
+def signed_to_twos_comp(n, numbits=16):
+    return n if n >= 0 else bit_not(-n, numbits) + 1
+
+def twos_comp_to_signed(n, numbits=16):
+    if (1 << (numbits-1) & n) > 0:
+        return -int(bit_not(n, numbits) + 1)
+    else:
+        return n
+
 @cocotb.test()
 async def test_adc_dac(dut):
 
@@ -53,6 +62,11 @@ async def test_adc_dac(dut):
     print(hex(dut.sample_out1.value))
     print(hex(dut.sample_out2.value))
     print(hex(dut.sample_out3.value))
+
+    assert dut.sample_out0.value == TEST_L0
+    assert dut.sample_out1.value == TEST_R0
+    assert dut.sample_out2.value == TEST_L1
+    assert dut.sample_out3.value == TEST_R1
 
     dut.sample_in0.value = Force(TEST_L0)
     dut.sample_in1.value = Force(TEST_R0)
@@ -90,16 +104,37 @@ async def test_input_cal(dut):
 
     test_values = [
             23173,
-            bit_not(14928)+1,
+            -14928,
             32000,
-            bit_not(32000)+1
+            -32000
     ]
 
-    for value in test_values:
-        dut.input_cal_instance.adc_in0.value = value
-        print(f"Stimulus: {hex(value)} {int(value)} (twos comp: {int(bit_not(value) + 1)})")
-        await RisingEdge(dut.input_cal_instance.sample_clk)
-        await RisingEdge(dut.input_cal_instance.sample_clk)
-        output = dut.input_cal_instance.cal_in0.value
-        print(f"Response: {hex(output)} {int(output)} (twos comp: {int(bit_not(output) + 1)})")
-        print("---")
+    cal_inst = dut.input_cal_instance
+
+    cal_mem = None
+    with open("input_cal_mem.hex", "r") as f_cal_mem:
+        f_cal = f_cal_mem.read().strip().split(' ')[1:]
+        cal_mem = [int(x, 16) for x in f_cal]
+    print(f"calibration constants: {cal_mem}")
+
+
+    channel = 0
+    for adc_inx, cal_inx in [(cal_inst.adc_in0, cal_inst.cal_in0),
+                             (cal_inst.adc_in1, cal_inst.cal_in1),
+                             (cal_inst.adc_in2, cal_inst.cal_in2),
+                             (cal_inst.adc_in3, cal_inst.cal_in3)]:
+
+        for value in test_values:
+            expect = ((value - cal_mem[channel*2]) *
+                      cal_mem[channel*2 + 1]) >> 10
+            if expect > 28000: expect = 28000
+            if expect < -28000: expect = -28000
+            adc_inx.value = signed_to_twos_comp(value)
+            print(f"ch={channel}\t{int(value):6d}\t", end="")
+            await RisingEdge(cal_inst.sample_clk)
+            await RisingEdge(cal_inst.sample_clk)
+            output = twos_comp_to_signed(cal_inx.value)
+            print(f"=>\t{int(output):6d}\t(expect={expect})")
+            assert output == expect
+
+        channel = channel + 1

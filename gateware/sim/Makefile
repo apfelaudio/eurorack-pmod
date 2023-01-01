@@ -9,6 +9,7 @@ VERILOG_SOURCES = ../ak4619/ak4619.sv \
                   ../cal/output_cal.sv \
                   ../cores/clkdiv.sv \
                   ../cores/bitcrush.sv \
+                  ../cores/seqswitch.sv \
 				  ../top.sv
 MODULE = tb_ak4619
 
