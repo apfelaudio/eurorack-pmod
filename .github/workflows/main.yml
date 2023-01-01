@@ -9,7 +9,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: yosys --version
-      - run: make -C gateware/ak4619/ak4619-cfg
       - run: make -C gateware
       - uses: actions/upload-artifact@v3
         with:
@@ -22,5 +21,4 @@ jobs:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: yosys --version
-      - run: make -C gateware/ak4619/ak4619-cfg
       - run: cd gateware/sim && ./00_run.sh

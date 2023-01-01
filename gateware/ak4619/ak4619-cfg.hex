@@ -1,0 +1,23 @@
+20 // I2C slave address and RW bit (W=0).
+00 // Register address to start at.
+37 // 0x00 Power Management
+AC // 0x01 Audio I/F Format
+1C // 0x02 Audio I/F Format
+04 // 0x03 System Clock Setting
+22 // 0x04 MIC AMP Gain
+22 // 0x05 MIC AMP Gain
+30 // 0x06 ADC1 Lch Digital Volume
+30 // 0x07 ADC1 Rch Digital Volume
+30 // 0x08 ADC2 Lch Digital Volume
+30 // 0x09 ADC2 Rch Digital Volume
+00 // 0x0A ADC Digital Filter Setting
+55 // 0x0B ADC Analog Input Setting
+00 // 0x0C Reserved
+06 // 0x0D ADC Mute & HPF Control
+18 // 0x0E DAC1 Lch Digital Volume
+18 // 0x0F DAC1 Rch Digital Volume
+18 // 0x10 DAC2 Lch Digital Volume
+18 // 0x11 DAC2 Rch Digital Volume
+04 // 0x12 DAC Input Select Setting
+05 // 0x13 DAC De-Emphasis Setting
+0A // 0x14 DAC Mute & Filter Setting
