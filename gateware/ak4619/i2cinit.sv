@@ -15,8 +15,8 @@ module i2cinit (
 parameter N_BYTES = 6'h17;
 
 // Array of i2c bytes to write to the slave.
-reg [7:0] i2c_bytes [0:N_BYTES];
-initial $readmemh("ak4619-cfg/ak4619-cfg.hex", i2c_bytes);
+reg [7:0] i2c_bytes [0:N_BYTES-1];
+initial $readmemh("ak4619-cfg.hex", i2c_bytes);
 
 reg [5:0] cur_reg_counter = 0;
 reg [7:0] cur_reg_value;
