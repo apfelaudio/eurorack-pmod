@@ -1,5 +1,7 @@
 # Eurorack PMOD
 
+![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
+
 A bridge between the FPGA world and Eurorack.
 
 This project contains hardware and gateware for getting started in FPGA-based audio synthesis with open source tools.

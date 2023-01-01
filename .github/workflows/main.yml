@@ -1,9 +1,26 @@
-name: Build default bitstream
-on:
-  workflow_dispatch:
+name: build & test
+
+on: [push, pull_request]
+
 jobs:
-  build:
+  build-bitstream:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: yosys --version
+      - run: make -C gateware/ak4619/ak4619-cfg
+      - run: make -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: eurorack-pmod-bitstream.bin
+          path: gateware/top.bin
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: yosys --version
+      - run: make -C gateware/ak4619/ak4619-cfg
+      - run: cd gateware/sim && ./00_run.sh
