@@ -2,13 +2,15 @@
 
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
-A bridge between the FPGA world and Eurorack.
-
-This project contains hardware and gateware for getting started in FPGA-based audio synthesis with open source tools.
+**FPGA-based audio synthesis using open source tools**, compatible with [modular synthesis hardware](https://en.wikipedia.org/wiki/Eurorack). This repository contains hardware and gateware for getting started.
 
 ![assembled eurorack-pmod module (front)](docs/img/eurorack-pmod.jpg)
 
-More photos can be found [below](#photos).
+[Want one?](#manufacturing). More photos can be found [below](#photos). 
+
+### This project is:
+- The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/).
+- Various [example cores](gateware/cores), initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (and trivially synthesizeable on other FPGAs). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 
 ## Hardware details
 - 4HP module compatible with modular synthesizer systems.
@@ -22,10 +24,18 @@ More photos can be found [below](#photos).
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 - Calibration process allows mV-level DC precision.
 
-## Gateware architecture
+### Gateware architecture
 ![gateware architecture](docs/img/gateware-arch.png)
 
 Links to the most important modules depicted above are provided below.
+
+### Gateware - Getting Started
+
+The gateware is automatically built and tested in CI, so it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml). Basically the reality of working with this device is as follows:
+
+1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar.
+2. Calibrate your hardware using the process described in [`gateware/cal/cal.py`](gateware/cal/cal.py). Use this to create your own `gatewarecal/cal_mem.hex` to compensate for any DC biases in the ADCs/DACs. (this step is only necessary if you need sub-50mV accuracy on your inputs/outputs, which is the case if you are tuning oscillators, not so much if you are creating rhythm pulses.
+3. Pick the core you want to use from `gateware/cores` and define the correct one in `gateware/top.sv`. Note, you can only have one enabled at a time unless you add extra connections between them!
 
 # Project structure
 The project is split into 2 directories, [`hardware`](hardware) for the PCB/panel and [`gateware`](gateware) for the FPGA source. Some interesting directories:
@@ -40,6 +50,7 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 The current revision (2.2) works fine without any bodges or modifications after assembly according to the supplied gerbers and BOM.
 
 **Want a board?** Please fill out this [google form](https://forms.gle/rSEGuKGHPVXYotHRA). If there are enough people interested I may do a small manufacturing run.
+
 
 ## Known limitations
 - Gateware only runs at 96KHz/16bit samples (no reason this can't be improved, just haven't gotten around to it).
