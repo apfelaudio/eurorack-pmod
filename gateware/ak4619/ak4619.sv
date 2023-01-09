@@ -3,11 +3,11 @@
 // Currently assumes the device is configured in the audio
 // interface mode specified in ak4619-cfg.c.
 //
-// Currently 93.75KHz/16bit samples, but there is no reason
+// Currently 187.5KHz/16bit samples, but there is no reason
 // we can't go higher, just need to experiment.
 
 module ak4619 (
-    input  clk,   // Assumed 12MHz
+    input  clk,   // Assumed 24MHz
     output pdn,
     output mclk,
     output bick,
@@ -38,7 +38,7 @@ assign i2c_sda = sda_out_i2cinit ? 1'bz : 1'b0;
 
 assign bick = clk;
 assign mclk = clk;
-assign lrck = clkdiv[6]; // 12MHz >> 7 == 93.75KHz
+assign lrck = clkdiv[6]; // 24MHz >> 7 == 187.5KHz
 assign sample_clk = lrck;
 
 
