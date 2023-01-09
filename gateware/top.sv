@@ -4,7 +4,7 @@
 // UART, or select one of the user-defined 'cores' (DSP modules).
 
 // Transmit CODEC samples over UART
-`define UART_SAMPLE_TRANSMITTER
+//`define UART_SAMPLE_TRANSMITTER
 
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
@@ -45,8 +45,25 @@ module top (
 `endif
 );
 
-localparam clk_freq = 12_000_000;
+localparam clk_freq = 24_000_000;
 localparam baud = 115200;
+
+wire clk_24mhz;
+wire clk_24mhz_lock;
+SB_PLL40_PAD #(
+    .FEEDBACK_PATH("SIMPLE"),
+    .PLLOUT_SELECT("GENCLK"),
+    .DIVR(4'b0000),
+    .DIVF(7'b0111111),
+    .DIVQ(3'b101),
+    .FILTER_RANGE(3'b001)
+) pll_24mhz (
+    .PACKAGEPIN(CLK),
+    .PLLOUTGLOBAL(clk_24mhz),
+    .LOCK(clk_24mhz_lock),
+    .RESETB(1'b1),
+    .BYPASS(1'b0)
+);
 
 wire sample_clk;
 
@@ -80,8 +97,9 @@ assign sample_dac3 = force_cal_output;
 
 `endif
 
+/*
 cal cal_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
@@ -112,10 +130,16 @@ assign cal_out1 = cal_in1;
 assign cal_out2 = cal_in2;
 assign cal_out3 = cal_in3;
 `endif
+*/
+
+assign sample_dac0 = ~sample_adc0;
+assign sample_dac1 = ~sample_adc1;
+assign sample_dac2 = ~sample_adc2;
+assign sample_dac3 = ~sample_adc3;
 
 `ifdef CORE_SAMPLER
 sampler sampler_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -130,7 +154,7 @@ sampler sampler_instance (
 
 `ifdef CORE_CLKDIV
 clkdiv clkdiv_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -145,7 +169,7 @@ clkdiv clkdiv_instance (
 
 `ifdef CORE_SEQSWITCH
 seqswitch seqswitch_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -160,7 +184,7 @@ seqswitch seqswitch_instance (
 
 `ifdef CORE_BITCRUSH
 bitcrush bitcrush_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -175,7 +199,7 @@ bitcrush bitcrush_instance (
 
 `ifdef CORE_VCA
 vca vca_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -190,7 +214,7 @@ vca vca_instance (
 
 `ifdef CORE_FILTER
 filter filter_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -205,7 +229,7 @@ filter filter_instance (
 
 `ifdef CORE_VCO
 vco vco_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -219,7 +243,7 @@ vco vco_instance (
 `endif
 
 ak4619 ak4619_instance (
-    .clk     (CLK),
+    .clk     (clk_24mhz),
     .pdn     (P2_3),
     .mclk    (P2_4),
     .bick    (P2_10),
@@ -251,7 +275,7 @@ assign LEDR_N = led1_toggle;
 assign LEDG_N = led2_toggle;
 
 uart_tx #(clk_freq, baud) utx1 (
-	.clk(CLK),
+	.clk(clk_24mhz),
 	.tx_start(tx1_start),
 	.tx_data(tx1_data),
 	.tx(TX),
@@ -271,7 +295,7 @@ reg last_sample_clk = 0;
 
 reg signed [15:0] adc_word_out = 16'h0;
 
-always @(posedge CLK) begin
+always @(posedge clk_24mhz) begin
     if (sample_clk && ~last_sample_clk && state == CH_ID) begin
         case (cur_ch)
 `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
