@@ -10,7 +10,7 @@ AC // 0x01 Audio I/F Format
 30 // 0x07 ADC1 Rch Digital Volume
 30 // 0x08 ADC2 Lch Digital Volume
 30 // 0x09 ADC2 Rch Digital Volume
-00 // 0x0A ADC Digital Filter Setting
+22 // 0x0A ADC Digital Filter Setting
 55 // 0x0B ADC Analog Input Setting
 00 // 0x0C Reserved
 06 // 0x0D ADC Mute & HPF Control
