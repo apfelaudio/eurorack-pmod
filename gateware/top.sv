@@ -97,7 +97,6 @@ assign sample_dac3 = force_cal_output;
 
 `endif
 
-/*
 cal cal_instance (
     .clk     (clk_24mhz),
     .sample_clk  (sample_clk),
@@ -130,12 +129,6 @@ assign cal_out1 = cal_in1;
 assign cal_out2 = cal_in2;
 assign cal_out3 = cal_in3;
 `endif
-*/
-
-assign sample_dac0 = ~sample_adc0;
-assign sample_dac1 = ~sample_adc1;
-assign sample_dac2 = ~sample_adc2;
-assign sample_dac3 = ~sample_adc3;
 
 `ifdef CORE_SAMPLER
 sampler sampler_instance (
