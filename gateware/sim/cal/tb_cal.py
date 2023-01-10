@@ -18,10 +18,10 @@ def twos_comp_to_signed(n, numbits=16):
 @cocotb.test()
 async def test_cal_00(dut):
 
-    clock = Clock(dut.sample_clk, 5, units='us')
-    cocotb.start_soon(clock.start())
-    clock = Clock(dut.clk, 83, units='ns')
-    cocotb.start_soon(clock.start())
+    clock_24m = Clock(dut.clk, 40, units='ns')
+    cocotb.start_soon(clock_24m.start())
+    clock_sample = Clock(dut.sample_clk, 40*128, units='ns')
+    cocotb.start_soon(clock_sample.start())
 
     test_values = [
             23173,
@@ -54,7 +54,10 @@ async def test_cal_00(dut):
             expect = ((value - cal_mem[channel*2]) *
                       cal_mem[channel*2 + 1]) >> 10
             cal_inx.value = Force(signed_to_twos_comp(value))
+            if expect >  32000: expect = 32000
+            if expect < -32000: expect = -32000
             print(f"ch={channel}\t{int(value):6d}\t", end="")
+            await FallingEdge(dut.sample_clk)
             await RisingEdge(dut.sample_clk)
             await RisingEdge(dut.sample_clk)
             await RisingEdge(dut.sample_clk)
