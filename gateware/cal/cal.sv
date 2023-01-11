@@ -34,8 +34,13 @@ module cal (
 
 localparam CAL_ST_ZERO      = 3'd0,
            CAL_ST_MULTIPLY  = 3'd1,
-           CAL_ST_OUT       = 3'd2,
-           CAL_ST_HALT      = 3'd3;
+           CAL_ST_CLAMPL    = 3'd2,
+           CAL_ST_OUT       = 3'd3,
+           CAL_ST_HALT      = 3'd4;
+
+// Only need to clamp negative values as with current hardware it
+// is impossible to overflow in the positive direction during cal.
+localparam CLAMPL = -32'sd32000;
 
 logic signed [15:0] cal_mem [0:15];
 logic signed [15:0] in      [0:7];
@@ -54,8 +59,6 @@ always_ff @(posedge clk) begin
     if (sample_clk && (l_sample_clk != sample_clk)) begin
         state <= CAL_ST_ZERO;
         ch <= 0;
-        underflow <= 8'b00000000;
-        overflow <= 8'b00000000;
         in[0] <= in0;
         in[1] <= in1;
         in[2] <= in2;
@@ -78,14 +81,15 @@ always_ff @(posedge clk) begin
             if (ch == 7) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
-            out0  <= out[0];
-            out1  <= out[1];
-            out2  <= out[2];
-            out3  <= out[3];
-            out4  <= out[4];
-            out5  <= out[5];
-            out6  <= out[6];
-            out7  <= out[7];
+            // TODO(sebholzapfel): add CLAMPL to pipeline.
+            out0  <= out[0] < CLAMPL ? CLAMPL : out[0];
+            out1  <= out[1] < CLAMPL ? CLAMPL : out[1];
+            out2  <= out[2] < CLAMPL ? CLAMPL : out[2];
+            out3  <= out[3] < CLAMPL ? CLAMPL : out[3];
+            out4  <= out[4] < CLAMPL ? CLAMPL : out[4];
+            out5  <= out[5] < CLAMPL ? CLAMPL : out[5];
+            out6  <= out[6] < CLAMPL ? CLAMPL : out[6];
+            out7  <= out[7] < CLAMPL ? CLAMPL : out[7];
             state <= CAL_ST_HALT;
         end
     endcase
