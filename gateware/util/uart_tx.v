@@ -19,7 +19,7 @@
 
 module uart_tx #(
     parameter clk_freq = 24000000,
-    parameter baud     = 1000000
+    parameter baud     =  1000000
 )(
 	input clk,
 	input tx_start,
