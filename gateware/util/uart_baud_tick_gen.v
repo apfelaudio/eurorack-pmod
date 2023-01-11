@@ -23,8 +23,8 @@
 module baud_tick_gen(
 	input clk, enable,
 	output tick);
-parameter clk_freq = 12000000;
-parameter baud = 115200;
+parameter clk_freq = 24000000;
+parameter baud     =  1000000;
 parameter oversampling = 1;
 
 function integer log2(input integer v); begin log2=0; while(v >> log2) log2 = log2 + 1; end endfunction

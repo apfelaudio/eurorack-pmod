@@ -6,11 +6,11 @@
 `default_nettype none
 
 // Transmit CODEC samples over UART
-//`define UART_SAMPLE_TRANSMITTER
+`define UART_SAMPLE_TRANSMITTER
 
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
-//`define UART_SAMPLE_TRANSMIT_RAW_ADC
+`define UART_SAMPLE_TRANSMIT_RAW_ADC
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -19,9 +19,9 @@
 //`define CORE_CLKDIV
 //`define CORE_SEQSWITCH
 //`define CORE_SAMPLER
-//`define CORE_MIRROR
+`define CORE_MIRROR
 //`define CORE_VCA
-`define CORE_VCO
+//`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 
@@ -281,8 +281,7 @@ logic led1_toggle = 1'b0;
 logic led2_toggle = 1'b0;
 logic [3:0] state = XMIT_ST_SENT0;
 logic [1:0] cur_ch = 0;
-logic last_sample_clk = 0;
-logic signed [15:0] adc_word_out = 16'h0;
+logic signed [W-1:0] adc_word_out = 16'h0;
 
 assign LEDR_N = led1_toggle;
 assign LEDG_N = led2_toggle;
@@ -296,39 +295,47 @@ uart_tx #(CLK_FREQ, BAUD_RATE) utx1 (
 );
 
 always_ff @(posedge clk_24mhz) begin
-    last_sample_clk <= sample_clk;
-    if (sample_clk && ~last_sample_clk && state == XMIT_ST_CH_ID) begin
-        case (cur_ch)
-`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-            // Used for calibrating the input channels
-            2'h0: adc_word_out <= sample_adc0;
-            2'h1: adc_word_out <= sample_adc1;
-            2'h2: adc_word_out <= sample_adc2;
-            2'h3: adc_word_out <= sample_adc3;
-`else
-            2'h0: adc_word_out <= cal_in0;
-            2'h1: adc_word_out <= cal_in1;
-            2'h2: adc_word_out <= cal_in2;
-            2'h3: adc_word_out <= cal_in3;
-`endif
-        endcase
-        led1_toggle <= ~led1_toggle;
-    end else if(~tx1_busy) begin
-        case (state)
-            XMIT_ST_SENT0: tx1_data <= "C";
-            XMIT_ST_SENT1: tx1_data <= "H";
-            XMIT_ST_CH_ID: tx1_data <= "0" + cur_ch;
-            XMIT_ST_MSB:  tx1_data <= (adc_word_out & 16'hFF00) >> 8;
-            XMIT_ST_LSB:  tx1_data <= (adc_word_out & 16'h00FF);
-        endcase
+    led1_toggle <= ~led1_toggle;
+    if(~tx1_busy) begin
         tx1_start <= 1'b1;
-        if(state < XMIT_ST_LSB) begin
-            state <= state + 1;
-        end else begin
-            state <= XMIT_ST_SENT0;
-            cur_ch <= cur_ch + 1;
-            led2_toggle <= ~led2_toggle;
-        end
+        case (state)
+            XMIT_ST_SENT0: begin
+                tx1_data <= "C";
+                state <= XMIT_ST_SENT1;
+                case (cur_ch)
+                    `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
+                    // Used for calibrating the input channels
+                    2'h0: adc_word_out <= sample_adc0;
+                    2'h1: adc_word_out <= sample_adc1;
+                    2'h2: adc_word_out <= sample_adc2;
+                    2'h3: adc_word_out <= sample_adc3;
+                    `else
+                    2'h0: adc_word_out <= cal_in0;
+                    2'h1: adc_word_out <= cal_in1;
+                    2'h2: adc_word_out <= cal_in2;
+                    2'h3: adc_word_out <= cal_in3;
+                    `endif
+                endcase
+            end
+            XMIT_ST_SENT1: begin
+                tx1_data <= "H";
+                state <= XMIT_ST_CH_ID;
+            end
+            XMIT_ST_CH_ID: begin
+                tx1_data <= "0" + cur_ch;
+                state <= XMIT_ST_MSB;
+            end
+            XMIT_ST_MSB: begin
+                tx1_data <= (adc_word_out & 16'hFF00) >> 8;
+                state <= XMIT_ST_LSB;
+            end
+            XMIT_ST_LSB: begin
+                tx1_data <= (adc_word_out & 16'h00FF);
+                state <= XMIT_ST_SENT0;
+                cur_ch <= cur_ch + 1;
+                led2_toggle <= ~led2_toggle;
+            end
+        endcase
     end
 end
 
