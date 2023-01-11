@@ -60,7 +60,7 @@ def twos_comp(val, bits):
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
 
-ser = serial.Serial(SERIAL_PORT, 115200)
+ser = serial.Serial(SERIAL_PORT, 1000000)
 
 ch_avg = np.zeros(4)
 p5v_avg = np.zeros(4)

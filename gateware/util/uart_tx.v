@@ -17,15 +17,16 @@
  *
  */
 
-module uart_tx(
+module uart_tx #(
+    parameter clk_freq = 24000000,
+    parameter baud     = 1000000
+)(
 	input clk,
 	input tx_start,
 	input [7:0] tx_data,
 	output tx,
-	output tx_busy);
-
-parameter clk_freq = 12000000;
-parameter baud = 115200;
+	output tx_busy
+);
 
 wire bit_tick;
 baud_tick_gen #(clk_freq, baud) tickgen(.clk(clk), .enable(tx_busy), .tick(bit_tick));

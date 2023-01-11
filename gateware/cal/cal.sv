@@ -14,7 +14,7 @@
 `default_nettype none
 
 module cal #(
-    parameter integer W = 16, // sample width
+    parameter int W = 16, // sample width
     parameter CAL_MEM_FILE = "cal_mem.hex"
 )(
     input clk, // 24Mhz
@@ -39,11 +39,12 @@ module cal #(
 
 localparam int N_CHANNELS = 8;
 
-localparam int CAL_ST_ZERO      = 3'd0,
-               CAL_ST_MULTIPLY  = 3'd1,
-               CAL_ST_CLAMPL    = 3'd2,
-               CAL_ST_OUT       = 3'd3,
-               CAL_ST_HALT      = 3'd4;
+localparam int CAL_ST_LATCH     = 3'd0,
+               CAL_ST_ZERO      = 3'd1,
+               CAL_ST_MULTIPLY  = 3'd2,
+               CAL_ST_CLAMPL    = 3'd3,
+               CAL_ST_OUT       = 3'd4,
+               CAL_ST_HALT      = 3'd5;
 
 // Only need to clamp negative values as with current hardware it
 // is impossible to overflow in the positive direction during cal.
@@ -64,21 +65,24 @@ always_ff @(posedge clk) begin
 
     // On rising sample_clk.
     if (sample_clk && (l_sample_clk != sample_clk)) begin
-        state <= CAL_ST_ZERO;
-        ch <= 0;
-        in[0] <= in0;
-        in[1] <= in1;
-        in[2] <= in2;
-        in[3] <= in3;
-        in[4] <= in4;
-        in[5] <= in5;
-        in[6] <= in6;
-        in[7] <= in7;
+        state <= CAL_ST_LATCH;
     end else begin
         ch <= ch + 1;
     end
 
     case (state)
+        CAL_ST_LATCH: begin
+            in[0] <= in0;
+            in[1] <= in1;
+            in[2] <= in2;
+            in[3] <= in3;
+            in[4] <= in4;
+            in[5] <= in5;
+            in[6] <= in6;
+            in[7] <= in7;
+            ch <= 0;
+            state <= CAL_ST_ZERO;
+        end
         CAL_ST_ZERO: begin
             out[ch] <= (in[ch] - cal_mem[{ch, 1'b0}]);
             if (ch == N_CHANNELS-1) state <= CAL_ST_MULTIPLY;

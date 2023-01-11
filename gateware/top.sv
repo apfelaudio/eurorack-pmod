@@ -3,6 +3,8 @@
 // The defines below allow you to select calibration mode, spit samples out
 // UART, or select one of the user-defined 'cores' (DSP modules).
 
+`default_nettype none
+
 // Transmit CODEC samples over UART
 //`define UART_SAMPLE_TRANSMITTER
 
@@ -17,14 +19,16 @@
 //`define CORE_CLKDIV
 //`define CORE_SEQSWITCH
 //`define CORE_SAMPLER
-`define CORE_MIRROR
+//`define CORE_MIRROR
 //`define CORE_VCA
-//`define CORE_VCO
+`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 
-module top (
-     input   CLK
+module top #(
+    parameter int W = 16 // sample width, bits
+)(
+     input   CLK // Assumed 12Mhz
     ,output  P2_1
     ,inout   P2_2
     ,output  P2_3
@@ -45,11 +49,37 @@ module top (
 `endif
 );
 
-localparam clk_freq = 24_000_000;
-localparam baud = 115200;
+localparam CLK_FREQ  = 24_000_000;
+localparam BAUD_RATE =  1_000_000;
 
-wire clk_24mhz;
-wire clk_24mhz_lock;
+// 24MHz master clock == 24MHz / 128 == 187.5KHz sample clock.
+// For a 'true' 192KHz sample clock we probably want a 12.288MHz
+// crystal, as the PLL can't actually achieve it alone.
+
+logic clk_24mhz;
+logic clk_24mhz_lock;
+logic sample_clk;
+
+// Raw samples to/from CODEC
+logic signed [W-1:0] sample_adc0;
+logic signed [W-1:0] sample_adc1;
+logic signed [W-1:0] sample_adc2;
+logic signed [W-1:0] sample_adc3;
+logic signed [W-1:0] sample_dac0;
+logic signed [W-1:0] sample_dac1;
+logic signed [W-1:0] sample_dac2;
+logic signed [W-1:0] sample_dac3;
+
+// Calibrated samples to/from CODEC
+logic signed [W-1:0] cal_in0;
+logic signed [W-1:0] cal_in1;
+logic signed [W-1:0] cal_in2;
+logic signed [W-1:0] cal_in3;
+logic signed [W-1:0] cal_out0;
+logic signed [W-1:0] cal_out1;
+logic signed [W-1:0] cal_out2;
+logic signed [W-1:0] cal_out3;
+
 SB_PLL40_PAD #(
     .FEEDBACK_PATH("SIMPLE"),
     .PLLOUT_SELECT("GENCLK"),
@@ -65,31 +95,10 @@ SB_PLL40_PAD #(
     .BYPASS(1'b0)
 );
 
-wire sample_clk;
-
-// Raw samples to/from CODEC
-wire signed [15:0] sample_adc0;
-wire signed [15:0] sample_adc1;
-wire signed [15:0] sample_adc2;
-wire signed [15:0] sample_adc3;
-wire signed [15:0] sample_dac0;
-wire signed [15:0] sample_dac1;
-wire signed [15:0] sample_dac2;
-wire signed [15:0] sample_dac3;
-
-// Calibrated samples to/from CODEC
-wire signed [15:0] cal_in0;
-wire signed [15:0] cal_in1;
-wire signed [15:0] cal_in2;
-wire signed [15:0] cal_in3;
-wire signed [15:0] cal_out0;
-wire signed [15:0] cal_out1;
-wire signed [15:0] cal_out2;
-wire signed [15:0] cal_out3;
-
 `ifdef OUTPUT_CALIBRATION
 
-wire signed [15:0] force_cal_output = BTN_N ? 20000 : -20000;
+logic signed [W-1:0] force_cal_output;
+assign force_cal_output = BTN_N ? 20000 : -20000;
 assign sample_dac0 = force_cal_output;
 assign sample_dac1 = force_cal_output;
 assign sample_dac2 = force_cal_output;
@@ -98,8 +107,8 @@ assign sample_dac3 = force_cal_output;
 `endif
 
 cal cal_instance (
-    .clk     (clk_24mhz),
-    .sample_clk  (sample_clk),
+    .clk (clk_24mhz),
+    .sample_clk (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
     .in0 (~sample_adc0),
@@ -259,15 +268,26 @@ ak4619 ak4619_instance (
 
 `ifdef UART_SAMPLE_TRANSMITTER
 
-reg tx1_start;
-reg [7:0] tx1_data;
-reg tx1_busy;
-reg led1_toggle = 1'b0;
-reg led2_toggle = 1'b0;
+localparam int XMIT_ST_SENT0      = 4'h0,
+               XMIT_ST_SENT1      = 4'h1,
+               XMIT_ST_CH_ID      = 4'h2,
+               XMIT_ST_MSB        = 4'h3,
+               XMIT_ST_LSB        = 4'h4;
+
+logic tx1_start;
+logic [7:0] tx1_data;
+logic tx1_busy;
+logic led1_toggle = 1'b0;
+logic led2_toggle = 1'b0;
+logic [3:0] state = XMIT_ST_SENT0;
+logic [1:0] cur_ch = 0;
+logic last_sample_clk = 0;
+logic signed [15:0] adc_word_out = 16'h0;
+
 assign LEDR_N = led1_toggle;
 assign LEDG_N = led2_toggle;
 
-uart_tx #(clk_freq, baud) utx1 (
+uart_tx #(CLK_FREQ, BAUD_RATE) utx1 (
 	.clk(clk_24mhz),
 	.tx_start(tx1_start),
 	.tx_data(tx1_data),
@@ -275,21 +295,9 @@ uart_tx #(clk_freq, baud) utx1 (
 	.tx_busy(tx1_busy)
 );
 
-localparam
-	SENT0      = 4'h0,
-	SENT1      = 4'h1,
-    CH_ID      = 4'h2,
-	MSB        = 4'h3,
-	LSB        = 4'h4;
-
-reg [3:0] state = SENT0;
-reg [1:0] cur_ch = 0;
-reg last_sample_clk = 0;
-
-reg signed [15:0] adc_word_out = 16'h0;
-
-always @(posedge clk_24mhz) begin
-    if (sample_clk && ~last_sample_clk && state == CH_ID) begin
+always_ff @(posedge clk_24mhz) begin
+    last_sample_clk <= sample_clk;
+    if (sample_clk && ~last_sample_clk && state == XMIT_ST_CH_ID) begin
         case (cur_ch)
 `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
             // Used for calibrating the input channels
@@ -305,23 +313,19 @@ always @(posedge clk_24mhz) begin
 `endif
         endcase
         led1_toggle <= ~led1_toggle;
-    end
-    last_sample_clk <= sample_clk;
-    if(~tx1_busy) begin
+    end else if(~tx1_busy) begin
         case (state)
-            SENT0: tx1_data <= "C";
-            SENT1: tx1_data <= "H";
-            CH_ID: tx1_data <= "0" + cur_ch;
-            MSB:  tx1_data <= (adc_word_out & 16'hFF00) >> 8;
-            LSB:  tx1_data <= (adc_word_out & 16'h00FF);
+            XMIT_ST_SENT0: tx1_data <= "C";
+            XMIT_ST_SENT1: tx1_data <= "H";
+            XMIT_ST_CH_ID: tx1_data <= "0" + cur_ch;
+            XMIT_ST_MSB:  tx1_data <= (adc_word_out & 16'hFF00) >> 8;
+            XMIT_ST_LSB:  tx1_data <= (adc_word_out & 16'h00FF);
         endcase
-
         tx1_start <= 1'b1;
-
-        if(state < LSB) begin
+        if(state < XMIT_ST_LSB) begin
             state <= state + 1;
         end else begin
-            state <= SENT0;
+            state <= XMIT_ST_SENT0;
             cur_ch <= cur_ch + 1;
             led2_toggle <= ~led2_toggle;
         end
