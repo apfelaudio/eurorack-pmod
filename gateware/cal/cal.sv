@@ -17,7 +17,7 @@ module cal #(
     parameter int W = 16, // sample width
     parameter CAL_MEM_FILE = "cal_mem.hex"
 )(
-    input clk, // 24Mhz
+    input clk, // 12Mhz
     input sample_clk,
     input signed [W-1:0] in0,
     input signed [W-1:0] in1,
