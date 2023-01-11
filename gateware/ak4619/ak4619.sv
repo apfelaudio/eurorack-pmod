@@ -10,7 +10,7 @@
 module ak4619 #(
     parameter int W = 16 // sample width, bits
 )(
-    input  clk,   // Assumed 24MHz
+    input  clk,   // Assumed 12MHz
     output pdn,
     output mclk,
     output bick,
@@ -46,7 +46,7 @@ logic sda_out_i2cinit;
 assign pdn         = 1'b1;
 assign bick        = clk;
 assign mclk        = clk;
-assign lrck        = clkdiv[6];   // 24MHz >> 7 == 187.5KHz
+assign lrck        = clkdiv[6];   // 12MHz >> 7 == 93.75KHz
 assign i2c_scl     = scl_i2cinit     ? 1'bz : 1'b0;
 assign i2c_sda     = sda_out_i2cinit ? 1'bz : 1'b0;
 

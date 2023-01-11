@@ -2,24 +2,21 @@
 //
 // Currently only used for initializing the registers in the AK4619 on boot.
 
+`default_nettype none
 
-module i2cinit (
+module i2cinit #(
+    // File and length of i2c bytes to write to the slave.
+    parameter     F_PATH  = "ak4619-cfg.hex",
+    parameter int N_BYTES = 6'h17,
+    // How long to wait after init before starting I2C TX.
+    parameter int N_WAIT_CYCLES = 16'hFF
+)(
     input     clk, // 2x i2c clock
-
     // Note: outputs are NOT tristated on HI, this should be handled
     // in a parent module depending on the output pin topology.
     output    scl,
     output    sda_out
 );
-
-parameter N_BYTES = 6'h17;
-
-// Array of i2c bytes to write to the slave.
-reg [7:0] i2c_bytes [0:N_BYTES-1];
-initial $readmemh("ak4619-cfg.hex", i2c_bytes);
-
-reg [5:0] cur_reg_counter = 0;
-reg [7:0] cur_reg_value;
 
 localparam I2CINIT_WAIT  = 3'd0,
            I2CINIT_START = 3'd1, // Issue start condition
@@ -28,23 +25,25 @@ localparam I2CINIT_WAIT  = 3'd0,
            I2CINIT_STOP  = 3'd4,
            I2CINIT_DONE  = 3'd5;
 
-reg [2:0] i2cinit_state = I2CINIT_WAIT;
+logic [7:0] i2c_bytes [0:N_BYTES-1];
+initial $readmemh(F_PATH, i2c_bytes);
 
-reg clk_cnt = 1'b0;
-reg clk_scl = 1'b0;
-reg clk_sda = 1'b0;
+logic [2:0] i2cinit_state = I2CINIT_WAIT;
 
-reg scl_en = 1'b0;
-reg sda_wr = 1'b1;
-reg sda_startstop = 1'b1;
+logic [15:0] wait_cycles    = 16'd0;
+logic [7:0] cur_byte        = 8'd0;
+logic [2:0] cur_shift       = 3'd0;
+logic clk_cnt               = 1'b0;
+logic clk_scl               = 1'b0;
+logic clk_sda               = 1'b0;
+logic scl_en                = 1'b0;
+logic sda_wr                = 1'b1;
+logic sda_startstop         = 1'b1;
+
 assign scl = scl_en ? clk_scl : 1'b1;
 assign sda_out = ~(~sda_wr || ~sda_startstop);
 
-reg [15:0] wait_cycles = 16'd0;
-reg [7:0] cur_byte  = 8'd0;
-reg [2:0] cur_shift = 3'd0;
-
-always @(posedge clk) begin
+always_ff @(posedge clk) begin
     clk_cnt <= clk_cnt + 1;
     if (clk_cnt == 0) begin
         clk_scl <= ~clk_scl;
@@ -59,7 +58,7 @@ always @(posedge clk) begin
             case (i2cinit_state)
                 I2CINIT_WAIT: begin
                     wait_cycles = wait_cycles + 1;
-                    if (wait_cycles == 16'hFF) begin
+                    if (wait_cycles == N_WAIT_CYCLES) begin
                         i2cinit_state <= I2CINIT_START;
                     end
                 end
