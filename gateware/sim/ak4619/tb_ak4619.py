@@ -34,7 +34,7 @@ async def test_ak4619_00(dut):
 
     dut.sdout1.value = 0
 
-    await FallingEdge(dut.lrck)
+    await FallingEdge(dut.sample_clk)
     await clock_out_word(dut, TEST_L0)
     await clock_out_word(dut, TEST_R0)
     await clock_out_word(dut, TEST_L1)
@@ -42,6 +42,8 @@ async def test_ak4619_00(dut):
 
     # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
+    await RisingEdge(dut.sample_clk)
+    await FallingEdge(dut.sample_clk)
     print("Data clocked from sdout1 present at sample_outX:")
     print(hex(dut.sample_out0.value))
     print(hex(dut.sample_out1.value))
@@ -58,8 +60,8 @@ async def test_ak4619_00(dut):
     dut.sample_in2.value = Force(TEST_L1)
     dut.sample_in3.value = Force(TEST_R1)
 
-    await FallingEdge(dut.lrck)
-    await FallingEdge(dut.lrck)
+    await FallingEdge(dut.sample_clk)
+    await FallingEdge(dut.sample_clk)
 
     result_l0 = await clock_in_word(dut)
     result_r0 = await clock_in_word(dut)
@@ -82,4 +84,4 @@ async def test_ak4619_00(dut):
     dut.sample_in2.value = Release()
     dut.sample_in3.value = Release()
 
-    await FallingEdge(dut.lrck)
+    await FallingEdge(dut.sample_clk)
