@@ -32,17 +32,17 @@ module cal (
     output logic signed [15:0] out7
 );
 
-localparam CAL_ST_ZERO     = 2'd0,
-           CAL_ST_MULTIPLY = 2'd1,
-           CAL_ST_HALT     = 2'd2;
+localparam CAL_ST_ZERO      = 3'd0,
+           CAL_ST_MULTIPLY  = 3'd1,
+           CAL_ST_OUT       = 3'd2,
+           CAL_ST_HALT      = 3'd3;
 
 logic signed [15:0] cal_mem [0:15];
 logic signed [15:0] in      [0:7];
 logic signed [31:0] out     [0:7];
-logic        [2:0]  ch           = 3'd0;
-logic        [1:0]  state        = CAL_ST_ZERO;
+logic        [2:0]  ch = 3'd0;
+logic        [2:0]  state = CAL_ST_ZERO;
 logic               l_sample_clk = 1'd0;
-
 
 // Calibration memory for 8 channels stored as
 // 2 bytes shift, 2 bytes multiply * 8 channels.
@@ -54,6 +54,8 @@ always_ff @(posedge clk) begin
     if (sample_clk && (l_sample_clk != sample_clk)) begin
         state <= CAL_ST_ZERO;
         ch <= 0;
+        underflow <= 8'b00000000;
+        overflow <= 8'b00000000;
         in[0] <= in0;
         in[1] <= in1;
         in[2] <= in2;
@@ -62,15 +64,6 @@ always_ff @(posedge clk) begin
         in[5] <= in5;
         in[6] <= in6;
         in[7] <= in7;
-
-        out0  <= out[0];
-        out1  <= out[1];
-        out2  <= out[2];
-        out3  <= out[3];
-        out4  <= out[4];
-        out5  <= out[5];
-        out6  <= out[6];
-        out7  <= out[7];
     end else begin
         ch <= ch + 1;
     end
@@ -82,7 +75,18 @@ always_ff @(posedge clk) begin
         end
         CAL_ST_MULTIPLY: begin
             out[ch] <= (out[ch] * cal_mem[{ch, 1'b1}]) >>> 10;
-            if (ch == 7) state <= CAL_ST_HALT;
+            if (ch == 7) state <= CAL_ST_OUT;
+        end
+        CAL_ST_OUT: begin
+            out0  <= out[0];
+            out1  <= out[1];
+            out2  <= out[2];
+            out3  <= out[3];
+            out4  <= out[4];
+            out5  <= out[5];
+            out6  <= out[6];
+            out7  <= out[7];
+            state <= CAL_ST_HALT;
         end
     endcase
 
