@@ -8,7 +8,7 @@
 `default_nettype none
 
 module ak4619 #(
-    parameter int W = 16 // sample width, bits
+    parameter W = 16 // sample width, bits
 )(
     input  clk,   // Assumed 12MHz
     output pdn,
