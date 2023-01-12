@@ -27,7 +27,7 @@ parameter clk_freq = 12000000;
 parameter baud     =   115200;
 parameter oversampling = 1;
 
-function integer log2(input integer v); begin log2=0; while(v >> log2) log2 = log2 + 1; end endfunction
+function integer log2(input integer v); begin log2=0; while(1'(v >> log2)) log2 = log2 + 1; end endfunction
 
 localparam acc_width = log2(clk_freq / baud) + 8; // +/- 2% max timing error over a byte
 

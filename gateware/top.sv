@@ -253,11 +253,11 @@ ak4619 ak4619_instance (
 
 `ifdef UART_SAMPLE_TRANSMITTER
 
-localparam int XMIT_ST_SENT0      = 4'h0,
-               XMIT_ST_SENT1      = 4'h1,
-               XMIT_ST_CH_ID      = 4'h2,
-               XMIT_ST_MSB        = 4'h3,
-               XMIT_ST_LSB        = 4'h4;
+localparam XMIT_ST_SENT0      = 4'h0,
+           XMIT_ST_SENT1      = 4'h1,
+           XMIT_ST_CH_ID      = 4'h2,
+           XMIT_ST_MSB        = 4'h3,
+           XMIT_ST_LSB        = 4'h4;
 
 logic tx1_start;
 logic [7:0] tx1_data;
@@ -307,18 +307,21 @@ always_ff @(posedge clk_12mhz) begin
                 state <= XMIT_ST_CH_ID;
             end
             XMIT_ST_CH_ID: begin
-                tx1_data <= "0" + cur_ch;
+                tx1_data <= "0" + 8'(cur_ch);
                 state <= XMIT_ST_MSB;
             end
             XMIT_ST_MSB: begin
-                tx1_data <= (adc_word_out & 16'hFF00) >> 8;
+                tx1_data <= 8'((adc_word_out & 16'hFF00) >> 8);
                 state <= XMIT_ST_LSB;
             end
             XMIT_ST_LSB: begin
-                tx1_data <= (adc_word_out & 16'h00FF);
+                tx1_data <= 8'((adc_word_out & 16'h00FF));
                 state <= XMIT_ST_SENT0;
                 cur_ch <= cur_ch + 1;
                 led2_toggle <= ~led2_toggle;
+            end
+            default: begin
+                // Should never reach here
             end
         endcase
     end
