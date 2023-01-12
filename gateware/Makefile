@@ -1,8 +1,8 @@
 PROJ = top
 ADD_SRC = ak4619/i2cinit.sv \
 		  ak4619/ak4619.sv \
-		  util/uart_baud_tick_gen.v \
-		  util/uart_tx.v \
+		  util/baud_tick_gen.sv \
+		  util/uart_tx.sv \
 		  cal/cal.sv \
 		  cores/clkdiv.sv \
 		  cores/seqswitch.sv \
