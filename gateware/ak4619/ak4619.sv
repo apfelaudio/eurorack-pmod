@@ -33,7 +33,7 @@ module ak4619 #(
 
 localparam int N_CHANNELS = 4;
 
-logic signed [W-1:0] dac_words [N_CHANNELS];
+logic signed [(W*N_CHANNELS)-1:0] dac_words;
 logic signed [W-1:0] adc_words [N_CHANNELS];
 
 logic sdout1_latched    = 1'b0;
@@ -55,10 +55,8 @@ assign bit_counter = clkdiv[4:0];
 assign sample_clk  = lrck;
 
 always_ff @(negedge sample_clk) begin
-    dac_words[0] <= sample_in0;
-    dac_words[1] <= sample_in1;
-    dac_words[2] <= sample_in2;
-    dac_words[3] <= sample_in3;
+    dac_words = {sample_in3, sample_in2,
+                 sample_in1, sample_in0};
     sample_out0  <= adc_words[0];
     sample_out1  <= adc_words[1];
     sample_out2  <= adc_words[2];
@@ -68,7 +66,12 @@ end
 always_ff @(negedge clk) begin
     // Clock out 16 bits
     if (bit_counter <= (W-1)) begin
-        sdin1 <= dac_words[channel][(W-1) - bit_counter];
+        case (channel)
+            0: sdin1 <= dac_words[(1*W)-1-bit_counter];
+            1: sdin1 <= dac_words[(2*W)-1-bit_counter];
+            2: sdin1 <= dac_words[(3*W)-1-bit_counter];
+            3: sdin1 <= dac_words[(4*W)-1-bit_counter];
+        endcase
     end else begin
         sdin1 <= 0;
     end

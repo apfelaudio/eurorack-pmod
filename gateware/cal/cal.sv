@@ -51,7 +51,7 @@ localparam CAL_ST_LATCH     = 3'd0,
 // is impossible to overflow in the positive direction during cal.
 localparam int signed CLAMPL = -32'sd32000;
 
-logic signed [W-1:0]     cal_mem [0:2*N_CHANNELS];
+logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
 logic        [2:0]       ch      = 0;
 logic        [2:0]       state   = CAL_ST_ZERO;
@@ -74,19 +74,19 @@ always_ff @(posedge clk) begin
     case (state)
         CAL_ST_LATCH: begin
             case (ch)
-                0: out[0] <= in0;
-                1: out[1] <= in1;
-                2: out[2] <= in2;
-                3: out[3] <= in3;
-                4: out[4] <= in4;
-                5: out[5] <= in5;
-                6: out[6] <= in6;
-                7: out[7] <= in7;
+                0: out[0] <= 32'(in0);
+                1: out[1] <= 32'(in1);
+                2: out[2] <= 32'(in2);
+                3: out[3] <= 32'(in3);
+                4: out[4] <= 32'(in4);
+                5: out[5] <= 32'(in5);
+                6: out[6] <= 32'(in6);
+                7: out[7] <= 32'(in7);
             endcase
             if (ch == LAST_CH_IX) state <= CAL_ST_ZERO;
         end
         CAL_ST_ZERO: begin
-            out[ch] <= (out[ch] - cal_mem[{ch, 1'b0}]);
+            out[ch] <= (out[ch] - 32'(cal_mem[{ch, 1'b0}]));
             if (ch == LAST_CH_IX) state <= CAL_ST_MULTIPLY;
         end
         CAL_ST_MULTIPLY: begin
