@@ -20,5 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
-      - run: yosys --version
+      - run: cocotb-config -v
       - run: cd gateware/sim && ./00_run.sh
+
+  run-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: verilator --version
+      - run: cd gateware && scripts/verilator_lint
