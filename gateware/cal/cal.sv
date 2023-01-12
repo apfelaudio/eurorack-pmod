@@ -14,7 +14,7 @@
 `default_nettype none
 
 module cal #(
-    parameter int W = 16, // sample width
+    parameter W = 16, // sample width
     parameter CAL_MEM_FILE = "cal_mem.hex"
 )(
     input clk, // 12Mhz
@@ -37,14 +37,15 @@ module cal #(
     output logic signed [W-1:0] out7
 );
 
-localparam int N_CHANNELS = 8;
+localparam N_CHANNELS = 8;
+localparam LAST_CH_IX = 3'd7;
 
-localparam int CAL_ST_LATCH     = 3'd0,
-               CAL_ST_ZERO      = 3'd1,
-               CAL_ST_MULTIPLY  = 3'd2,
-               CAL_ST_CLAMPL    = 3'd3,
-               CAL_ST_OUT       = 3'd4,
-               CAL_ST_HALT      = 3'd5;
+localparam CAL_ST_LATCH     = 3'd0,
+           CAL_ST_ZERO      = 3'd1,
+           CAL_ST_MULTIPLY  = 3'd2,
+           CAL_ST_CLAMPL    = 3'd3,
+           CAL_ST_OUT       = 3'd4,
+           CAL_ST_HALT      = 3'd5;
 
 // Only need to clamp negative values as with current hardware it
 // is impossible to overflow in the positive direction during cal.
@@ -85,22 +86,25 @@ always_ff @(posedge clk) begin
         end
         CAL_ST_ZERO: begin
             out[ch] <= (in[ch] - cal_mem[{ch, 1'b0}]);
-            if (ch == N_CHANNELS-1) state <= CAL_ST_MULTIPLY;
+            if (ch == LAST_CH_IX) state <= CAL_ST_MULTIPLY;
         end
         CAL_ST_MULTIPLY: begin
             out[ch] <= (out[ch] * cal_mem[{ch, 1'b1}]) >>> 10;
-            if (ch == N_CHANNELS-1) state <= CAL_ST_OUT;
+            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPL;
+        end
+        CAL_ST_CLAMPL: begin
+            out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
+            if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
-            // TODO(sebholzapfel): add CLAMPL to pipeline.
-            out0  <= out[0] < CLAMPL ? CLAMPL : out[0];
-            out1  <= out[1] < CLAMPL ? CLAMPL : out[1];
-            out2  <= out[2] < CLAMPL ? CLAMPL : out[2];
-            out3  <= out[3] < CLAMPL ? CLAMPL : out[3];
-            out4  <= out[4] < CLAMPL ? CLAMPL : out[4];
-            out5  <= out[5] < CLAMPL ? CLAMPL : out[5];
-            out6  <= out[6] < CLAMPL ? CLAMPL : out[6];
-            out7  <= out[7] < CLAMPL ? CLAMPL : out[7];
+            out0  <= out[0][W-1:0];
+            out1  <= out[1][W-1:0];
+            out2  <= out[2][W-1:0];
+            out3  <= out[3][W-1:0];
+            out4  <= out[4][W-1:0];
+            out5  <= out[5][W-1:0];
+            out6  <= out[6][W-1:0];
+            out7  <= out[7][W-1:0];
             state <= CAL_ST_HALT;
         end
         default: begin
