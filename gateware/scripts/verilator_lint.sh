@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
+
 verilator --lint-only -Ical -Iak4619 -Iutil -Icores top.sv
 verilator --lint-only -Icores bitcrush.sv
 verilator --lint-only -Icores clkdiv.sv
