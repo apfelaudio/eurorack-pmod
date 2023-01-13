@@ -29,8 +29,11 @@ module vca #(
     output signed [W-1:0] sample_out3
 );
 
-logic signed [(W*2)-1:0] vca1 = sample_in0 * sample_in1;
-logic signed [(W*2)-1:0] vca2 = sample_in2 * sample_in3;
+logic signed [(W*2)-1:0] vca1;
+logic signed [(W*2)-1:0] vca2;
+
+assign vca1 = sample_in0 * sample_in1;
+assign vca2 = sample_in2 * sample_in3;
 
 assign sample_out0 = sample_in0;
 assign sample_out1 = W'(vca1 >>> W);
