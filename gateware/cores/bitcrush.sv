@@ -9,20 +9,25 @@
 // - Output 0: Input 0 (mirrored)
 // - Output 1-3: Audio outputs (bitcrushed)
 
-module bitcrush (
-    input clk, // 12Mhz
+module bitcrush #(
+    parameter W = 16
+)(
+    input clk,
     input sample_clk,
-    input signed [15:0] sample_in0,
-    input signed [15:0] sample_in1,
-    input signed [15:0] sample_in2,
-    input signed [15:0] sample_in3,
-    output signed [15:0] sample_out0,
-    output signed [15:0] sample_out1,
-    output signed [15:0] sample_out2,
-    output signed [15:0] sample_out3
+    input signed [W-1:0] sample_in0,
+    input signed [W-1:0] sample_in1,
+    input signed [W-1:0] sample_in2,
+    input signed [W-1:0] sample_in3,
+    output signed [W-1:0] sample_out0,
+    output signed [W-1:0] sample_out1,
+    output signed [W-1:0] sample_out2,
+    output signed [W-1:0] sample_out3
 );
 
-wire signed [15:0] mask;
+logic signed [W-1:0] mask;
+logic signed [W-1:0] out1;
+logic signed [W-1:0] out2;
+logic signed [W-1:0] out3;
 
 assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
               (sample_in0 > 4*4500) ? 16'b1111111111100000 :
@@ -35,10 +40,6 @@ assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
               (sample_in0 > 4*1000) ? 16'b1111000000000000 :
               (sample_in0 > 4* 500) ? 16'b1110000000000000 :
                                       16'b1100000000000000;
-
-reg signed [15:0] out1;
-reg signed [15:0] out2;
-reg signed [15:0] out3;
 
 always @(posedge sample_clk) begin
     out1 <= sample_in1 & mask;

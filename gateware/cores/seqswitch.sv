@@ -73,6 +73,9 @@ always @(posedge sample_clk) begin
             sample_out2 <= sample_in1;
             sample_out3 <= sample_in2;
         end
+        default: begin
+            // State is never entered
+        end
     endcase
 end
 
