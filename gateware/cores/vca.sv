@@ -17,7 +17,7 @@
 module vca #(
     parameter W = 16
 )(
-    input clk, // 12Mhz
+    input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,

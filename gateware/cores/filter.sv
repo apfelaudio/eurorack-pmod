@@ -9,20 +9,22 @@
 // - Output 2: Bandpass out
 // - Output 3: Notch out
 
-module filter (
-    input clk, // 12Mhz
+module filter #(
+    parameter W = 16
+)(
+    input clk,
     input sample_clk,
-    input signed [15:0] sample_in0,
-    input signed [15:0] sample_in1,
-    input signed [15:0] sample_in2,
-    input signed [15:0] sample_in3,
-    output signed [15:0] sample_out0,
-    output signed [15:0] sample_out1,
-    output signed [15:0] sample_out2,
-    output signed [15:0] sample_out3
+    input signed [W-1:0] sample_in0,
+    input signed [W-1:0] sample_in1,
+    input signed [W-1:0] sample_in2,
+    input signed [W-1:0] sample_in3,
+    output signed [W-1:0] sample_out0,
+    output signed [W-1:0] sample_out1,
+    output signed [W-1:0] sample_out2,
+    output signed [W-1:0] sample_out3
 );
 
-filter_svf_pipelined #(.SAMPLE_BITS(16)) filter_svf_inst(
+filter_svf_pipelined #(.SAMPLE_BITS(W)) filter_svf_inst(
     .clk(clk),
     .in(sample_in0),
     .sample_clk(sample_clk),

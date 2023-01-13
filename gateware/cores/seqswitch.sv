@@ -12,38 +12,39 @@
 // - Output 2: Input 2 -> 3 -> 1 -> 2 ...
 // - Output 3: Input 3 -> 1 -> 2 -> 3 ...
 
-module seqswitch (
-    input clk, // 12Mhz
+module seqswitch #(
+    parameter W = 16,
+    parameter FP_OFFSET = 2
+)(
+    input clk,
     input sample_clk,
-    input signed [15:0] sample_in0,
-    input signed [15:0] sample_in1,
-    input signed [15:0] sample_in2,
-    input signed [15:0] sample_in3,
-    output signed [15:0] sample_out0,
-    output reg signed [15:0] sample_out1,
-    output reg signed [15:0] sample_out2,
-    output reg signed [15:0] sample_out3
+    input signed [W-1:0] sample_in0,
+    input signed [W-1:0] sample_in1,
+    input signed [W-1:0] sample_in2,
+    input signed [W-1:0] sample_in3,
+    output signed [W-1:0] sample_out0,
+    output reg signed [W-1:0] sample_out1,
+    output reg signed [W-1:0] sample_out2,
+    output reg signed [W-1:0] sample_out3
 );
 
 // Calibrated samples represent millivolts in 16 bits, last 2 bits are fractional.
-`define FROM_MV(value) (value <<< 2)
+`define FROM_MV(value) (value <<< FP_OFFSET);
 
 // Input and output voltage thresholds.
-`define SCHMITT_HI `FROM_MV(2000)
-`define SCHMITT_LO `FROM_MV(500)
-`define OUT_HI     `FROM_MV(5000)
-`define OUT_LO     `FROM_MV(0)
+localparam SCHMITT_HI = `FROM_MV(2000)
+localparam SCHMITT_LO = `FROM_MV(500)
 
 // State variable for schmitt inputs.
-reg last_state_hi = 1'b0;
+logic last_state_hi = 1'b0;
 
 // Current routing state of the sequential switch.
-reg [1:0] switch_state = 2'b00;
+logic [1:0] switch_state = 2'b00;
 
-always @(posedge sample_clk) begin
+always_ff @(posedge sample_clk) begin
 
     // Rising edge of clock.
-    if (sample_in0 > `SCHMITT_HI && !last_state_hi) begin
+    if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
         last_state_hi <= 1'b1;
 
         // Update switch routing on a rising edge.
@@ -52,7 +53,7 @@ always @(posedge sample_clk) begin
     end
 
     // Falling edge of clock.
-    if (sample_in0 < `SCHMITT_LO && last_state_hi) begin
+    if (sample_in0 < SCHMITT_LO && last_state_hi) begin
         last_state_hi <= 1'b0;
     end
 

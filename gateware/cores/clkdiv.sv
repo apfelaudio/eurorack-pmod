@@ -39,7 +39,7 @@ localparam OUT_LO     = `FROM_MV(0);
 logic last_state_hi = 1'b0;
 logic [3:0] div = 0;
 
-always @(posedge sample_clk) begin
+always_ff @(posedge sample_clk) begin
     if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
         last_state_hi <= 1'b1;
         // Increment count on every rising edge.
