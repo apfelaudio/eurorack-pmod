@@ -14,25 +14,27 @@
 // - Output 2: Input #3 (mirrored)
 // - Output 3: Input 2 * Input 3
 //
-module vca (
+module vca #(
+    parameter W = 16
+)(
     input clk, // 12Mhz
     input sample_clk,
-    input signed [15:0] sample_in0,
-    input signed [15:0] sample_in1,
-    input signed [15:0] sample_in2,
-    input signed [15:0] sample_in3,
-    output signed [15:0] sample_out0,
-    output signed [15:0] sample_out1,
-    output signed [15:0] sample_out2,
-    output signed [15:0] sample_out3
+    input signed [W-1:0] sample_in0,
+    input signed [W-1:0] sample_in1,
+    input signed [W-1:0] sample_in2,
+    input signed [W-1:0] sample_in3,
+    output signed [W-1:0] sample_out0,
+    output signed [W-1:0] sample_out1,
+    output signed [W-1:0] sample_out2,
+    output signed [W-1:0] sample_out3
 );
 
-wire signed [31:0] vca1 = sample_in0 * sample_in1;
-wire signed [31:0] vca2 = sample_in2 * sample_in3;
+logic signed [(W*2)-1:0] vca1 = sample_in0 * sample_in1;
+logic signed [(W*2)-1:0] vca2 = sample_in2 * sample_in3;
 
 assign sample_out0 = sample_in0;
-assign sample_out1 = vca1 >>> 16;
+assign sample_out1 = W'(vca1 >>> W);
 assign sample_out2 = sample_in2;
-assign sample_out3 = vca2 >>> 16;
+assign sample_out3 = W'(vca2 >>> W);
 
 endmodule
