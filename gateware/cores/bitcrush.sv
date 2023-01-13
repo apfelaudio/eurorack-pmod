@@ -41,7 +41,7 @@ assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
               (sample_in0 > 4* 500) ? 16'b1110000000000000 :
                                       16'b1100000000000000;
 
-always @(posedge sample_clk) begin
+always_ff @(posedge sample_clk) begin
     out1 <= sample_in1 & mask;
     out2 <= sample_in2 & mask;
     out3 <= sample_in3 & mask;

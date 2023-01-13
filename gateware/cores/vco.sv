@@ -11,7 +11,7 @@ module vco #(
     parameter WAVETABLE_PATH = "vco/wavetable.hex",
     parameter WAVETABLE_SIZE = 256
 )(
-    input clk, // 12Mhz
+    input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
@@ -42,7 +42,7 @@ logic [31:0] wavetable_pos = 32'h0;
 assign lut_index = sample_in0 >>> 6;
 assign lut_index_clamped = $clog2(V_OCT_LUT_SIZE)'(lut_index < 0 ? W'(0) : lut_index);
 
-always @(posedge sample_clk) begin
+always_ff @(posedge sample_clk) begin
     // TODO: linear interpolation between frequencies, silence oscillator
     // whenever we are outside the LUT bounds.
     wavetable_pos <= wavetable_pos + 32'(v_oct_lut[lut_index_clamped]);

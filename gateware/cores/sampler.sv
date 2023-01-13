@@ -44,7 +44,7 @@ logic [$clog2(N_SAMPLES):0] sample_pos = 0;
 // Value of the last sample at sample_pos, synchronized to sample_clk.
 logic [W-1:0] cur_sample = 16'h0;
 
-always @(posedge sample_clk) begin
+always_ff @(posedge sample_clk) begin
     sclkdiv <= sclkdiv + 1;
     if (sclkdiv % 2 == 0 && sample_pos <= N_SAMPLES) begin
         sample_pos <= sample_pos + 1;
