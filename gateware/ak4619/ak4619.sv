@@ -42,6 +42,7 @@ logic [1:0] channel;
 logic [4:0] bit_counter;
 logic scl_i2cinit;
 logic sda_out_i2cinit;
+logic last_sample_clk;
 
 assign pdn         = 1'b1;
 assign bick        = clk;
@@ -54,16 +55,17 @@ assign channel     = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
 assign bit_counter = clkdiv[4:0];
 assign sample_clk  = lrck;
 
-always_ff @(negedge sample_clk) begin
-    dac_words = {sample_in3, sample_in2,
-                 sample_in1, sample_in0};
-    sample_out0  <= adc_words[0];
-    sample_out1  <= adc_words[1];
-    sample_out2  <= adc_words[2];
-    sample_out3  <= adc_words[3];
-end
-
 always_ff @(negedge clk) begin
+
+    if (~sample_clk && (last_sample_clk != sample_clk)) begin
+        dac_words <= {sample_in3, sample_in2,
+                      sample_in1, sample_in0};
+        sample_out0  <= adc_words[0];
+        sample_out1  <= adc_words[1];
+        sample_out2  <= adc_words[2];
+        sample_out3  <= adc_words[3];
+    end
+
     // Clock out 16 bits
     if (bit_counter <= (W-1)) begin
         case (channel)
@@ -84,6 +86,7 @@ always_ff @(negedge clk) begin
     end
 
     clkdiv <= clkdiv + 1;
+    last_sample_clk <= sample_clk;
 end
 
 always_ff @(posedge clk) begin
