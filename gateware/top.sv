@@ -54,7 +54,7 @@ module top #(
 // crystal, as the PLL can't actually achieve it alone.
 
 localparam CLK_FREQ  = 12_000_000;
-localparam BAUD_RATE =    115_200;
+localparam BAUD_RATE =  1_000_000;
 
 logic clk_12mhz;
 logic sample_clk;

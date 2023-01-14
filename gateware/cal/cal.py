@@ -38,7 +38,7 @@ import time
 import numpy as np
 import keyboard
 
-SERIAL_PORT = '/dev/ttyUSB1'
+SERIAL_PORT = '/dev/ttyUSB2'
 
 # Input calibration is aiming for N counts per volt
 COUNT_PER_VOLT = 4000
@@ -60,7 +60,7 @@ def twos_comp(val, bits):
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
 
-ser = serial.Serial(SERIAL_PORT, 115200)
+ser = serial.Serial(SERIAL_PORT, 1000000)
 
 ch_avg = np.zeros(4)
 p5v_avg = np.zeros(4)
