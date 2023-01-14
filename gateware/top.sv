@@ -49,16 +49,31 @@ module top #(
 `endif
 );
 
-// 12MHz master clock == 12MHz / 128 == 93.75KHz sample clock.
-// For a 'true' 96KHz sample clock we probably want a 12.288MHz
+// 24MHz master clock == 24MHz / 128 == 187.5KHz sample clock.
+// For a 'true' 196KHz sample clock we probably want a 12.288MHz
 // crystal, as the PLL can't actually achieve it alone.
 
-localparam CLK_FREQ  = 12_000_000;
+localparam CLK_FREQ  = 24_000_000;
 localparam BAUD_RATE =  1_000_000;
 
-logic clk_12mhz;
+logic clk;
+logic clk_lock;
 logic sample_clk;
-assign clk_12mhz = CLK;
+
+SB_PLL40_PAD #(
+    .FEEDBACK_PATH("SIMPLE"),
+    .PLLOUT_SELECT("GENCLK"),
+    .DIVR(4'b0000),
+    .DIVF(7'b0111111),
+    .DIVQ(3'b101),
+    .FILTER_RANGE(3'b001)
+) pll_24mhz (
+    .PACKAGEPIN(CLK),
+    .PLLOUTGLOBAL(clk),
+    .LOCK(clk_lock),
+    .RESETB(1'b1),
+    .BYPASS(1'b0)
+);
 
 // Raw samples to/from CODEC
 logic signed [W-1:0] sample_adc0;
@@ -92,7 +107,7 @@ assign sample_dac3 = force_cal_output;
 `endif
 
 cal cal_instance (
-    .clk (clk_12mhz),
+    .clk (clk),
     .sample_clk (sample_clk),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
@@ -126,7 +141,7 @@ assign cal_out3 = cal_in3;
 
 `ifdef CORE_SAMPLER
 sampler sampler_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -141,7 +156,7 @@ sampler sampler_instance (
 
 `ifdef CORE_CLKDIV
 clkdiv clkdiv_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -156,7 +171,7 @@ clkdiv clkdiv_instance (
 
 `ifdef CORE_SEQSWITCH
 seqswitch seqswitch_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -171,7 +186,7 @@ seqswitch seqswitch_instance (
 
 `ifdef CORE_BITCRUSH
 bitcrush bitcrush_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -186,7 +201,7 @@ bitcrush bitcrush_instance (
 
 `ifdef CORE_VCA
 vca vca_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -201,7 +216,7 @@ vca vca_instance (
 
 `ifdef CORE_FILTER
 filter filter_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -216,7 +231,7 @@ filter filter_instance (
 
 `ifdef CORE_VCO
 vco vco_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
     .sample_in1 (cal_in1),
@@ -230,7 +245,7 @@ vco vco_instance (
 `endif
 
 ak4619 ak4619_instance (
-    .clk     (clk_12mhz),
+    .clk     (clk),
     .pdn     (P2_3),
     .mclk    (P2_4),
     .bick    (P2_10),
@@ -272,14 +287,14 @@ assign LEDR_N = led1_toggle;
 assign LEDG_N = led2_toggle;
 
 uart_tx #(CLK_FREQ, BAUD_RATE) utx1 (
-	.clk(clk_12mhz),
+	.clk(clk),
 	.tx_start(tx1_start),
 	.tx_data(tx1_data),
 	.tx(TX),
 	.tx_busy(tx1_busy)
 );
 
-always_ff @(posedge clk_12mhz) begin
+always_ff @(posedge clk) begin
     led1_toggle <= ~led1_toggle;
     if(~tx1_busy) begin
         tx1_start <= 1'b1;
