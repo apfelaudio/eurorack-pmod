@@ -54,8 +54,8 @@ async def test_cal_00(dut):
             expect = ((value - cal_mem[channel*2]) *
                       cal_mem[channel*2 + 1]) >> 10
             cal_inx.value = Force(signed_to_twos_comp(value))
-            if expect >  32000: expect = 32000
-            if expect < -32000: expect = -32000
+            if expect >  32767: expect = 32767
+            if expect < -32768: expect = -32768
             print(f"ch={channel}\t{int(value):6d}\t", end="")
             await FallingEdge(dut.sample_clk)
             await RisingEdge(dut.sample_clk)

@@ -28,7 +28,7 @@
 module top #(
     parameter int W = 16 // sample width, bits
 )(
-     input   CLK // Assumed 12Mhz
+     input   CLK
     ,output  P2_1
     ,inout   P2_2
     ,output  P2_3

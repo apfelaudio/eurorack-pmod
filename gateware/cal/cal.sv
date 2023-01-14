@@ -43,13 +43,9 @@ localparam LAST_CH_IX = 3'd7;
 localparam CAL_ST_LATCH     = 3'd0,
            CAL_ST_ZERO      = 3'd1,
            CAL_ST_MULTIPLY  = 3'd2,
-           CAL_ST_CLAMPL    = 3'd3,
+           CAL_ST_CLAMP     = 3'd3,
            CAL_ST_OUT       = 3'd4,
            CAL_ST_HALT      = 3'd5;
-
-// Only need to clamp negative values as with current hardware it
-// is impossible to overflow in the positive direction during cal.
-localparam int signed CLAMPL = -32'sd32000;
 
 logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
@@ -91,10 +87,15 @@ always_ff @(posedge clk) begin
         end
         CAL_ST_MULTIPLY: begin
             out[ch] <= (out[ch] * cal_mem[{ch, 1'b1}]) >>> 10;
-            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPL;
+            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMP;
         end
-        CAL_ST_CLAMPL: begin
-            //out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
+        CAL_ST_CLAMP: begin
+            // Only check for 1 extra bit of overflow as we don't expect the
+            // calibrator to overflow by more than 2x the max sample value.
+            if (out[ch][W] == 1'b1 && out[ch][W-1] == 1'b0)
+                out[ch] <= 32'hFFFF8000;
+            else if (out[ch][W] == 1'b0 && out[ch][W-1] == 1'b1)
+                out[ch] <= 32'h00007FFF;
             if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
