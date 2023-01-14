@@ -1,5 +1,5 @@
 /*
- *  icebreaker examples - Async uart tx module
+ *  Partially lifted from icebreaker examples - Async uart tx module
  *
  *  Copyright (C) 2018 Piotr Esden-Tempski <piotr@esden.net>
  *
@@ -18,8 +18,8 @@
  */
 
 module uart_tx #(
-    parameter clk_freq = 12000000,
-    parameter baud     =  1000000
+    parameter CLK_FREQ = 12_000_000,
+    parameter BAUD     =  1_000_000
 )(
 	input clk,
 	input tx_start,
@@ -28,8 +28,14 @@ module uart_tx #(
 	output tx_busy
 );
 
-wire bit_tick;
-baud_tick_gen #(clk_freq, baud) tickgen(.clk(clk), .enable(tx_busy), .tick(bit_tick));
+localparam DIVIDER_MAX_COUNT = 128;
+localparam DIVIDER_BITS = $clog2(DIVIDER_MAX_COUNT);
+
+generate
+if (((CLK_FREQ % BAUD) != 0) ||
+    ((CLK_FREQ / BAUD) > DIVIDER_MAX_COUNT))
+    $error("Cannot generate baud rate using simple divider");
+endgenerate
 
 localparam
 	IDLE      = 4'b0000, // tx = high
@@ -45,17 +51,35 @@ localparam
 	BIT_STOP1 = 4'b0010, // tx = high
 	BIT_STOP2 = 4'b0011; // tx = high
 
-reg [3:0] tx_state = IDLE;
-wire tx_ready = (tx_state == 0);
+logic bit_tick;
+logic tx_ready;
+logic [3:0] tx_state = IDLE;
+logic [7:0] tx_shift = 0;
+logic [DIVIDER_BITS-1:0] clkdiv = 0;
+
+assign tx_ready = (tx_state == IDLE);
 assign tx_busy = ~tx_ready;
 
-reg [7:0] tx_shift = 0;
-always @(posedge clk)
+//           high if state START, STOP1, STOP2
+//           |                high if transmitting bits and bit is 1
+//           |                |
+//           V                V
+assign tx = (tx_state < 4) | (tx_state[3] & tx_shift[0]);
+
+always_ff @(posedge clk)
 begin
+
+    if (clkdiv == DIVIDER_BITS'((CLK_FREQ / BAUD) - 1)) begin
+        clkdiv <= 0;
+        bit_tick <= 1'b1;
+    end else begin
+        clkdiv <= clkdiv + 1;
+        bit_tick <= 1'b0;
+    end
+
 	if (tx_ready & tx_start)
 		tx_shift <= tx_data;
-	else
-	if (tx_state[3] & bit_tick)
+	else if (tx_state[3] & bit_tick)
 		tx_shift <= (tx_shift >> 1);
 
 	case (tx_state)
@@ -73,13 +97,6 @@ begin
 		BIT_STOP2: if(bit_tick) tx_state <= IDLE;
 		default:   if(bit_tick) tx_state <= IDLE;
 	endcase
-
 end
-
-//           high if state START, STOP1, STOP2
-//           |                high if transmitting bits and bit is 1
-//           |                |
-//           V                V
-assign tx = (tx_state < 4) | (tx_state[3] & tx_shift[0]);
 
 endmodule
