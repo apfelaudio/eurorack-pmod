@@ -43,8 +43,9 @@ logic [4:0] bit_counter;
 logic scl_i2cinit;
 logic sda_out_i2cinit;
 logic last_sample_clk;
+logic [31:0] powerup   = 32'd20000;
 
-assign pdn         = 1'b1;
+assign pdn         = powerup == 0;
 assign bick        = clk;
 assign mclk        = clk;
 assign lrck        = clkdiv[6];   // 24MHz >> 7 == 187.5KHz
@@ -64,6 +65,9 @@ always_ff @(negedge clk) begin
         sample_out1  <= adc_words[1];
         sample_out2  <= adc_words[2];
         sample_out3  <= adc_words[3];
+        if (powerup > 0) begin
+            powerup <= powerup - 1;
+        end
     end
 
     // Clock out 16 bits
