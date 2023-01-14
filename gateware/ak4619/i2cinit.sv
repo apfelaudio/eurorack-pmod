@@ -9,7 +9,7 @@ module i2cinit #(
     parameter F_PATH  = "ak4619-cfg.hex",
     parameter N_BYTES = 16'h17,
     // How long to wait after init before starting I2C TX.
-    parameter N_WAIT_CYCLES = 256
+    parameter N_WAIT_CYCLES = 64*128
 )(
     input     clk, // 2x i2c clock
     // Note: outputs are NOT tristated on HI, this should be handled
