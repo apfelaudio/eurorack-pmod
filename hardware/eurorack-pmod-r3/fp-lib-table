@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "AudioJacks")(type "KiCad")(uri "${KIPRJMOD}/../libs/AudioJacks/AudioJacks.pretty")(options "")(descr ""))
+  (lib (name "AudioJacksFixed")(type "KiCad")(uri "/home/seb/dev/eurorack-pmod/hardware/libs/custom/AudioJacksFixed.pretty")(options "")(descr ""))
+  (lib (name "BournsEncoders")(type "KiCad")(uri "/home/seb/dev/eurorack-pmod/hardware/libs/custom/BournsEncoders.pretty")(options "")(descr ""))
+)
