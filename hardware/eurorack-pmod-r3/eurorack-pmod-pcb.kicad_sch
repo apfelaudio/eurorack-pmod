@@ -89,118 +89,6 @@
         )
       )
     )
-    (symbol "Connector:AudioJack2_Ground_Switch" (in_bom yes) (on_board yes)
-      (property "Reference" "J" (id 0) (at 0 11.43 0)
-        (effects (font (size 1.27 1.27)))
-      )
-      (property "Value" "AudioJack2_Ground_Switch" (id 1) (at 0 8.89 0)
-        (effects (font (size 1.27 1.27)))
-      )
-      (property "Footprint" "" (id 2) (at 0 5.08 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "Datasheet" "~" (id 3) (at 0 5.08 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_keywords" "audio jack receptacle mono headphones phone TS connector" (id 4) (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_description" "Audio Jack, 2 Poles (Mono / TS), Grounded Sleeve, Switched Pole (Normalling)" (id 5) (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_fp_filters" "Jack*" (id 6) (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (symbol "AudioJack2_Ground_Switch_0_1"
-        (rectangle (start -2.54 -2.54) (end -3.81 0)
-          (stroke (width 0.254) (type default) (color 0 0 0 0))
-          (fill (type outline))
-        )
-        (rectangle (start 2.54 6.35) (end -2.54 -5.08)
-          (stroke (width 0.254) (type default) (color 0 0 0 0))
-          (fill (type background))
-        )
-      )
-      (symbol "AudioJack2_Ground_Switch_1_1"
-        (polyline
-          (pts
-            (xy 0.635 4.826)
-            (xy 0.889 4.318)
-          )
-          (stroke (width 0) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 1.778 -0.254)
-            (xy 2.032 -0.762)
-          )
-          (stroke (width 0) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 0 0)
-            (xy 0.635 -0.635)
-            (xy 1.27 0)
-            (xy 2.54 0)
-          )
-          (stroke (width 0.254) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 2.54 -2.54)
-            (xy 1.778 -2.54)
-            (xy 1.778 -0.254)
-            (xy 1.524 -0.762)
-          )
-          (stroke (width 0) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 2.54 2.54)
-            (xy 0.635 2.54)
-            (xy 0.635 4.826)
-            (xy 0.381 4.318)
-          )
-          (stroke (width 0) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 2.54 5.08)
-            (xy -0.635 5.08)
-            (xy -0.635 0)
-            (xy -1.27 -0.635)
-            (xy -1.905 0)
-          )
-          (stroke (width 0.254) (type default) (color 0 0 0 0))
-          (fill (type none))
-        )
-        (pin passive line (at 0 -7.62 90) (length 2.54)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "G" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at 5.08 5.08 180) (length 2.54)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "S" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at 5.08 2.54 180) (length 2.54)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "SN" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at 5.08 0 180) (length 2.54)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "T" (effects (font (size 1.27 1.27))))
-        )
-        (pin passive line (at 5.08 -2.54 180) (length 2.54)
-          (name "~" (effects (font (size 1.27 1.27))))
-          (number "TN" (effects (font (size 1.27 1.27))))
-        )
-      )
-    )
     (symbol "Connector_Generic:Conn_02x05_Odd_Even" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (id 0) (at 1.27 7.62 0)
         (effects (font (size 1.27 1.27)))
@@ -3451,24 +3339,6 @@
     (pin "1" (uuid af656907-10e6-42c6-80a0-f5ebbdb3eff3))
   )
 
-  (symbol (lib_id "Connector:AudioJack2_Ground_Switch") (at 21.59 37.465 0) (unit 1)
-    (in_bom yes) (on_board yes) (fields_autoplaced)
-    (uuid 7b87920d-924e-4355-aee6-18a35dae605a)
-    (property "Reference" "J?" (id 0) (at 20.955 25.4 0))
-    (property "Value" "AudioJack2_Ground_Switch" (id 1) (at 20.955 27.94 0))
-    (property "Footprint" "" (id 2) (at 21.59 32.385 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "~" (id 3) (at 21.59 32.385 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "G" (uuid b96e5588-1bbe-4686-867e-2ce1253babde))
-    (pin "S" (uuid 89cb8afa-fe88-4328-b93d-b5690611fc60))
-    (pin "SN" (uuid 3674484c-80f2-48bd-bad4-34687d771b9b))
-    (pin "T" (uuid 6f4663af-afd2-4224-80d6-c9fbc9a59f15))
-    (pin "TN" (uuid 14f3141d-e798-4c99-9d99-83f32516877b))
-  )
-
   (symbol (lib_id "power:GND") (at 227.584 143.637 180) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 8062d8e5-7185-4040-9a67-81cf150a7ee0)
@@ -4561,7 +4431,7 @@
     (path "/a54fdb62-43c4-4e85-921d-731c4f88ca3e"
       (reference "#PWR048") (unit 1) (value "-12V") (footprint "")
     )
-    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/f8157f18-cff1-4cbd-83ab-43ca1188ed06"
+    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/83df8420-a058-4018-8d92-4f05c59e70b4"
       (reference "#PWR049") (unit 1) (value "GND") (footprint "")
     )
     (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/c9e50de3-b171-4db9-9aa3-efa16d55c5ac"
@@ -4579,10 +4449,10 @@
     (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/fbaf1634-8af7-427b-ba4b-54cdedbeff79"
       (reference "#PWR054") (unit 1) (value "-12V") (footprint "")
     )
-    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/a2fb83bf-7b48-47ea-8a45-10e68b446030"
+    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/83df8420-a058-4018-8d92-4f05c59e70b4"
       (reference "#PWR055") (unit 1) (value "GND") (footprint "")
     )
-    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/c9249002-b1ff-42aa-884e-d8e89c23393e"
+    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/808ac103-136d-455c-bd03-074051262fa4"
       (reference "#PWR056") (unit 1) (value "GND") (footprint "")
     )
     (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/e5d30ba1-21c4-47d7-8856-58f3b8b79b32"
@@ -4591,7 +4461,7 @@
     (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/ef0795d3-0e71-4b86-a3e2-82557b404517"
       (reference "#PWR058") (unit 1) (value "GND") (footprint "")
     )
-    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/f8157f18-cff1-4cbd-83ab-43ca1188ed06"
+    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/320f35b0-f1b9-4ac5-b9e7-fa8ed35e7591"
       (reference "#PWR059") (unit 1) (value "GND") (footprint "")
     )
     (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/c9e50de3-b171-4db9-9aa3-efa16d55c5ac"
@@ -4609,10 +4479,10 @@
     (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/fbaf1634-8af7-427b-ba4b-54cdedbeff79"
       (reference "#PWR064") (unit 1) (value "-12V") (footprint "")
     )
-    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/a2fb83bf-7b48-47ea-8a45-10e68b446030"
+    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/808ac103-136d-455c-bd03-074051262fa4"
       (reference "#PWR065") (unit 1) (value "GND") (footprint "")
     )
-    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/c9249002-b1ff-42aa-884e-d8e89c23393e"
+    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/320f35b0-f1b9-4ac5-b9e7-fa8ed35e7591"
       (reference "#PWR066") (unit 1) (value "GND") (footprint "")
     )
     (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/e5d30ba1-21c4-47d7-8856-58f3b8b79b32"
@@ -4620,9 +4490,6 @@
     )
     (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/ef0795d3-0e71-4b86-a3e2-82557b404517"
       (reference "#PWR068") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/cf5e06f8-e54e-4565-94f1-fc1d97e38f12"
-      (reference "#PWR069") (unit 1) (value "GND") (footprint "")
     )
     (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/6074cb3e-3608-43b6-a23a-0c3df62333ac"
       (reference "#PWR070") (unit 1) (value "GND") (footprint "")
@@ -4636,17 +4503,11 @@
     (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/6e14d26c-4c21-40c3-9de0-3acb1cc7cdff"
       (reference "#PWR073") (unit 1) (value "-12V") (footprint "")
     )
-    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/4f1ffc4f-2e14-4d0c-9564-20992c56bd45"
-      (reference "#PWR074") (unit 1) (value "GND") (footprint "")
-    )
     (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/d712a270-08a1-486f-8b11-036ba63352a9"
       (reference "#PWR075") (unit 1) (value "GND") (footprint "")
     )
     (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/d7b10d7e-ebb8-47d3-9bcf-dacae829368a"
       (reference "#PWR076") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/cf5e06f8-e54e-4565-94f1-fc1d97e38f12"
-      (reference "#PWR077") (unit 1) (value "GND") (footprint "")
     )
     (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/6074cb3e-3608-43b6-a23a-0c3df62333ac"
       (reference "#PWR078") (unit 1) (value "GND") (footprint "")
@@ -4659,9 +4520,6 @@
     )
     (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/6e14d26c-4c21-40c3-9de0-3acb1cc7cdff"
       (reference "#PWR081") (unit 1) (value "-12V") (footprint "")
-    )
-    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/4f1ffc4f-2e14-4d0c-9564-20992c56bd45"
-      (reference "#PWR082") (unit 1) (value "GND") (footprint "")
     )
     (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/d712a270-08a1-486f-8b11-036ba63352a9"
       (reference "#PWR083") (unit 1) (value "GND") (footprint "")
@@ -4810,32 +4668,29 @@
     (path "/fb5db7ec-3a57-4523-a15b-4d70b8816c07"
       (reference "J2") (unit 1) (value "PMOD") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical")
     )
-    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/0ca8049e-374e-4510-b0d6-237c1ff61814"
-      (reference "J3") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/16fa1eb4-1876-4a8c-ad8b-573530d99da3"
+      (reference "J3") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/2ffcf9ec-5bf1-4043-8c2b-91f0b5559f71"
-      (reference "J4") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/ffd79913-d69b-48e3-a2e5-4374ac43aecb/4d4b17ba-f49c-48ba-9790-1bc033f4b3d9"
+      (reference "J4") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/0ca8049e-374e-4510-b0d6-237c1ff61814"
-      (reference "J5") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/16fa1eb4-1876-4a8c-ad8b-573530d99da3"
+      (reference "J5") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/2ffcf9ec-5bf1-4043-8c2b-91f0b5559f71"
-      (reference "J6") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/26ad21f7-706e-4aa7-ae23-d7556e7daddf/4d4b17ba-f49c-48ba-9790-1bc033f4b3d9"
+      (reference "J6") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/88acac22-af75-4e59-b952-9dde91272d5f"
-      (reference "J7") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/691cfdd9-7de3-432e-aa67-46ad69c4722d"
+      (reference "J7") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/1b0cdd8d-d417-42de-bcb9-c7732dbaff1f"
-      (reference "J8") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/ee8a9905-d244-4108-aba7-f2ec5b742432/6f6e5866-5e4d-48a3-ae69-8f9bc53c4ced"
+      (reference "J8") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/88acac22-af75-4e59-b952-9dde91272d5f"
-      (reference "J9") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
+    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/691cfdd9-7de3-432e-aa67-46ad69c4722d"
+      (reference "J9") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
-    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/1b0cdd8d-d417-42de-bcb9-c7732dbaff1f"
-      (reference "J10") (unit 1) (value "PJ398SM") (footprint "AudioJacks:Jack_3.5mm_QingPu_WQP-PJ302M_Horizontal")
-    )
-    (path "/7b87920d-924e-4355-aee6-18a35dae605a"
-      (reference "J?") (unit 1) (value "AudioJack2_Ground_Switch") (footprint "")
+    (path "/62386825-0ccb-4e80-b3cc-940f31e07af6/6f6e5866-5e4d-48a3-ae69-8f9bc53c4ced"
+      (reference "J10") (unit 1) (value "PJ-302M0") (footprint "AudioJacksFixed:pj324m")
     )
     (path "/ef7ba825-2145-422c-8d36-6096f321c863"
       (reference "L1") (unit 1) (value "Ferrite") (footprint "Inductor_SMD:L_0603_1608Metric")
