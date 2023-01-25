@@ -445,6 +445,14 @@
     [
       "62386825-0ccb-4e80-b3cc-940f31e07af6",
       "dual_mono_outputs2"
+    ],
+    [
+      "04b0c562-7287-43d3-9594-fcf167d8f492",
+      "vref"
+    ],
+    [
+      "ebbd56c3-68ab-4549-924c-1c9abb435ddd",
+      "led_driver"
     ]
   ],
   "text_variables": {}
