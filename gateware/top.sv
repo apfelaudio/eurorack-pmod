@@ -24,6 +24,7 @@
 //`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
+//`define CORE_DELAY
 
 module top #(
     parameter int W = 16 // sample width, bits
@@ -216,6 +217,21 @@ filter filter_instance (
 
 `ifdef CORE_VCO
 vco vco_instance (
+    .clk     (clk_12mhz),
+    .sample_clk  (sample_clk),
+    .sample_in0 (cal_in0),
+    .sample_in1 (cal_in1),
+    .sample_in2 (cal_in2),
+    .sample_in3 (cal_in3),
+    .sample_out0 (cal_out0),
+    .sample_out1 (cal_out1),
+    .sample_out2 (cal_out2),
+    .sample_out3 (cal_out3)
+);
+`endif
+
+`ifdef CORE_DELAY
+delay delay_instance (
     .clk     (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
