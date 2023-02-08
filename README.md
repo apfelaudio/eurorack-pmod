@@ -4,6 +4,8 @@
 
 **FPGA-based audio synthesis using open source tools**, compatible with [modular synthesis hardware](https://en.wikipedia.org/wiki/Eurorack). This repository contains hardware and gateware for getting started.
 
+For a high-level overview, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project.
+
 ![assembled eurorack-pmod module (front)](docs/img/eurorack-pmod.jpg)
 
 [Want one?](#manufacturing). More photos can be found [below](#photos). 
