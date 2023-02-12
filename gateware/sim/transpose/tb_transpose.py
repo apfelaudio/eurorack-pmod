@@ -23,11 +23,13 @@ async def test_transpose_00(dut):
 
     clock = Clock(dut.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
-    clock = Clock(dut.clk, 83, units='ns')
-    cocotb.start_soon(clock.start())
 
-    dut.sample_in0.value = 0
-    dut.sample_in1.value = 5000*4
+    # Not needed at the moment as we aren't pipelining things
+    #clock = Clock(dut.clk, 83, units='ns')
+    #cocotb.start_soon(clock.start())
+
+    dut.sample_in.value = 0
+    dut.pitch.value = 5000*4
 
     # Clock in some zeroes so the delay lines are full of zeroes.
 
@@ -45,8 +47,8 @@ async def test_transpose_00(dut):
 
         data_in = int(1000*math.sin(i / 100))
 
-        dut.sample_in0.value = signed_to_twos_comp(data_in)
-        data_out = twos_comp_to_signed(dut.sample_out1.value)
+        dut.sample_in.value = signed_to_twos_comp(data_in)
+        data_out = twos_comp_to_signed(dut.sample_out.value)
 
         print(f"i={i} in:", data_in)
         print(f"i={i} out:", data_out)
