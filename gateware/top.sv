@@ -25,7 +25,7 @@
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 //`define CORE_DELAY
-//`define CORE_TRANSPOSE
+//`define CORE_PITCH_SHIFT
 
 module top #(
     parameter int W = 16 // sample width, bits
@@ -246,8 +246,8 @@ delay delay_instance (
 );
 `endif
 
-`ifdef CORE_TRANSPOSE
-transpose transpose_instance (
+`ifdef CORE_PITCH_SHIFT
+pitch_shift pitch_shift_instance (
     .clk     (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
