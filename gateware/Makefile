@@ -10,6 +10,8 @@ ADD_SRC = ak4619/i2cinit.sv \
 		  cores/vca.sv \
 		  cores/vco.sv \
 		  cores/delay.sv \
+		  cores/delayline.sv \
+		  cores/transpose.sv \
 		  cores/filter.sv \
 		  cores/filter/filter_svf_pipelined.sv
 

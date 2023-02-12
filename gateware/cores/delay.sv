@@ -59,6 +59,8 @@ assign sample_out1 = rdata;
 // Raw instantiation of an ICE40 RAM primitive. We could do this using
 // pure Verilog which would be synthesized to this, but it's interesting
 // to have a mental picture of what the hardware looks like.
+//
+// You can easily do this without raw instantiation. See `delayline.sv`.
 SB_RAM40_4K #(
     // MODE 0: 256x16bits == 256 samples delay buffer.
     .WRITE_MODE(0),
