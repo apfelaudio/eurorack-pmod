@@ -1,4 +1,9 @@
-// Delay & decimate.
+// Toy delay example using raw BRAM instantiation.
+//
+// This exists to show you how a RAM tile is instantiated under
+// the hood on iCE40 to give you a deeper look at what's synthesized.
+// For echo effects, you should check out the `stereo_echo.sv` core and
+// its implementation in `echo.sv` and `delayline.sv`.
 //
 // Given input audio on input 0, delay and/or decimate it.
 //
@@ -11,7 +16,7 @@
 // - Output 0: Audio input (mirrored)
 // - Output 0: Audio input (delayed + decimated)
 
-module delay #(
+module delay_raw #(
     parameter W = 16,
     parameter FP_OFFSET = 2,
     // Decimate sample rate by 2^^DECIMATE before writes/reads to

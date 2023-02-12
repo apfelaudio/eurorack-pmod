@@ -7,5 +7,6 @@ verilator --lint-only -Icores sampler.sv
 verilator --lint-only -Icores seqswitch.sv
 verilator --lint-only -Icores vca.sv
 verilator --lint-only -Icores vco.sv
-verilator --lint-only -Icores -Iutil delay.sv
+verilator --lint-only -Icores -Iutil delay_raw.sv
 verilator --lint-only -Icores pitch_shift.sv
+verilator --lint-only -Icores stereo_echo.sv
