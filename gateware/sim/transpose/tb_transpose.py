@@ -27,6 +27,7 @@ async def test_transpose_00(dut):
     cocotb.start_soon(clock.start())
 
     dut.sample_in0.value = 0
+    dut.sample_in1.value = 5000*4
 
     # Clock in some zeroes so the delay lines are full of zeroes.
 

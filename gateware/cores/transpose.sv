@@ -5,13 +5,12 @@
 // This core saves incoming samples into 2 delay lines, plays them
 // back at modified speed, and cross-fades between them to avoid
 // discontinuities. Basically we chop up the input into grains of
-// size WINDOW and speed them up in the time domain. This allows
+// size WINDOW and speed/slow playback in the time domain. This allows
 // us to do pitch shifting without time stretching.
-//
-// Loosely inspired by the 'transpose' function from Faust.
 //
 // Mapping:
 // - Input 0: Audio input
+// - Input 1: Pitch shift amount (CV, not 1V/oct yet)
 // - Output 0: Audio input (mirrored)
 // - Output 1: Audio input (transposed)
 // - Output 2: Audio input (dry + transposed mixed)
@@ -35,7 +34,7 @@ module transpose #(
 );
 
 // Fractional delay and the offset fed into delay lines.
-logic [15:0] d = 0;
+logic signed [15:0] d = 0;
 logic [8:0] delay;
 
 // Output of the delay lines
@@ -49,7 +48,7 @@ logic signed [7:0] env0_reg;
 logic signed [7:0] env1_reg;
 
 // Some LSBs of `d` are fractional.
-assign delay = d[9:1];
+assign delay = d[15:7];
 
 delayline delay_0(
     .sample_clk(sample_clk),
@@ -66,13 +65,9 @@ delayline delay_1(
 );
 
 always_ff @(posedge sample_clk) begin
-    // This value -1 is actually the 'pitch shift' amount. We are
-    // walking up the delay lines (-1 >> 1 == -0.5x) faster than
-    // usual (as we are dropping the lsb of `d`, which means we
-    // pitch UP by 50%, or a perfect 5th.
-    //
-    // TODO: control this from an input.
-    d <= d - 1;
+    // The value we increment `d` by here is actually the 'pitch shift' amount.
+    // walking up the delay lines some amount faster or slower than usual.
+    d <= d + (sample_in1 >>> 8);
 
     if (delay < XFADE) begin
         env0 <= delay[7:0];
