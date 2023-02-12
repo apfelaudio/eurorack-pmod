@@ -28,35 +28,27 @@ async def test_transpose_00(dut):
 
     dut.sample_in0.value = 0
 
+    # Clock in some zeroes so the delay lines are full of zeroes.
+
     for i in range(1024):
         await RisingEdge(dut.sample_clk)
 
-    ins = []
-    out0 = []
-    out1 = []
-    outs = []
+    # Stimulate the pitch shifter with a sine wave and make sure
+    # the output does not have any discontinuities
 
     data_out_last = None
-
     breaknext = False
 
-    for i in range(4096):
+    for i in range(2048):
         await RisingEdge(dut.sample_clk)
 
         data_in = int(1000*math.sin(i / 100))
-        dut.sample_in0.value = signed_to_twos_comp(data_in)
 
-        #out0.append(twos_comp_to_signed(dut.sample_out0.value))
-        #out1.append(twos_comp_to_signed(dut.sample_out1.value))
-        data_out = twos_comp_to_signed(dut.sample_out0.value)
+        dut.sample_in0.value = signed_to_twos_comp(data_in)
+        data_out = twos_comp_to_signed(dut.sample_out1.value)
 
         print(f"i={i} in:", data_in)
         print(f"i={i} out:", data_out)
-        #print(f"i={i} delay0:", out0[-1])
-        #print(f"i={i} delay1:", out1[-1])
-
-        ins.append(data_in)
-        outs.append(data_out)
 
         if data_out_last is not None:
             print(f"del0: {int(dut.delay_out0)}")
@@ -64,14 +56,14 @@ async def test_transpose_00(dut):
             print(f"del1: {int(dut.delay_out1)}")
             print(f"env1: {int(dut.env1)}")
             if breaknext:
+                print("FOUND A DISCONTINUITY - failing...")
+                assert(False)
                 break
             if abs(data_out - data_out_last) > 50:
+                # Found a discontinuity in the output
                 print("=========================")
+                # It's useful to show one more sample after
+                # the discontinuity for debugging.
                 breaknext = True
 
         data_out_last = data_out
-
-    """
-    with open("dump.pkl", "wb") as f:
-        pickle.dump({"i": ins, "o0": out0, "o1": out1, "o2": out2})
-        """
