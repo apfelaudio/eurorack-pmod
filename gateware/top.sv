@@ -19,13 +19,13 @@
 //`define CORE_CLKDIV
 //`define CORE_SEQSWITCH
 //`define CORE_SAMPLER
-//`define CORE_MIRROR
+`define CORE_MIRROR
 //`define CORE_VCA
 //`define CORE_VCO
 //`define CORE_FILTER
 //`define CORE_BITCRUSH
 //`define CORE_DELAY
-`define CORE_PITCH_SHIFT
+//`define CORE_PITCH_SHIFT
 
 module top #(
     parameter int W = 16 // sample width, bits

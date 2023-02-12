@@ -11,7 +11,7 @@
 module transpose #(
     parameter W = 16,
     parameter WINDOW = 512,
-    parameter XFADE = 64
+    parameter XFADE = 128
 )(
     input sample_clk,
     input signed [W-1:0] pitch,
@@ -19,6 +19,7 @@ module transpose #(
     output logic signed [W-1:0] sample_out
 );
 
+localparam DELAYLINE_LEN = WINDOW*2;
 localparam DELAY_INT_BITS  = $clog2(WINDOW);
 localparam DELAY_FRAC_BITS = DELAY_INT_BITS + 7;
 localparam XFADE_BITS = $clog2(XFADE);
@@ -38,15 +39,17 @@ logic [XFADE_BITS:0] env1;
 logic signed [XFADE_BITS:0] env0_reg;
 logic signed [XFADE_BITS:0] env1_reg;
 
+// TODO: There is a little aliasing that's audible over pitch changes as we
+// have no interpolation between integer delay line steps.
 
-delayline delay_0(
+delayline #(W, DELAYLINE_LEN) delay_0 (
     .sample_clk(sample_clk),
     .delay({1'b0, delay_int}),
     .in(sample_in),
     .out(delay_out0)
 );
 
-delayline delay_1(
+delayline #(W, DELAYLINE_LEN) delay_1(
     .sample_clk(sample_clk),
     .delay({1'b0, delay_int}+WINDOW),
     .in(sample_in),
@@ -68,7 +71,8 @@ always_ff @(posedge sample_clk) begin
         env1 <= 0;
     end
 
-    // Envelopes need to be delayed by 1 sample to avoid discontinuity.
+    // Envelopes need to be delayed by 1 sample to avoid discontinuity as we
+    // swap between the 2 delay line feeds.
     env0_reg <= env0;
     env1_reg <= env1;
 
