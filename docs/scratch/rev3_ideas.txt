@@ -1,8 +1,0 @@
-- [done] Flip swapped op-amp inputs
-- [done] Move LEDs closer to edge
-
-- Shrink LED brightness range to +/- 5V?
-    - Also make sure op-amps don't overheat!
-- Figure out channel coupling issue
-- Solve op-amp offset for LEDs
-- Round corners away from panel
