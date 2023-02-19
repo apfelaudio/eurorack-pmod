@@ -301,79 +301,22 @@ ak4619 ak4619_instance (
 
 `ifdef UART_SAMPLE_TRANSMITTER
 
-localparam XMIT_ST_SENT0      = 4'h0,
-           XMIT_ST_SENT1      = 4'h1,
-           XMIT_ST_CH_ID      = 4'h2,
-           XMIT_ST_MSB        = 4'h3,
-           XMIT_ST_LSB        = 4'h4;
-
-logic tx1_start;
-logic [7:0] tx1_data;
-logic tx1_busy;
-logic led1_toggle = 1'b0;
-logic led2_toggle = 1'b0;
-logic [3:0] state = XMIT_ST_SENT0;
-logic [1:0] cur_ch = 0;
-logic signed [W-1:0] adc_word_out = 16'h0;
-
-assign LEDR_N = led1_toggle;
-assign LEDG_N = led2_toggle;
-
-uart_tx #(CLK_FREQ, BAUD_RATE) utx1 (
-	.clk(clk_12mhz),
-	.tx_start(tx1_start),
-	.tx_data(tx1_data),
-	.tx(TX),
-	.tx_busy(tx1_busy)
+cal_uart cal_uart_instance (
+    .clk (clk_12mhz),
+    .tx_o(TX),
+`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
+     // Used for calibrating the input channels
+    .in0(sample_adc0),
+    .in1(sample_adc1),
+    .in2(sample_adc2),
+    .in3(sample_adc3)
+`else
+    .in0(cal_in0),
+    .in1(cal_in1),
+    .in2(cal_in2),
+    .in3(cal_in3)
+`endif
 );
-
-always_ff @(posedge clk_12mhz) begin
-    led1_toggle <= ~led1_toggle;
-    if(~tx1_busy) begin
-        tx1_start <= 1'b1;
-        case (state)
-            XMIT_ST_SENT0: begin
-                tx1_data <= "C";
-                state <= XMIT_ST_SENT1;
-                case (cur_ch)
-                    `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-                    // Used for calibrating the input channels
-                    2'h0: adc_word_out <= sample_adc0;
-                    2'h1: adc_word_out <= sample_adc1;
-                    2'h2: adc_word_out <= sample_adc2;
-                    2'h3: adc_word_out <= sample_adc3;
-                    `else
-                    2'h0: adc_word_out <= cal_in0;
-                    2'h1: adc_word_out <= cal_in1;
-                    2'h2: adc_word_out <= cal_in2;
-                    2'h3: adc_word_out <= cal_in3;
-                    `endif
-                endcase
-            end
-            XMIT_ST_SENT1: begin
-                tx1_data <= "H";
-                state <= XMIT_ST_CH_ID;
-            end
-            XMIT_ST_CH_ID: begin
-                tx1_data <= "0" + 8'(cur_ch);
-                state <= XMIT_ST_MSB;
-            end
-            XMIT_ST_MSB: begin
-                tx1_data <= 8'((adc_word_out & 16'hFF00) >> 8);
-                state <= XMIT_ST_LSB;
-            end
-            XMIT_ST_LSB: begin
-                tx1_data <= 8'((adc_word_out & 16'h00FF));
-                state <= XMIT_ST_SENT0;
-                cur_ch <= cur_ch + 1;
-                led2_toggle <= ~led2_toggle;
-            end
-            default: begin
-                // Should never reach here
-            end
-        endcase
-    end
-end
 
 `endif
 
