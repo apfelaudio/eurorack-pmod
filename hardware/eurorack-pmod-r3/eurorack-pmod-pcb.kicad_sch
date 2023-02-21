@@ -1576,7 +1576,6 @@
     )
   )
 
-
   (junction (at 58.674 33.147) (diameter 0) (color 0 0 0 0)
     (uuid 01756af9-9fb2-4f0d-b3ad-58451fd4ec6e)
   )
@@ -2841,10 +2840,10 @@
     (property "dig#" "399-8276-1-ND" (id 4) (at 232.664 57.023 90)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "mfg#" "T491A225K020AT" (id 5) (at 232.664 59.563 90)
+    (property "mfg#" "T491A225K016AT" (id 5) (at 232.664 59.563 90)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "lcsc#" "C1953682" (id 6) (at 230.759 48.133 0)
+    (property "lcsc#" "C117025" (id 6) (at 230.759 48.133 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 5e829e90-2e85-444d-9c44-beae46ee6f38))
@@ -2921,10 +2920,10 @@
     (property "dig#" "399-8276-1-ND" (id 4) (at 226.949 59.563 90)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "mfg#" "T491A225K020AT" (id 5) (at 226.949 62.103 90)
+    (property "mfg#" "T491A225K016AT" (id 5) (at 226.949 62.103 90)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "lcsc#" "C1953682" (id 6) (at 225.044 50.673 0)
+    (property "lcsc#" "C117025" (id 6) (at 225.044 50.673 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid d723e0f7-f973-4ed4-8fc5-9c359125b249))
@@ -4585,6 +4584,12 @@
     (property "Datasheet" "~" (id 3) (at 32.004 38.227 0)
       (effects (font (size 1.27 1.27)) hide)
     )
+    (property "lcsc#" "C492433" (id 4) (at 32.004 38.227 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "mfg#" "PZ254R-12-10P" (id 5) (at 32.004 38.227 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
     (pin "1" (uuid e740cf83-9f75-4adf-954d-5649c01dc084))
     (pin "10" (uuid 5d136ce7-ef7f-4370-9d78-e6fefbd0f617))
     (pin "2" (uuid b0eb6ca2-8905-4f0c-8e7e-8b3367fcfce4))
@@ -4831,6 +4836,12 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 36.83 81.915 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "lcsc#" "C2894986" (id 4) (at 36.83 81.915 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "mfg#" "PZ254-2-06-W-8.5" (id 5) (at 36.83 81.915 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid e1a3a54f-8717-4924-9f12-20b9e225652e))
@@ -5469,49 +5480,49 @@
       (reference "D2") (unit 1) (value "1N4007FL") (footprint "Diode_SMD:D_SOD-123F")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/ee0cc2a0-b533-4935-9095-74a39a8ff7e2"
-      (reference "D3") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D3") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/0dbc6dd4-44da-4768-8b0c-9817eb0b2ad9"
       (reference "D4") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/203853da-bdfe-4eb9-90ab-90ce89d7d51b"
-      (reference "D5") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D5") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/cea187bd-ff81-4359-9f97-4b2c2908cb0b"
       (reference "D6") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/6f0998f5-74e0-425e-a7e4-640f57f43f42"
-      (reference "D7") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D7") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/e690c1a0-4761-4f74-b73c-e91dd7097716"
       (reference "D8") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/761050fe-0aa0-4a2c-9741-d1ea106cc658"
-      (reference "D9") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D9") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/73bec92c-2d51-4ad1-9a52-2ffe910bfa7d"
       (reference "D10") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/13a58654-3d7b-4409-97d1-9e037cc75622"
-      (reference "D11") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D11") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/c9b7e7a2-ffba-449a-a7b5-0601c182d17c"
       (reference "D12") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/c671539c-89de-4bc7-a980-9625eb0577fb"
-      (reference "D13") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D13") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/287448a0-b3e3-470d-b258-47cb4c3665d8"
       (reference "D14") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/3113e256-c2f0-468a-9f57-90c036a3693f"
-      (reference "D15") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D15") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/8d39f6e9-2837-442f-9cf7-31d1508e9c34"
       (reference "D16") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/04f4f233-fe3e-44ba-b07f-83346e9322c7"
-      (reference "D17") (unit 1) (value "LED 0402 YELLOW") (footprint "LED_SMD:LED_0402_1005Metric")
+      (reference "D17") (unit 1) (value "LED 0402 GREEN") (footprint "LED_SMD:LED_0402_1005Metric")
     )
     (path "/ebbd56c3-68ab-4549-924c-1c9abb435ddd/7d7931ff-37a0-48f9-a38a-9295a7f496c2"
       (reference "D18") (unit 1) (value "LED 0402 RED") (footprint "LED_SMD:LED_0402_1005Metric")
