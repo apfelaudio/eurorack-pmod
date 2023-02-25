@@ -8,6 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make -C gateware
       - uses: actions/upload-artifact@v3
@@ -20,6 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: git submodule update --init gateware/external/no2misc
       - run: cocotb-config -v
       - run: cd gateware/sim && ./00_run.sh
 
@@ -28,5 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: git submodule update --init gateware/external/no2misc
       - run: verilator --version
       - run: cd gateware && scripts/verilator_lint.sh
