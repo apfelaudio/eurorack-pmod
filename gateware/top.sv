@@ -6,7 +6,7 @@
 `default_nettype none
 
 // Transmit CODEC samples over UART
-`define UART_SAMPLE_TRANSMITTER
+//`define UART_SAMPLE_TRANSMITTER
 
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
@@ -46,22 +46,26 @@ module top #(
     ,output LEDR_N
     ,output LEDG_N
 `endif
-`ifdef OUTPUT_CALIBRATION
-    // Button to toggle between +/- 5V output cal.
     ,input   BTN_N
-`endif
 );
 
-// 12MHz master clock == 12MHz / 128 == 93.75KHz sample clock.
-// For a 'true' 96KHz sample clock we probably want a 12.288MHz
-// crystal, as the PLL can't actually achieve it alone.
-
-localparam CLK_FREQ  = 12_000_000;
-localparam BAUD_RATE =  1_000_000;
-
+logic rst;
 logic clk_12mhz;
+logic clk_24mhz;
 logic sample_clk;
-assign clk_12mhz = CLK;
+
+ice40_sysmgr ice40_sysmgr_instance (
+    .clk_in(CLK),
+`ifdef OUTPUT_CALIBRATION
+    // For output calibration the button is used elsewhere.
+    .rst_in(1'b1),
+`else
+    .rst_in(~BTN_N),
+`endif
+    .clk_2x_out(clk_24mhz),
+    .clk_1x_out(clk_12mhz),
+    .rst_out(rst)
+);
 
 // Raw samples to/from CODEC
 logic signed [W-1:0] sample_adc0;
@@ -111,8 +115,13 @@ cal cal_instance (
     .out1 (cal_in1),
     .out2 (cal_in2),
     .out3 (cal_in3),
-`ifndef OUTPUT_CALIBRATION
-    // In output calibration mode these wires are forced.
+`ifdef OUTPUT_CALIBRATION
+    // In output calibration mode this is driven from elsewhere.
+    .out4 (),
+    .out5 (),
+    .out6 (),
+    .out7 ()
+`else
     .out4 (sample_dac0),
     .out5 (sample_dac1),
     .out6 (sample_dac2),
@@ -285,8 +294,6 @@ ak4619 ak4619_instance (
     .lrck    (P2_9),
     .sdin1   (P2_7),
     .sdout1  (P2_8),
-    .i2c_scl (P2_1),
-    .i2c_sda (P2_2),
     .sample_clk  (sample_clk),
     .sample_out0 (sample_adc0),
     .sample_out1 (sample_adc1),
@@ -298,82 +305,42 @@ ak4619 ak4619_instance (
     .sample_in3 (sample_dac3)
 );
 
+logic i2c_scl_oe;
+logic i2c_sda_oe;
+
+// TODO: switch to explicit tristating IO blocks for this so
+// Yosys throws blocking errors if the flow doesn't support it.
+assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
+assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
+
+pmod_i2c_master pmod_i2c_master_instance (
+    .clk(clk_12mhz),
+    .rst(rst),
+
+    .scl_oe(i2c_scl_oe),
+    .scl_i(P2_1),
+    .sda_oe(i2c_sda_oe),
+    .sda_i(P2_2)
+);
 
 `ifdef UART_SAMPLE_TRANSMITTER
 
-localparam XMIT_ST_SENT0      = 4'h0,
-           XMIT_ST_SENT1      = 4'h1,
-           XMIT_ST_CH_ID      = 4'h2,
-           XMIT_ST_MSB        = 4'h3,
-           XMIT_ST_LSB        = 4'h4;
-
-logic tx1_start;
-logic [7:0] tx1_data;
-logic tx1_busy;
-logic led1_toggle = 1'b0;
-logic led2_toggle = 1'b0;
-logic [3:0] state = XMIT_ST_SENT0;
-logic [1:0] cur_ch = 0;
-logic signed [W-1:0] adc_word_out = 16'h0;
-
-assign LEDR_N = led1_toggle;
-assign LEDG_N = led2_toggle;
-
-uart_tx #(CLK_FREQ, BAUD_RATE) utx1 (
-	.clk(clk_12mhz),
-	.tx_start(tx1_start),
-	.tx_data(tx1_data),
-	.tx(TX),
-	.tx_busy(tx1_busy)
+cal_uart cal_uart_instance (
+    .clk (clk_12mhz),
+    .tx_o(TX),
+`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
+     // Used for calibrating the input channels
+    .in0(sample_adc0),
+    .in1(sample_adc1),
+    .in2(sample_adc2),
+    .in3(sample_adc3)
+`else
+    .in0(cal_in0),
+    .in1(cal_in1),
+    .in2(cal_in2),
+    .in3(cal_in3)
+`endif
 );
-
-always_ff @(posedge clk_12mhz) begin
-    led1_toggle <= ~led1_toggle;
-    if(~tx1_busy) begin
-        tx1_start <= 1'b1;
-        case (state)
-            XMIT_ST_SENT0: begin
-                tx1_data <= "C";
-                state <= XMIT_ST_SENT1;
-                case (cur_ch)
-                    `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-                    // Used for calibrating the input channels
-                    2'h0: adc_word_out <= sample_adc0;
-                    2'h1: adc_word_out <= sample_adc1;
-                    2'h2: adc_word_out <= sample_adc2;
-                    2'h3: adc_word_out <= sample_adc3;
-                    `else
-                    2'h0: adc_word_out <= cal_in0;
-                    2'h1: adc_word_out <= cal_in1;
-                    2'h2: adc_word_out <= cal_in2;
-                    2'h3: adc_word_out <= cal_in3;
-                    `endif
-                endcase
-            end
-            XMIT_ST_SENT1: begin
-                tx1_data <= "H";
-                state <= XMIT_ST_CH_ID;
-            end
-            XMIT_ST_CH_ID: begin
-                tx1_data <= "0" + 8'(cur_ch);
-                state <= XMIT_ST_MSB;
-            end
-            XMIT_ST_MSB: begin
-                tx1_data <= 8'((adc_word_out & 16'hFF00) >> 8);
-                state <= XMIT_ST_LSB;
-            end
-            XMIT_ST_LSB: begin
-                tx1_data <= 8'((adc_word_out & 16'h00FF));
-                state <= XMIT_ST_SENT0;
-                cur_ch <= cur_ch + 1;
-                led2_toggle <= ~led2_toggle;
-            end
-            default: begin
-                // Should never reach here
-            end
-        endcase
-    end
-end
 
 `endif
 

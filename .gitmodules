@@ -1,3 +1,6 @@
 [submodule "hardware/libs/AudioJacks"]
 	path = hardware/libs/AudioJacks
 	url = https://github.com/clacktronics/AudioJacks
+[submodule "gateware/external/no2misc"]
+	path = gateware/external/no2misc
+	url = https://github.com/no2fpga/no2misc

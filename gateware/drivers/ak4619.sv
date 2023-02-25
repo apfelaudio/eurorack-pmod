@@ -3,7 +3,7 @@
 // Currently assumes the device is configured in the audio
 // interface mode specified in ak4619-cfg.hex.
 //
-// Currently 187.5KHz/16bit samples.
+// Currently 93.75KHz/16bit samples.
 
 `default_nettype none
 
@@ -17,8 +17,6 @@ module ak4619 #(
     output lrck,
     output reg sdin1,
     input  sdout1,
-    output i2c_scl,
-    inout i2c_sda,
 
     output sample_clk,
     output reg signed [W-1:0] sample_out0,
@@ -40,15 +38,11 @@ logic sdout1_latched    = 1'b0;
 logic [7:0] clkdiv      = 8'd0;
 logic [1:0] channel;
 logic [4:0] bit_counter;
-logic scl_i2cinit;
-logic sda_out_i2cinit;
 
 assign pdn         = 1'b1;
 assign bick        = clk;
 assign mclk        = clk;
 assign lrck        = clkdiv[6];   // 12MHz >> 7 == 93.75KHz
-assign i2c_scl     = scl_i2cinit     ? 1'bz : 1'b0;
-assign i2c_sda     = sda_out_i2cinit ? 1'bz : 1'b0;
 
 assign channel     = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
 assign bit_counter = clkdiv[4:0];
@@ -89,12 +83,6 @@ end
 always_ff @(posedge clk) begin
     sdout1_latched <= sdout1;
 end
-
-i2cinit i2cinit_instance (
-    .clk (sample_clk),
-    .scl (scl_i2cinit),
-    .sda_out (sda_out_i2cinit)
-);
 
 `ifdef COCOTB_SIM
 initial begin
