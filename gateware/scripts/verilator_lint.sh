@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-verilator --lint-only -Ical -Iak4619 -Iexternal/no2misc/rtl -Icores top.sv
+verilator --lint-only -Ical -Idrivers -Iexternal/no2misc/rtl -Icores -Wno-INITIALDLY top.sv
 verilator --lint-only -Icores bitcrush.sv
 verilator --lint-only -Icores clkdiv.sv
 verilator --lint-only -Icores sampler.sv

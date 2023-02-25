@@ -46,10 +46,7 @@ module top #(
     ,output LEDR_N
     ,output LEDG_N
 `endif
-`ifdef OUTPUT_CALIBRATION
-    // Button to toggle between +/- 5V output cal.
     ,input   BTN_N
-`endif
 );
 
 // 12MHz master clock == 12MHz / 128 == 93.75KHz sample clock.
@@ -285,8 +282,6 @@ ak4619 ak4619_instance (
     .lrck    (P2_9),
     .sdin1   (P2_7),
     .sdout1  (P2_8),
-    .i2c_scl (P2_1),
-    .i2c_sda (P2_2),
     .sample_clk  (sample_clk),
     .sample_out0 (sample_adc0),
     .sample_out1 (sample_adc1),
@@ -298,6 +293,23 @@ ak4619 ak4619_instance (
     .sample_in3 (sample_dac3)
 );
 
+logic i2c_rst;
+logic i2c_scl_oe;
+logic i2c_sda_oe;
+
+assign i2c_rst = ~BTN_N;
+assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
+assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
+
+pmod_i2c_master pmod_i2c_master_instance (
+    .clk(clk_12mhz),
+    .rst(i2c_rst),
+
+    .scl_oe(i2c_scl_oe),
+    .scl_i(P2_1),
+    .sda_oe(i2c_sda_oe),
+    .sda_i(P2_2)
+);
 
 `ifdef UART_SAMPLE_TRANSMITTER
 
