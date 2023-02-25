@@ -3,7 +3,7 @@
 // Currently assumes the device is configured in the audio
 // interface mode specified in ak4619-cfg.hex.
 //
-// Currently 187.5KHz/16bit samples.
+// Currently 93.75KHz/16bit samples.
 
 `default_nettype none
 

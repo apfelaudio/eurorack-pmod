@@ -15,12 +15,13 @@ module pmod_i2c_master #(
 );
 
 // Overall state machine of this core.
+// Most of these will not be used until hardware R3.
 localparam I2C_INIT          = 4'h0,
            I2C_INIT_CAL      = 4'h1,
            I2C_INIT_JACK     = 4'h2,
            I2C_INIT_LED      = 4'h3,
-           I2C_INIT_CODEC1    = 4'h4,
-           I2C_INIT_CODEC2    = 4'h5,
+           I2C_INIT_CODEC1   = 4'h4,
+           I2C_INIT_CODEC2   = 4'h5,
            I2C_UPDATE_LEDS   = 4'h6,
            I2C_UPDATE_JACK   = 4'h7,
            I2C_IDLE          = 4'h8;

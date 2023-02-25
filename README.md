@@ -45,7 +45,7 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 - [`gateware/cores`](gateware/cores): example user core implementations (i.e sequential switch, bitcrusher, filter, vco, vca, sampler etc).
 - [`gateware/top.sv`](gateware/top.sv): top-level gateware with defines for selecting features.
 - [`gateware/cal/cal.py`](gateware/cal/cal.py): tool used to calibrate the hardware after assembly, generating calibration memory.
-- [`gateware/ak4619`](gateware/ak4619): driver for AK4619 ADC/DAC used on this board.
+- [`gateware/drivers`](gateware/drivers): driver for CODEC used on this board.
 - [`hardware/eurorack-pmod-pcb-flat`](hardware/eurorack-pmod-pcb-flat): KiCAD design files for PCB and front panel.
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
 

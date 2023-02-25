@@ -6,7 +6,7 @@
 `default_nettype none
 
 // Transmit CODEC samples over UART
-`define UART_SAMPLE_TRANSMITTER
+//`define UART_SAMPLE_TRANSMITTER
 
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
@@ -49,16 +49,23 @@ module top #(
     ,input   BTN_N
 );
 
-// 12MHz master clock == 12MHz / 128 == 93.75KHz sample clock.
-// For a 'true' 96KHz sample clock we probably want a 12.288MHz
-// crystal, as the PLL can't actually achieve it alone.
-
-localparam CLK_FREQ  = 12_000_000;
-localparam BAUD_RATE =  1_000_000;
-
+logic rst;
 logic clk_12mhz;
+logic clk_24mhz;
 logic sample_clk;
-assign clk_12mhz = CLK;
+
+ice40_sysmgr ice40_sysmgr_instance (
+    .clk_in(CLK),
+`ifdef OUTPUT_CALIBRATION
+    // For output calibration the button is used elsewhere.
+    .rst_in(1'b1),
+`else
+    .rst_in(~BTN_N),
+`endif
+    .clk_2x_out(clk_24mhz),
+    .clk_1x_out(clk_12mhz),
+    .rst_out(rst)
+);
 
 // Raw samples to/from CODEC
 logic signed [W-1:0] sample_adc0;
@@ -108,8 +115,13 @@ cal cal_instance (
     .out1 (cal_in1),
     .out2 (cal_in2),
     .out3 (cal_in3),
-`ifndef OUTPUT_CALIBRATION
-    // In output calibration mode these wires are forced.
+`ifdef OUTPUT_CALIBRATION
+    // In output calibration mode this is driven from elsewhere.
+    .out4 (),
+    .out5 (),
+    .out6 (),
+    .out7 ()
+`else
     .out4 (sample_dac0),
     .out5 (sample_dac1),
     .out6 (sample_dac2),
@@ -293,17 +305,17 @@ ak4619 ak4619_instance (
     .sample_in3 (sample_dac3)
 );
 
-logic i2c_rst;
 logic i2c_scl_oe;
 logic i2c_sda_oe;
 
-assign i2c_rst = ~BTN_N;
+// TODO: switch to explicit tristating IO blocks for this so
+// Yosys throws blocking errors if the flow doesn't support it.
 assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
 assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
 
 pmod_i2c_master pmod_i2c_master_instance (
     .clk(clk_12mhz),
-    .rst(i2c_rst),
+    .rst(rst),
 
     .scl_oe(i2c_scl_oe),
     .scl_i(P2_1),
