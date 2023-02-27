@@ -70,7 +70,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory "fab1/")
+      (outputdirectory "../fab/fab3_panel/")
     )
   )
 

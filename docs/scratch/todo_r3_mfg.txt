@@ -1,13 +1,13 @@
 Design:
 - [DONE] R3.0 PCB design
-- R3.0 panel design
+- [DONE+ORDERED] R3.0 panel design
 
 Proto build:
 - Procure all parts / shuffle PN#s
     - [DONE] pre-order AK4619VN
-    - Find better 0402 LEDs
-    - Add header pins
-- Manufacture 3x units @ CM
+    - [DONE] Find better 0402 LEDs
+    - [DONE] Add header pins
+- [PENDING PARTS] Manufacture 3x units @ CM
 
 Bringup / Validate:
 - Add driver for Jackdetect / LEDs / Cal mem
