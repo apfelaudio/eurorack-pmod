@@ -3,8 +3,8 @@
 `default_nettype none
 
 module pmod_i2c_master #(
-    parameter CODEC_CFG  = "ak4619-cfg.hex",
-    parameter CODEC_CFG_BYTES = 16'h17
+    parameter CODEC_CFG  = "pca9635-cfg.hex",
+    parameter CODEC_CFG_BYTES = 16'd26
 )(
     input  clk,
     input  rst,

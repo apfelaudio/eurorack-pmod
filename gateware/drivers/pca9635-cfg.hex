@@ -1,0 +1,26 @@
+06 // I2C slave address (0x3<<1) and RW bit (W=0)
+80 // Auto-increment starting from MODE1
+91 // MODE1
+00 // MODE2
+80 // PWM0
+80 // PWM1
+80 // PWM2
+80 // PWM3
+80 // PWM4
+80 // PWM5
+80 // PWM6
+80 // PWM7
+80 // PWM8
+80 // PWM9
+80 // PWM10
+80 // PWM11
+80 // PWM12
+80 // PWM13
+80 // PWM14
+80 // PWM15
+FF // GRPPWM
+00 // GRPFREQ
+AA // LEDOUT0
+AA // LEDOUT1
+AA // LEDOUT2
+AA // LEDOUT3
