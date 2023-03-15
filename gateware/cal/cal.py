@@ -38,7 +38,7 @@ import time
 import numpy as np
 import keyboard
 
-SERIAL_PORT = '/dev/ttyUSB2'
+SERIAL_PORT = '/dev/ttyUSB1'
 
 # Input calibration is aiming for N counts per volt
 COUNT_PER_VOLT = 4000
