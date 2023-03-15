@@ -1,6 +1,6 @@
-06 // I2C slave address (0x3<<1) and RW bit (W=0)
+0A // I2C slave address (0x5<<1) and RW bit (W=0)
 80 // Auto-increment starting from MODE1
-91 // MODE1
+81 // MODE1
 00 // MODE2
 80 // PWM0
 80 // PWM1
