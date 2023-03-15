@@ -52,13 +52,23 @@ logic       ack_out;
 logic       err_out;
 logic       ready;
 
+
+logic [18:0] init_cnt;
+
 always_ff @(posedge clk) begin
     if (rst) begin
-        i2c_state <= I2C_INIT_CODEC1;
+        i2c_state <= I2C_INIT;
         codec_config_pos <= 0;
+        init_cnt <= 18'h0;
     end else begin
         if (ready && ~stb) begin
             case (i2c_state)
+                I2C_INIT: begin
+                    if(init_cnt[17])
+                        i2c_state <= I2C_INIT_CODEC1;
+                    else
+                        init_cnt <= init_cnt + 1;
+                end
                 I2C_INIT_CODEC1: begin
                     cmd <= I2CMASTER_START;
                     stb <= 1'b1;
@@ -78,7 +88,9 @@ always_ff @(posedge clk) begin
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
-                default: i2c_state <= I2C_IDLE;
+                default: begin
+                    i2c_state <= I2C_IDLE;
+                end
             endcase
         end else begin
             stb <= 1'b0;

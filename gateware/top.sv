@@ -288,6 +288,7 @@ stereo_echo echo_instance (
 
 ak4619 ak4619_instance (
     .clk     (clk_12mhz),
+    .rst     (rst),
     .pdn     (P2_3),
     .mclk    (P2_4),
     .bick    (P2_10),
