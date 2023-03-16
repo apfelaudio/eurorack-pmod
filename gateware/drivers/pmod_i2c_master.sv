@@ -13,24 +13,22 @@ module pmod_i2c_master #(
 	output scl_oe,
 	input  scl_i,
 	output sda_oe,
-	input  sda_i
+	input  sda_i,
+
+    input signed [7:0] led0
 );
 
 // Overall state machine of this core.
 // Most of these will not be used until hardware R3.
-localparam I2C_INIT          = 4'h0,
-           I2C_INIT_JACK     = 4'h1,
-           I2C_INIT_LED1     = 4'h2,
-           I2C_INIT_LED2     = 4'h3,
-           I2C_INIT_CODEC1   = 4'h4,
-           I2C_INIT_CODEC2   = 4'h5,
-           I2C_UPDATE_LEDS   = 4'h6,
-           I2C_UPDATE_JACK   = 4'h7,
-           I2C_IDLE          = 4'h8,
-           I2C_INIT2          = 4'h9;
+localparam I2C_DELAY1        = 0,
+           I2C_INIT_CODEC1   = 1,
+           I2C_INIT_CODEC2   = 2,
+           I2C_INIT_LED1     = 3,
+           I2C_INIT_LED2     = 4,
+           I2C_IDLE          = 5;
 
 
-logic [3:0] i2c_state = I2C_INIT;
+logic [3:0] i2c_state = I2C_DELAY1;
 
 // Index into i2c config memories
 logic [15:0] i2c_config_pos = 0;
@@ -62,20 +60,19 @@ logic       err_out;
 logic       ready;
 
 
-logic [23:0] init_cnt;
+logic [23:0] delay_cnt;
 
 always_ff @(posedge clk) begin
     if (rst) begin
-        i2c_state <= I2C_INIT;
-        init_cnt <= 0;
+        i2c_state <= I2C_DELAY1;
+        delay_cnt <= 0;
     end else begin
+        delay_cnt <= delay_cnt + 1;
         if (ready && ~stb) begin
             case (i2c_state)
-                I2C_INIT: begin
-                    if(init_cnt[17])
+                I2C_DELAY1: begin
+                    if(delay_cnt[17])
                         i2c_state <= I2C_INIT_CODEC1;
-                    else
-                        init_cnt <= init_cnt + 1;
                 end
                 I2C_INIT_CODEC1: begin
                     cmd <= I2CMASTER_START;
@@ -84,23 +81,18 @@ always_ff @(posedge clk) begin
                     i2c_config_pos <= 0;
                 end
                 I2C_INIT_CODEC2: begin
+                    // Shift out all bytes in the CODEC configuration in
+                    // one long transaction until we are finished.
                     if (i2c_config_pos != CODEC_CFG_BYTES) begin
                         data_in <= codec_config[5'(i2c_config_pos)];
                         cmd <= I2CMASTER_WRITE;
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT2;
-                        init_cnt <= 0;
+                        i2c_state <= I2C_INIT_LED1;
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
-                end
-                I2C_INIT2: begin
-                    if(init_cnt[17])
-                        i2c_state <= I2C_INIT_LED1;
-                    else
-                        init_cnt <= init_cnt + 1;
                 end
                 I2C_INIT_LED1: begin
                     cmd <= I2CMASTER_START;
@@ -109,15 +101,26 @@ always_ff @(posedge clk) begin
                     i2c_config_pos <= 0;
                 end
                 I2C_INIT_LED2: begin
-                    // Shift out all bytes in the LED configuration in
-                    // one long transaction until we are finished.
                     if (i2c_config_pos != LED_CFG_BYTES) begin
-                        data_in <= led_config[5'(i2c_config_pos)];
+                        if (i2c_config_pos > 3 && i2c_config_pos <= 3 + 16)
+                            if (i2c_config_pos % 2 == 0) begin
+                                if(led0 > 0)
+                                    data_in <= led0;
+                                else
+                                    data_in <= 0;
+                            end else begin
+                                if (led0 > 0)
+                                    data_in <= 0;
+                                else
+                                    data_in <= -led0;
+                            end
+                        else
+                            data_in <= led_config[5'(i2c_config_pos)];
                         cmd <= I2CMASTER_WRITE;
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_IDLE;
+                        i2c_state <= I2C_INIT_LED1;
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
@@ -132,7 +135,7 @@ always_ff @(posedge clk) begin
     end
 end
 
-i2c_master #(.DW(6)) i2c_master_inst(
+i2c_master #(.DW(4)) i2c_master_inst(
     .scl_oe(scl_oe),
     .scl_i(scl_i),
     .sda_oe(sda_oe),

@@ -321,7 +321,9 @@ pmod_i2c_master pmod_i2c_master_instance (
     .scl_oe(i2c_scl_oe),
     .scl_i(P2_1),
     .sda_oe(i2c_sda_oe),
-    .sda_i(P2_2)
+    .sda_i(P2_2),
+
+    .led0(cal_in0[15:8])
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER
