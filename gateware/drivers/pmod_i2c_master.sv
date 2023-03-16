@@ -72,9 +72,27 @@ always_ff @(posedge clk) begin
             case (i2c_state)
                 I2C_INIT: begin
                     if(init_cnt[17])
-                        i2c_state <= I2C_INIT_LED1;
+                        i2c_state <= I2C_INIT_CODEC1;
                     else
                         init_cnt <= init_cnt + 1;
+                end
+                I2C_INIT_CODEC1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_CODEC2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_INIT_CODEC2: begin
+                    if (i2c_config_pos != CODEC_CFG_BYTES) begin
+                        data_in <= codec_config[5'(i2c_config_pos)];
+                        cmd <= I2CMASTER_WRITE;
+                        i2c_config_pos <= i2c_config_pos + 1;
+                    end else begin
+                        cmd <= I2CMASTER_STOP;
+                        i2c_state <= I2C_INIT_LED1;
+                    end
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
                 end
                 I2C_INIT_LED1: begin
                     cmd <= I2CMASTER_START;
@@ -87,24 +105,6 @@ always_ff @(posedge clk) begin
                     // one long transaction until we are finished.
                     if (i2c_config_pos != LED_CFG_BYTES) begin
                         data_in <= led_config[5'(i2c_config_pos)];
-                        cmd <= I2CMASTER_WRITE;
-                        i2c_config_pos <= i2c_config_pos + 1;
-                    end else begin
-                        cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT_CODEC1;
-                    end
-                    ack_in <= 1'b1;
-                    stb <= 1'b1;
-                end
-                I2C_INIT_CODEC1: begin
-                    cmd <= I2CMASTER_START;
-                    stb <= 1'b1;
-                    i2c_state <= I2C_INIT_CODEC2;
-                    i2c_config_pos <= 0;
-                end
-                I2C_INIT_CODEC2: begin
-                    if (i2c_config_pos != CODEC_CFG_BYTES) begin
-                        data_in <= codec_config[5'(i2c_config_pos)];
                         cmd <= I2CMASTER_WRITE;
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
