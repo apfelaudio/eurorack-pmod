@@ -26,7 +26,8 @@ localparam I2C_INIT          = 4'h0,
            I2C_INIT_CODEC2   = 4'h5,
            I2C_UPDATE_LEDS   = 4'h6,
            I2C_UPDATE_JACK   = 4'h7,
-           I2C_IDLE          = 4'h8;
+           I2C_IDLE          = 4'h8,
+           I2C_INIT2          = 4'h9;
 
 
 logic [3:0] i2c_state = I2C_INIT;
@@ -89,10 +90,17 @@ always_ff @(posedge clk) begin
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT_LED1;
+                        i2c_state <= I2C_INIT2;
+                        init_cnt <= 0;
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
+                end
+                I2C_INIT2: begin
+                    if(init_cnt[17])
+                        i2c_state <= I2C_INIT_LED1;
+                    else
+                        init_cnt <= init_cnt + 1;
                 end
                 I2C_INIT_LED1: begin
                     cmd <= I2CMASTER_START;
