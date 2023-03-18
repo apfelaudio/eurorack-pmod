@@ -44,12 +44,12 @@ localparam CAL_ST_LATCH     = 3'd0,
            CAL_ST_ZERO      = 3'd1,
            CAL_ST_MULTIPLY  = 3'd2,
            CAL_ST_CLAMPL    = 3'd3,
-           CAL_ST_OUT       = 3'd4,
-           CAL_ST_HALT      = 3'd5;
+           CAL_ST_CLAMPH    = 3'd4,
+           CAL_ST_OUT       = 3'd5,
+           CAL_ST_HALT      = 3'd6;
 
-// Only need to clamp negative values as with current hardware it
-// is impossible to overflow in the positive direction during cal.
 localparam int signed CLAMPL = -32'sd32000;
+localparam int signed CLAMPH =  32'sd32000;
 
 logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
@@ -95,6 +95,10 @@ always_ff @(posedge clk) begin
         end
         CAL_ST_CLAMPL: begin
             out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
+            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPH;
+        end
+        CAL_ST_CLAMPH: begin
+            out[ch] <= ((out[ch] > CLAMPH) ? CLAMPH : out[ch]);
             if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
