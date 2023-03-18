@@ -22,7 +22,9 @@ module pmod_i2c_master #(
     input signed [7:0] led4,
     input signed [7:0] led5,
     input signed [7:0] led6,
-    input signed [7:0] led7
+    input signed [7:0] led7,
+
+    output logic [7:0] jack
 );
 
 // Overall state machine of this core.
@@ -30,9 +32,11 @@ module pmod_i2c_master #(
 localparam I2C_DELAY1        = 0,
            I2C_INIT_CODEC1   = 1,
            I2C_INIT_CODEC2   = 2,
-           I2C_INIT_LED1     = 3,
-           I2C_INIT_LED2     = 4,
-           I2C_IDLE          = 5;
+           I2C_LED1          = 3,
+           I2C_LED2          = 4,
+           I2C_JACK1         = 5,
+           I2C_JACK2         = 6,
+           I2C_IDLE          = 7;
 
 
 logic [3:0] i2c_state = I2C_DELAY1;
@@ -97,22 +101,22 @@ always_ff @(posedge clk) begin
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT_LED1;
+                        i2c_state <= I2C_LED1;
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
-                I2C_INIT_LED1: begin
+                I2C_LED1: begin
                     cmd <= I2CMASTER_START;
                     stb <= 1'b1;
-                    i2c_state <= I2C_INIT_LED2;
+                    i2c_state <= I2C_LED2;
                     i2c_config_pos <= 0;
                 end
-                I2C_INIT_LED2: begin
+                I2C_LED2: begin
                     case (i2c_config_pos)
                         LED_CFG_BYTES: begin
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_INIT_LED1;
+                            i2c_state <= I2C_JACK1;
                         end
                         default: begin
                             data_in <= led_config[5'(i2c_config_pos)];
@@ -134,6 +138,26 @@ always_ff @(posedge clk) begin
                         PCA9635_PWM0 + 13: data_in <= led6 > 0 ? led6 : 0;
                         PCA9635_PWM0 + 14: data_in <= led7 > 0 ? 0 : -led7;
                         PCA9635_PWM0 + 15: data_in <= led7 > 0 ? led7 : 0;
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_JACK1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_JACK2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_JACK2: begin
+                    case (i2c_config_pos)
+                        0: data_in <= 8'hAA; // TODO: address!
+                        1: data_in <= 8'h01; // Read input register
+                        2: jack <= data_out;
+                        3: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_JACK1;
+                        end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
                     ack_in <= 1'b1;

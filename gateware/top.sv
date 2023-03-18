@@ -330,7 +330,9 @@ pmod_i2c_master pmod_i2c_master_instance (
     .led4(cal_out0[W-1:W-8]),
     .led5(cal_out1[W-1:W-8]),
     .led6(cal_out2[W-1:W-8]),
-    .led7(cal_out3[W-1:W-8])
+    .led7(cal_out3[W-1:W-8]),
+
+    .jack()
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER
