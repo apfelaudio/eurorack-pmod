@@ -289,7 +289,7 @@ stereo_echo echo_instance (
 ak4619 ak4619_instance (
     .clk     (clk_12mhz),
     .rst     (rst),
-    .pdn     (P2_3),
+    .pdn     (),
     .mclk    (P2_4),
     .bick    (P2_10),
     .lrck    (P2_9),
@@ -313,6 +313,7 @@ logic i2c_sda_oe;
 // Yosys throws blocking errors if the flow doesn't support it.
 assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
 assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
+assign P2_3 = 1'b0;
 
 logic [7:0] jack;
 

@@ -144,25 +144,39 @@ always_ff @(posedge clk) begin
                     stb <= 1'b1;
                 end
                 I2C_JACK1: begin
-                    cmd <= I2CMASTER_START;
-                    stb <= 1'b1;
                     i2c_state <= I2C_JACK2;
                     i2c_config_pos <= 0;
                 end
                 I2C_JACK2: begin
                     case (i2c_config_pos)
-                        0: begin
-                            data_in <= 8'h30; // TODO: address!
-                            cmd <= I2CMASTER_WRITE;
-                        end
+                        // 1) Configure polarity inversion register.
+                        0: cmd <= I2CMASTER_START;
                         1: begin
-                            data_in <= 8'h01; // Read input register
+                            // (0x18 [address] << 1) | 0 [write]
+                            data_in <= 8'h30;
                             cmd <= I2CMASTER_WRITE;
                         end
-                        2: begin
-                            cmd <= I2CMASTER_READ;
+                        2: data_in <= 8'h02; // Index of inversion register.
+                        3: data_in <= 8'h00; // 0xF0 by default, we want 0x00
+
+                        // 2) Set current command register to input port.
+                        4: cmd <= I2CMASTER_START;
+                        5: begin
+                            data_in <= 8'h30;
+                            cmd <= I2CMASTER_WRITE;
                         end
-                        3: begin
+                        6: data_in <= 8'h00; // Index of input port register
+
+                        // 3) Read input port register.
+                        7: cmd <= I2CMASTER_START;
+                        8: begin
+                            data_in <= 8'h31;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        9: cmd <= I2CMASTER_READ;
+
+                        // 4) Save the result.
+                        10: begin
                             jack <= data_out;
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_DELAY1;
