@@ -317,6 +317,11 @@ assign P2_3 = 1'b0;
 
 logic [7:0] jack;
 
+logic [7:0] eeprom_mfg;
+logic [7:0] eeprom_dev;
+logic [15:0] eeprom_ser1;
+logic [15:0] eeprom_ser2;
+
 pmod_i2c_master pmod_i2c_master_instance (
     .clk(clk_12mhz),
     .rst(rst),
@@ -337,9 +342,9 @@ pmod_i2c_master pmod_i2c_master_instance (
 
     .jack(jack),
 
-    .eeprom_mfg_code(),
-    .eeprom_dev_code(),
-    .eeprom_serial()
+    .eeprom_mfg_code(eeprom_mfg),
+    .eeprom_dev_code(eeprom_dev),
+    .eeprom_serial({eeprom_ser1, eeprom_ser2})
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER
@@ -349,10 +354,10 @@ cal_uart cal_uart_instance (
     .tx_o(TX),
 `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
      // Used for calibrating the input channels
-    .in0(sample_adc0),
-    .in1(sample_adc1),
-    .in2(sample_adc2),
-    .in3(sample_adc3)
+    .in0(eeprom_mfg),
+    .in1(eeprom_dev),
+    .in2(eeprom_ser1),
+    .in3(eeprom_ser2)
 `else
     .in0(cal_in0),
     .in1(cal_in1),
