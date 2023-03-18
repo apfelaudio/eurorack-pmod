@@ -323,7 +323,14 @@ pmod_i2c_master pmod_i2c_master_instance (
     .sda_oe(i2c_sda_oe),
     .sda_i(P2_2),
 
-    .led0(cal_in0[15:8])
+    .led0( cal_in0[W-1:W-8]),
+    .led1( cal_in1[W-1:W-8]),
+    .led2( cal_in2[W-1:W-8]),
+    .led3( cal_in3[W-1:W-8]),
+    .led4(cal_out0[W-1:W-8]),
+    .led5(cal_out1[W-1:W-8]),
+    .led6(cal_out2[W-1:W-8]),
+    .led7(cal_out3[W-1:W-8])
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER

@@ -15,7 +15,14 @@ module pmod_i2c_master #(
 	output sda_oe,
 	input  sda_i,
 
-    input signed [7:0] led0
+    input signed [7:0] led0,
+    input signed [7:0] led1,
+    input signed [7:0] led2,
+    input signed [7:0] led3,
+    input signed [7:0] led4,
+    input signed [7:0] led5,
+    input signed [7:0] led6,
+    input signed [7:0] led7
 );
 
 // Overall state machine of this core.
@@ -40,6 +47,7 @@ initial $readmemh(CODEC_CFG, codec_config);
 // Logic for startup configuration of LEDs over I2C.
 logic [7:0] led_config [0:LED_CFG_BYTES-1];
 initial $readmemh(LED_CFG, led_config);
+localparam PCA9635_PWM0 = 4;
 
 // Valid commands for `i2c_master` core.
 localparam [1:0] I2CMASTER_START = 2'b00,
@@ -101,27 +109,33 @@ always_ff @(posedge clk) begin
                     i2c_config_pos <= 0;
                 end
                 I2C_INIT_LED2: begin
-                    if (i2c_config_pos != LED_CFG_BYTES) begin
-                        if (i2c_config_pos > 3 && i2c_config_pos <= 3 + 16)
-                            if (i2c_config_pos % 2 == 0) begin
-                                if(led0 > 0)
-                                    data_in <= led0;
-                                else
-                                    data_in <= 0;
-                            end else begin
-                                if (led0 > 0)
-                                    data_in <= 0;
-                                else
-                                    data_in <= -led0;
-                            end
-                        else
+                    case (i2c_config_pos)
+                        LED_CFG_BYTES: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_INIT_LED1;
+                        end
+                        default: begin
                             data_in <= led_config[5'(i2c_config_pos)];
-                        cmd <= I2CMASTER_WRITE;
-                        i2c_config_pos <= i2c_config_pos + 1;
-                    end else begin
-                        cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT_LED1;
-                    end
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        PCA9635_PWM0 +  0: data_in <= led0 > 0 ? 0 : -led0;
+                        PCA9635_PWM0 +  1: data_in <= led0 > 0 ? led0 : 0;
+                        PCA9635_PWM0 +  2: data_in <= led1 > 0 ? 0 : -led1;
+                        PCA9635_PWM0 +  3: data_in <= led1 > 0 ? led1 : 0;
+                        PCA9635_PWM0 +  4: data_in <= led2 > 0 ? 0 : -led2;
+                        PCA9635_PWM0 +  5: data_in <= led2 > 0 ? led2 : 0;
+                        PCA9635_PWM0 +  6: data_in <= led3 > 0 ? 0 : -led3;
+                        PCA9635_PWM0 +  7: data_in <= led3 > 0 ? led3 : 0;
+                        PCA9635_PWM0 +  8: data_in <= led4 > 0 ? 0 : -led4;
+                        PCA9635_PWM0 +  9: data_in <= led4 > 0 ? led4 : 0;
+                        PCA9635_PWM0 + 10: data_in <= led5 > 0 ? 0 : -led5;
+                        PCA9635_PWM0 + 11: data_in <= led5 > 0 ? led5 : 0;
+                        PCA9635_PWM0 + 12: data_in <= led6 > 0 ? 0 : -led6;
+                        PCA9635_PWM0 + 13: data_in <= led6 > 0 ? led6 : 0;
+                        PCA9635_PWM0 + 14: data_in <= led7 > 0 ? 0 : -led7;
+                        PCA9635_PWM0 + 15: data_in <= led7 > 0 ? led7 : 0;
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
