@@ -314,6 +314,8 @@ logic i2c_sda_oe;
 assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
 assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
 
+logic [7:0] jack;
+
 pmod_i2c_master pmod_i2c_master_instance (
     .clk(clk_12mhz),
     .rst(rst),
@@ -323,7 +325,7 @@ pmod_i2c_master pmod_i2c_master_instance (
     .sda_oe(i2c_sda_oe),
     .sda_i(P2_2),
 
-    .led0( cal_in0[W-1:W-8]),
+    .led0( jack ),
     .led1( cal_in1[W-1:W-8]),
     .led2( cal_in2[W-1:W-8]),
     .led3( cal_in3[W-1:W-8]),
@@ -332,7 +334,7 @@ pmod_i2c_master pmod_i2c_master_instance (
     .led6(cal_out2[W-1:W-8]),
     .led7(cal_out3[W-1:W-8]),
 
-    .jack()
+    .jack(jack)
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER

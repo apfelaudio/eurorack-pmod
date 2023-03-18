@@ -84,7 +84,7 @@ always_ff @(posedge clk) begin
             case (i2c_state)
                 I2C_DELAY1: begin
                     if(delay_cnt[17])
-                        i2c_state <= I2C_INIT_CODEC1;
+                        i2c_state <= I2C_JACK1;
                 end
                 I2C_INIT_CODEC1: begin
                     cmd <= I2CMASTER_START;
@@ -151,12 +151,25 @@ always_ff @(posedge clk) begin
                 end
                 I2C_JACK2: begin
                     case (i2c_config_pos)
-                        0: data_in <= 8'hAA; // TODO: address!
-                        1: data_in <= 8'h01; // Read input register
-                        2: jack <= data_out;
+                        0: begin
+                            data_in <= 8'h30; // TODO: address!
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        1: begin
+                            data_in <= 8'h01; // Read input register
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            cmd <= I2CMASTER_READ;
+                        end
                         3: begin
+                            jack <= data_out;
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_JACK1;
+                            i2c_state <= I2C_DELAY1;
+                            delay_cnt <= 0;
+                        end
+                        default: begin
+                            // do nothing
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
