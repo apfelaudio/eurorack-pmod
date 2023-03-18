@@ -38,10 +38,10 @@ localparam I2C_DELAY1        = 0,
            I2C_EEPROM2       = 2,
            I2C_INIT_CODEC1   = 3,
            I2C_INIT_CODEC2   = 4,
-           I2C_LED1          = 5,
-           I2C_LED2          = 6,
-           I2C_JACK1         = 7,
-           I2C_JACK2         = 8,
+           I2C_LED1          = 5, // <<--\ LED/JACK re-runs indefinitely.
+           I2C_LED2          = 6, //     |
+           I2C_JACK1         = 7, //     |
+           I2C_JACK2         = 8, // >>--/
            I2C_IDLE          = 9;
 
 

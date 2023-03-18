@@ -11,6 +11,8 @@
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
 `define UART_SAMPLE_TRANSMIT_RAW_ADC
+//`define UART_SAMPLE_TRANSMIT_CAL_ADC
+//`define UART_SAMPLE_TRANSMIT_EEPROM
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -58,7 +60,7 @@ ice40_sysmgr ice40_sysmgr_instance (
     .clk_in(CLK),
 `ifdef OUTPUT_CALIBRATION
     // For output calibration the button is used elsewhere.
-    .rst_in(1'b1),
+    .rst_in(1'b0),
 `else
     .rst_in(~BTN_N),
 `endif
