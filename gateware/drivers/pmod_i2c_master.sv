@@ -24,19 +24,25 @@ module pmod_i2c_master #(
     input signed [7:0] led6,
     input signed [7:0] led7,
 
-    output logic [7:0] jack
+    output logic [7:0] jack,
+
+    output logic [7:0]  eeprom_mfg_code,
+    output logic [7:0]  eeprom_dev_code,
+    output logic [31:0] eeprom_serial
 );
 
 // Overall state machine of this core.
 // Most of these will not be used until hardware R3.
 localparam I2C_DELAY1        = 0,
-           I2C_INIT_CODEC1   = 1,
-           I2C_INIT_CODEC2   = 2,
-           I2C_LED1          = 3,
-           I2C_LED2          = 4,
-           I2C_JACK1         = 5,
-           I2C_JACK2         = 6,
-           I2C_IDLE          = 7;
+           I2C_EEPROM1       = 1,
+           I2C_EEPROM2       = 2,
+           I2C_INIT_CODEC1   = 3,
+           I2C_INIT_CODEC2   = 4,
+           I2C_LED1          = 5,
+           I2C_LED2          = 6,
+           I2C_JACK1         = 7,
+           I2C_JACK2         = 8,
+           I2C_IDLE          = 9;
 
 
 logic [3:0] i2c_state = I2C_DELAY1;
@@ -71,7 +77,6 @@ logic       ack_out;
 logic       err_out;
 logic       ready;
 
-
 logic [23:0] delay_cnt;
 
 always_ff @(posedge clk) begin
@@ -84,7 +89,50 @@ always_ff @(posedge clk) begin
             case (i2c_state)
                 I2C_DELAY1: begin
                     if(delay_cnt[17])
-                        i2c_state <= I2C_JACK1;
+                        i2c_state <= I2C_EEPROM1;
+                end
+                I2C_EEPROM1: begin
+                    i2c_state <= I2C_EEPROM2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_EEPROM2: begin
+                    case (i2c_config_pos)
+                        0: cmd <= I2CMASTER_START;
+                        1: begin
+                            data_in <= 8'hA4;
+                            cmd <= I2CMASTER_WRITE;
+                            ack_in <= 1'b1;
+                        end
+                        2: data_in <= 8'hFA;
+                        3: cmd <= I2CMASTER_START;
+                        4: begin
+                            data_in <= 8'hA5;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        5: begin
+                            cmd <= I2CMASTER_READ;
+                            ack_in <= 1'b0;
+                        end
+                        6:  eeprom_mfg_code <= data_out;
+                        7:  eeprom_dev_code <= data_out;
+                        8:  eeprom_serial[32-0*8-1:32-1*8] <= data_out;
+                        9:  eeprom_serial[32-1*8-1:32-2*8] <= data_out;
+                        10: begin
+                            eeprom_serial[32-2*8-1:32-3*8] <= data_out;
+                            // Do not ack last byte.
+                            ack_in <= 1'b1;
+                        end
+                        11: begin
+                            eeprom_serial[32-3*8-1:32-4*8] <= data_out;
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_DELAY1;
+                            delay_cnt <= 0;
+                        end
+                        default: begin
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    stb <= 1'b1;
                 end
                 I2C_INIT_CODEC1: begin
                     cmd <= I2CMASTER_START;
