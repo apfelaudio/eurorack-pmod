@@ -289,7 +289,7 @@ stereo_echo echo_instance (
 ak4619 ak4619_instance (
     .clk     (clk_12mhz),
     .rst     (rst),
-    .pdn     (),
+    .pdn     (P2_3),
     .mclk    (P2_4),
     .bick    (P2_10),
     .lrck    (P2_9),
@@ -313,7 +313,6 @@ logic i2c_sda_oe;
 // Yosys throws blocking errors if the flow doesn't support it.
 assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
 assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
-assign P2_3 = 1'b0;
 
 logic [7:0] jack;
 
@@ -331,7 +330,7 @@ pmod_i2c_master pmod_i2c_master_instance (
     .sda_oe(i2c_sda_oe),
     .sda_i(P2_2),
 
-    .led0( jack ),
+    .led0( cal_in0[W-1:W-8]),
     .led1( cal_in1[W-1:W-8]),
     .led2( cal_in2[W-1:W-8]),
     .led3( cal_in3[W-1:W-8]),
@@ -352,13 +351,19 @@ pmod_i2c_master pmod_i2c_master_instance (
 cal_uart cal_uart_instance (
     .clk (clk_12mhz),
     .tx_o(TX),
-`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-     // Used for calibrating the input channels
+`ifdef UART_SAMPLE_TRANSMIT_EEPROM
     .in0(eeprom_mfg),
     .in1(eeprom_dev),
     .in2(eeprom_ser1),
     .in3(eeprom_ser2)
-`else
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
+    .in0(sample_adc0),
+    .in1(sample_adc1),
+    .in2(sample_adc2),
+    .in3(sample_adc3)
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_CAL_ADC
     .in0(cal_in0),
     .in1(cal_in1),
     .in2(cal_in2),
