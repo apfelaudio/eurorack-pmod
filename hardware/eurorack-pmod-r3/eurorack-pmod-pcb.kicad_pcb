@@ -89,7 +89,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory "../fab/fab3/")
+      (outputdirectory "../fab/rev_3_1/")
     )
   )
 
