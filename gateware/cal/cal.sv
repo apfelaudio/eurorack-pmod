@@ -19,6 +19,7 @@ module cal #(
 )(
     input clk, // 12Mhz
     input sample_clk,
+    input [7:0] jack,
     input signed [W-1:0] in0,
     input signed [W-1:0] in1,
     input signed [W-1:0] in2,
@@ -102,10 +103,11 @@ always_ff @(posedge clk) begin
             if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
-            out0  <= out[0][W-1:0];
-            out1  <= out[1][W-1:0];
-            out2  <= out[2][W-1:0];
-            out3  <= out[3][W-1:0];
+            // Calibrated input samples are zeroed if jack disconnected.
+            out0  <= jack[0] ? out[0][W-1:0] : 0;
+            out1  <= jack[1] ? out[1][W-1:0] : 0;
+            out2  <= jack[2] ? out[2][W-1:0] : 0;
+            out3  <= jack[3] ? out[3][W-1:0] : 0;
             out4  <= out[4][W-1:0];
             out5  <= out[5][W-1:0];
             out6  <= out[6][W-1:0];

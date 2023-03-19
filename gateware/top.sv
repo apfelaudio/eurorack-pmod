@@ -13,6 +13,7 @@
 `define UART_SAMPLE_TRANSMIT_RAW_ADC
 //`define UART_SAMPLE_TRANSMIT_CAL_ADC
 //`define UART_SAMPLE_TRANSMIT_EEPROM
+//`define UART_SAMPLE_TRANSMIT_JACK
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -100,9 +101,21 @@ assign sample_dac3 = force_cal_output;
 
 `endif
 
+// Jack detection inputs read constantly over I2C.
+// Logic '1' == jack is inserted. Bit 0 is input 0.
+logic [7:0] jack;
+
+// EEPROM data read over I2C during startup.
+logic [7:0] eeprom_mfg;
+logic [7:0] eeprom_dev;
+logic [15:0] eeprom_ser1;
+logic [15:0] eeprom_ser2;
+
 cal cal_instance (
     .clk (clk_12mhz),
     .sample_clk (sample_clk),
+    // Calibrated inputs are zeroed if jack is unplugged.
+    .jack (jack),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
     .in0 (~sample_adc0),
@@ -164,7 +177,8 @@ clkdiv clkdiv_instance (
     .sample_out0 (cal_out0),
     .sample_out1 (cal_out1),
     .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
+    .sample_out3 (cal_out3),
+    .jack(jack)
 );
 `endif
 
@@ -316,13 +330,6 @@ logic i2c_sda_oe;
 assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
 assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
 
-logic [7:0] jack;
-
-logic [7:0] eeprom_mfg;
-logic [7:0] eeprom_dev;
-logic [15:0] eeprom_ser1;
-logic [15:0] eeprom_ser2;
-
 pmod_i2c_master pmod_i2c_master_instance (
     .clk(clk_12mhz),
     .rst(rst),
@@ -353,12 +360,6 @@ pmod_i2c_master pmod_i2c_master_instance (
 cal_uart cal_uart_instance (
     .clk (clk_12mhz),
     .tx_o(TX),
-`ifdef UART_SAMPLE_TRANSMIT_EEPROM
-    .in0(eeprom_mfg),
-    .in1(eeprom_dev),
-    .in2(eeprom_ser1),
-    .in3(eeprom_ser2)
-`endif
 `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
     .in0(sample_adc0),
     .in1(sample_adc1),
@@ -370,6 +371,18 @@ cal_uart cal_uart_instance (
     .in1(cal_in1),
     .in2(cal_in2),
     .in3(cal_in3)
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_EEPROM
+    .in0(eeprom_mfg),
+    .in1(eeprom_dev),
+    .in2(eeprom_ser1),
+    .in3(eeprom_ser2)
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_JACK
+    .in0(jack),
+    .in1(),
+    .in2(),
+    .in3()
 `endif
 );
 
