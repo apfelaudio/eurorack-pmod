@@ -30,6 +30,7 @@
 //`define CORE_DELAY_RAW
 //`define CORE_PITCH_SHIFT
 //`define CORE_ECHO
+//`define CORE_LED_TEST
 
 module top #(
     parameter int W = 16 // sample width, bits
@@ -149,25 +150,30 @@ assign cal_out0 = cal_in0;
 assign cal_out1 = cal_in1;
 assign cal_out2 = cal_in2;
 assign cal_out3 = cal_in3;
-`endif
-
+`else
 `ifdef CORE_SAMPLER
 sampler sampler_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_CLKDIV
+`elsif CORE_CLKDIV
 clkdiv clkdiv_instance (
+`elsif CORE_SEQSWITCH
+seqswitch seqswitch_instance (
+`elsif CORE_BITCRUSH
+bitcrush bitcrush_instance (
+`elsif CORE_VCA
+vca vca_instance (
+`elsif CORE_FILTER
+filter filter_instance (
+`elsif CORE_VCO
+vco vco_instance (
+`elsif CORE_DELAY_RAW
+delay_raw delay_raw_instance (
+`elsif CORE_PITCH_SHIFT
+pitch_shift pitch_shift_instance (
+`elsif CORE_ECHO
+stereo_echo echo_instance (
+`elsif CORE_LED_TEST
+vco #(.FDIV(7)) vco_led_test_instance (
+`endif
     .clk     (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
@@ -179,126 +185,6 @@ clkdiv clkdiv_instance (
     .sample_out2 (cal_out2),
     .sample_out3 (cal_out3),
     .jack(jack)
-);
-`endif
-
-`ifdef CORE_SEQSWITCH
-seqswitch seqswitch_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_BITCRUSH
-bitcrush bitcrush_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_VCA
-vca vca_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_FILTER
-filter filter_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_VCO
-vco vco_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_DELAY_RAW
-delay_raw delay_raw_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_PITCH_SHIFT
-pitch_shift pitch_shift_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_ECHO
-stereo_echo echo_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
 );
 `endif
 
@@ -339,10 +225,19 @@ pmod_i2c_master pmod_i2c_master_instance (
     .sda_oe(i2c_sda_oe),
     .sda_i(P2_2),
 
+    // For LED testing, route output channel values
+    // to input and output LEDs so we can set them all.
+`ifdef CORE_LED_TEST
+    .led0(cal_out0[W-1:W-8]),
+    .led1(cal_out1[W-1:W-8]),
+    .led2(cal_out2[W-1:W-8]),
+    .led3(cal_out3[W-1:W-8]),
+`else
     .led0( cal_in0[W-1:W-8]),
     .led1( cal_in1[W-1:W-8]),
     .led2( cal_in2[W-1:W-8]),
     .led3( cal_in3[W-1:W-8]),
+`endif
     .led4(cal_out0[W-1:W-8]),
     .led5(cal_out1[W-1:W-8]),
     .led6(cal_out2[W-1:W-8]),

@@ -21,7 +21,8 @@ module filter #(
     output signed [W-1:0] sample_out0,
     output signed [W-1:0] sample_out1,
     output signed [W-1:0] sample_out2,
-    output signed [W-1:0] sample_out3
+    output signed [W-1:0] sample_out3,
+    input [7:0] jack
 );
 
 filter_svf_pipelined #(.SAMPLE_BITS(W)) filter_svf_inst(
