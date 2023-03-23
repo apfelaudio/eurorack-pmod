@@ -1,4 +1,14 @@
-// Driver for all I2C traffic to/from the `eurorack-pmod`.
+// Driver for I2C traffic to/from the `eurorack-pmod`.
+//
+// For HW Rev. 3+, this is:
+//    - AK4619 Audio Codec (I2C for configuration only, data is I2S)
+//    - 24AA025UIDT I2C EEPROM with unique ID
+//    - PCA9635 I2C PWM LED controller
+//    - PCA9557 I2C GPIO expander (for jack detection)
+//
+// This kind of stateful stuff is often best suited for a softcore rather
+// than pure Verilog, however I wanted to make it possible to use all
+// functions of the board without having to resort to using a softcore.
 
 `default_nettype none
 
@@ -10,11 +20,17 @@ module pmod_i2c_master #(
 )(
     input  clk,
     input  rst,
+
+    // I2C signals to be routed to PMOD IO.
 	output scl_oe,
 	input  scl_i,
 	output sda_oe,
 	input  sda_i,
 
+    // Signed LED values, -128 (max red) to 127 (max green).
+    // The hardware actually allows lighting both LEDs simultaneously,
+    // but for now this interface is good enough for visualizing
+    // the analog input and output channels.
     input signed [7:0] led0,
     input signed [7:0] led1,
     input signed [7:0] led2,
@@ -24,15 +40,18 @@ module pmod_i2c_master #(
     input signed [7:0] led6,
     input signed [7:0] led7,
 
+    // Jack detection outputs, 1 == inserted. (bit 0 is input 0, bit 4 is output 0).
     output logic [7:0] jack,
 
+    // Data read from EEPROM after reset.
     output logic [7:0]  eeprom_mfg_code,
     output logic [7:0]  eeprom_dev_code,
     output logic [31:0] eeprom_serial
 );
 
 // Overall state machine of this core.
-// Most of these will not be used until hardware R3.
+// Basically we bring up the EEPROM and CODEC, and then proceed to
+// update the LED outputs and read the jack insertion GPIOS in a loop.
 localparam I2C_DELAY1        = 0,
            I2C_EEPROM1       = 1,
            I2C_EEPROM2       = 2,
@@ -57,6 +76,7 @@ initial $readmemh(CODEC_CFG, codec_config);
 // Logic for startup configuration of LEDs over I2C.
 logic [7:0] led_config [0:LED_CFG_BYTES-1];
 initial $readmemh(LED_CFG, led_config);
+// Index at which PWM values start in the led config.
 localparam PCA9635_PWM0 = 4;
 
 // Valid commands for `i2c_master` core.
@@ -71,12 +91,13 @@ logic       ack_in;
 logic [1:0] cmd;
 logic       stb = 1'b0;
 
-// Inbound signals from `i2c_master core.
+// Inbound signals from `i2c_master` core.
 logic [7:0] data_out;
 logic       ack_out;
 logic       err_out;
 logic       ready;
 
+// Used for startup delay.
 logic [23:0] delay_cnt;
 
 always_ff @(posedge clk) begin
@@ -98,13 +119,17 @@ always_ff @(posedge clk) begin
                 I2C_EEPROM2: begin
                     case (i2c_config_pos)
                         0: cmd <= I2CMASTER_START;
+                        // Start a sequential random read transaction.
+                        // 0xA0 (command) | 0x2 << 1 (address) | 0 (write)
                         1: begin
                             data_in <= 8'hA4;
                             cmd <= I2CMASTER_WRITE;
                             ack_in <= 1'b1;
                         end
+                        // Write address of first word to read == 0xFA.
                         2: data_in <= 8'hFA;
                         3: cmd <= I2CMASTER_START;
+                        // Reissue the same command with LSB == 1 (read)
                         4: begin
                             data_in <= 8'hA5;
                             cmd <= I2CMASTER_WRITE;
@@ -113,6 +138,8 @@ always_ff @(posedge clk) begin
                             cmd <= I2CMASTER_READ;
                             ack_in <= 1'b0;
                         end
+                        // Now every byte we read is sequential starting 0xFA.
+                        // For now, we only care about unique bytes populated at factory.
                         6:  eeprom_mfg_code <= data_out;
                         7:  eeprom_dev_code <= data_out;
                         8:  eeprom_serial[32-0*8-1:32-1*8] <= data_out;
@@ -170,6 +197,7 @@ always_ff @(posedge clk) begin
                             data_in <= led_config[5'(i2c_config_pos)];
                             cmd <= I2CMASTER_WRITE;
                         end
+                        // Override PWM values from led configuration.
                         PCA9635_PWM0 +  0: data_in <= led0 > 0 ? 0 : -led0;
                         PCA9635_PWM0 +  1: data_in <= led0 > 0 ? led0 : 0;
                         PCA9635_PWM0 +  2: data_in <= led1 > 0 ? 0 : -led1;
