@@ -5,15 +5,8 @@
 
 `default_nettype none
 
-// Transmit CODEC samples over UART
-`define UART_SAMPLE_TRANSMITTER
-
-// Transmit raw CODEC samples, bypassing the input
-// calibration logic (necessary for calibrating inputs).
-`define UART_SAMPLE_TRANSMIT_RAW_ADC
-//`define UART_SAMPLE_TRANSMIT_CAL_ADC
-//`define UART_SAMPLE_TRANSMIT_EEPROM
-//`define UART_SAMPLE_TRANSMIT_JACK
+// Transmit debug information over UART
+`define DEBUG_UART
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -44,7 +37,7 @@ module top #(
     ,input   P2_8
     ,output  P2_9
     ,output  P2_10
-`ifdef UART_SAMPLE_TRANSMITTER
+`ifdef DEBUG_UART
     // UART and LEDs for samples being transmitted.
     ,output TX
     ,output LEDR_N
@@ -109,8 +102,7 @@ logic [7:0] jack;
 // EEPROM data read over I2C during startup.
 logic [7:0] eeprom_mfg;
 logic [7:0] eeprom_dev;
-logic [15:0] eeprom_ser1;
-logic [15:0] eeprom_ser2;
+logic [31:0] eeprom_serial;
 
 cal cal_instance (
     .clk (clk_12mhz),
@@ -247,38 +239,27 @@ pmod_i2c_master pmod_i2c_master_instance (
 
     .eeprom_mfg_code(eeprom_mfg),
     .eeprom_dev_code(eeprom_dev),
-    .eeprom_serial({eeprom_ser1, eeprom_ser2})
+    .eeprom_serial(eeprom_serial)
 );
 
-`ifdef UART_SAMPLE_TRANSMITTER
+`ifdef DEBUG_UART
 
-cal_uart cal_uart_instance (
+debug_uart debug_uart_instance (
     .clk (clk_12mhz),
+    .rst (rst),
     .tx_o(TX),
-`ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-    .in0(sample_adc0),
-    .in1(sample_adc1),
-    .in2(sample_adc2),
-    .in3(sample_adc3)
-`endif
-`ifdef UART_SAMPLE_TRANSMIT_CAL_ADC
-    .in0(cal_in0),
-    .in1(cal_in1),
-    .in2(cal_in2),
-    .in3(cal_in3)
-`endif
-`ifdef UART_SAMPLE_TRANSMIT_EEPROM
-    .in0(eeprom_mfg),
-    .in1(eeprom_dev),
-    .in2(eeprom_ser1),
-    .in3(eeprom_ser2)
-`endif
-`ifdef UART_SAMPLE_TRANSMIT_JACK
-    .in0(jack),
-    .in1(),
-    .in2(),
-    .in3()
-`endif
+    .adc0(sample_adc0),
+    .adc1(sample_adc1),
+    .adc2(sample_adc2),
+    .adc3(sample_adc3),
+    .dac0(sample_dac0),
+    .dac1(sample_dac1),
+    .dac2(sample_dac2),
+    .dac3(sample_dac3),
+    .eeprom_mfg(eeprom_mfg),
+    .eeprom_dev(eeprom_dev),
+    .eeprom_serial(eeprom_serial),
+    .jack(jack)
 );
 
 `endif

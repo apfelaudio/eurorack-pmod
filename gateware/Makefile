@@ -5,7 +5,7 @@ ADD_SRC = drivers/pmod_i2c_master.sv \
 		  external/no2misc/rtl/i2c_master.v \
 		  external/ice40_sysmgr.v \
 		  cal/cal.sv \
-		  cal/cal_uart.sv \
+		  cal/debug_uart.sv \
 		  cores/clkdiv.sv \
 		  cores/seqswitch.sv \
 		  cores/sampler.sv \
