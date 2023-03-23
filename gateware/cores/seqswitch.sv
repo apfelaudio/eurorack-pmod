@@ -25,7 +25,8 @@ module seqswitch #(
     output signed [W-1:0] sample_out0,
     output reg signed [W-1:0] sample_out1,
     output reg signed [W-1:0] sample_out2,
-    output reg signed [W-1:0] sample_out3
+    output reg signed [W-1:0] sample_out3,
+    input [7:0] jack
 );
 
 // Calibrated samples represent millivolts in 16 bits, last 2 bits are fractional.

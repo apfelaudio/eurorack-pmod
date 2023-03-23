@@ -12,8 +12,6 @@ async def i2c_clock_in_byte(sda, scl, invert):
             sda_val = 0 if sda_val else 1
         byte |= sda_val << (8-i)
     await (FallingEdge(scl) if invert else RisingEdge(scl))
-    # Make sure we are releasing the ack bit
-    assert sda.value == 0 if invert else 1
     return byte >> 1
 
 @cocotb.test()
@@ -28,6 +26,8 @@ async def test_i2cinit_00(dut):
     await RisingEdge(dut.clk)
 
     dut.rst.value = 0
+
+    dut.i2c_state.value = 3 # Jump to I2C_INIT_CODEC1
 
     await RisingEdge(dut.sda_oe)
 

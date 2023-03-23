@@ -18,8 +18,8 @@
 # OUTPUT calibration process:
 # 1. Recompile gateware with input calibration (from above!) and program FPGA with:
 #    - UART_SAMPLE_TRANSMITTER
+#    - UART_SAMPLE_TRANSMIT_CAL_ADC
 #    - OUTPUT_CALIBRATION
-#    - [important!] undef UART_SAMPLE_TRANSMIT_RAW_ADC (this step needs cal samples)
 # 2. Loop back all outputs to inputs (1->1, 2->2, ...)
 # 3. Run `sudo ./cal.py output`
 # 4. Wait for values to settle, hold 'p' to capture
@@ -38,7 +38,7 @@ import time
 import numpy as np
 import keyboard
 
-SERIAL_PORT = '/dev/ttyUSB2'
+SERIAL_PORT = '/dev/ttyUSB1'
 
 # Input calibration is aiming for N counts per volt
 COUNT_PER_VOLT = 4000

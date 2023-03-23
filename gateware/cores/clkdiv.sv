@@ -2,13 +2,16 @@
 //
 // Given an input clock source on input 0, produce divided output on Output 0 - 3.
 //
+// This core also demonstrates using jack detection.
+//
 // Mapping:
 // - Input 0: Clock input (Hi > 2V, Lo < 0.5V)
 // - Input 1-3: Not used
-// - Output 0: Clock * 1 (mirrored)
+// Outputs only become active if jack is inserted:
 // - Output 1: Clock / 2 (Hi == 5V, Lo == 0V)
 // - Output 2: Clock / 4
 // - Output 3: Clock / 8
+// - Output 4: Clock / 16
 
 module clkdiv #(
     parameter W = 16,
@@ -23,7 +26,10 @@ module clkdiv #(
     output signed [W-1:0] sample_out0,
     output signed [W-1:0] sample_out1,
     output signed [W-1:0] sample_out2,
-    output signed [W-1:0] sample_out3
+    output signed [W-1:0] sample_out3,
+
+    // Jack detection inputs.
+    input [7:0] jack
 );
 
 // Calibrated samples represent millivolts in 16 bits, last 2 bits are fractional.
@@ -49,10 +55,9 @@ always_ff @(posedge sample_clk) begin
     end
 end
 
-// output 0 mirrors input 0, outputs 1-3 are /2, /4, /8
-assign sample_out0 = sample_in0;
-assign sample_out1 = div[0] ? OUT_HI : OUT_LO;
-assign sample_out2 = div[1] ? OUT_HI : OUT_LO;
-assign sample_out3 = div[2] ? OUT_HI : OUT_LO;
+assign sample_out0 = (div[0] && jack[4]) ? OUT_HI : OUT_LO;
+assign sample_out1 = (div[1] && jack[5]) ? OUT_HI : OUT_LO;
+assign sample_out2 = (div[2] && jack[6]) ? OUT_HI : OUT_LO;
+assign sample_out3 = (div[3] && jack[7]) ? OUT_HI : OUT_LO;
 
 endmodule

@@ -10,6 +10,9 @@
 // The calibration memory is created by following the calibration process
 // documented in `cal.py`. This module only uses a single multiplier for
 // all channels such that there are plenty left over for user logic.
+//
+// This module also checks jack inputs and sets calibrated samples to zero
+// for any inputs for which a jack is not connected.
 
 `default_nettype none
 
@@ -19,6 +22,7 @@ module cal #(
 )(
     input clk, // 12Mhz
     input sample_clk,
+    input [7:0] jack,
     input signed [W-1:0] in0,
     input signed [W-1:0] in1,
     input signed [W-1:0] in2,
@@ -44,12 +48,12 @@ localparam CAL_ST_LATCH     = 3'd0,
            CAL_ST_ZERO      = 3'd1,
            CAL_ST_MULTIPLY  = 3'd2,
            CAL_ST_CLAMPL    = 3'd3,
-           CAL_ST_OUT       = 3'd4,
-           CAL_ST_HALT      = 3'd5;
+           CAL_ST_CLAMPH    = 3'd4,
+           CAL_ST_OUT       = 3'd5,
+           CAL_ST_HALT      = 3'd6;
 
-// Only need to clamp negative values as with current hardware it
-// is impossible to overflow in the positive direction during cal.
 localparam int signed CLAMPL = -32'sd32000;
+localparam int signed CLAMPH =  32'sd32000;
 
 logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
@@ -95,13 +99,18 @@ always_ff @(posedge clk) begin
         end
         CAL_ST_CLAMPL: begin
             out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
+            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPH;
+        end
+        CAL_ST_CLAMPH: begin
+            out[ch] <= ((out[ch] > CLAMPH) ? CLAMPH : out[ch]);
             if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
         end
         CAL_ST_OUT: begin
-            out0  <= out[0][W-1:0];
-            out1  <= out[1][W-1:0];
-            out2  <= out[2][W-1:0];
-            out3  <= out[3][W-1:0];
+            // Calibrated input samples are zeroed if jack disconnected.
+            out0  <= jack[0] ? out[0][W-1:0] : 0;
+            out1  <= jack[1] ? out[1][W-1:0] : 0;
+            out2  <= jack[2] ? out[2][W-1:0] : 0;
+            out3  <= jack[3] ? out[3][W-1:0] : 0;
             out4  <= out[4][W-1:0];
             out5  <= out[5][W-1:0];
             out6  <= out[6][W-1:0];

@@ -11,6 +11,7 @@ module ak4619 #(
     parameter W = 16 // sample width, bits
 )(
     input  clk,   // Assumed 12MHz
+    input  rst,
     output pdn,
     output mclk,
     output bick,
@@ -39,7 +40,7 @@ logic [7:0] clkdiv      = 8'd0;
 logic [1:0] channel;
 logic [4:0] bit_counter;
 
-assign pdn         = 1'b1;
+assign pdn         = ~rst;
 assign bick        = clk;
 assign mclk        = clk;
 assign lrck        = clkdiv[6];   // 12MHz >> 7 == 93.75KHz

@@ -1,4 +1,4 @@
-20 // I2C slave address and RW bit (W=0).
+20 // I2C slave address (0x10<<1) and RW bit (W=0).
 00 // Register address to start at.
 37 // 0x00 Power Management
 AC // 0x01 Audio I/F Format

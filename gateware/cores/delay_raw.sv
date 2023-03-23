@@ -33,7 +33,8 @@ module delay_raw #(
     output signed [W-1:0] sample_out0,
     output signed [W-1:0] sample_out1,
     output signed [W-1:0] sample_out2,
-    output signed [W-1:0] sample_out3
+    output signed [W-1:0] sample_out3,
+    input [7:0] jack
 );
 
 // Data to write/read to delay buffer.

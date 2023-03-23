@@ -6,11 +6,14 @@
 `default_nettype none
 
 // Transmit CODEC samples over UART
-//`define UART_SAMPLE_TRANSMITTER
+`define UART_SAMPLE_TRANSMITTER
 
 // Transmit raw CODEC samples, bypassing the input
 // calibration logic (necessary for calibrating inputs).
-//`define UART_SAMPLE_TRANSMIT_RAW_ADC
+`define UART_SAMPLE_TRANSMIT_RAW_ADC
+//`define UART_SAMPLE_TRANSMIT_CAL_ADC
+//`define UART_SAMPLE_TRANSMIT_EEPROM
+//`define UART_SAMPLE_TRANSMIT_JACK
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -27,6 +30,7 @@
 //`define CORE_DELAY_RAW
 //`define CORE_PITCH_SHIFT
 //`define CORE_ECHO
+//`define CORE_LED_TEST
 
 module top #(
     parameter int W = 16 // sample width, bits
@@ -58,7 +62,7 @@ ice40_sysmgr ice40_sysmgr_instance (
     .clk_in(CLK),
 `ifdef OUTPUT_CALIBRATION
     // For output calibration the button is used elsewhere.
-    .rst_in(1'b1),
+    .rst_in(1'b0),
 `else
     .rst_in(~BTN_N),
 `endif
@@ -98,9 +102,21 @@ assign sample_dac3 = force_cal_output;
 
 `endif
 
+// Jack detection inputs read constantly over I2C.
+// Logic '1' == jack is inserted. Bit 0 is input 0.
+logic [7:0] jack;
+
+// EEPROM data read over I2C during startup.
+logic [7:0] eeprom_mfg;
+logic [7:0] eeprom_dev;
+logic [15:0] eeprom_ser1;
+logic [15:0] eeprom_ser2;
+
 cal cal_instance (
     .clk (clk_12mhz),
     .sample_clk (sample_clk),
+    // Calibrated inputs are zeroed if jack is unplugged.
+    .jack (jack),
     // Note: inputs samples are inverted by analog frontend
     // Should add +1 for precise 2s complement sign change
     .in0 (~sample_adc0),
@@ -134,145 +150,30 @@ assign cal_out0 = cal_in0;
 assign cal_out1 = cal_in1;
 assign cal_out2 = cal_in2;
 assign cal_out3 = cal_in3;
-`endif
-
+`else
 `ifdef CORE_SAMPLER
 sampler sampler_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_CLKDIV
+`elsif CORE_CLKDIV
 clkdiv clkdiv_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_SEQSWITCH
+`elsif CORE_SEQSWITCH
 seqswitch seqswitch_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_BITCRUSH
+`elsif CORE_BITCRUSH
 bitcrush bitcrush_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_VCA
+`elsif CORE_VCA
 vca vca_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_FILTER
+`elsif CORE_FILTER
 filter filter_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_VCO
+`elsif CORE_VCO
 vco vco_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_DELAY_RAW
+`elsif CORE_DELAY_RAW
 delay_raw delay_raw_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_PITCH_SHIFT
+`elsif CORE_PITCH_SHIFT
 pitch_shift pitch_shift_instance (
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
-);
-`endif
-
-`ifdef CORE_ECHO
+`elsif CORE_ECHO
 stereo_echo echo_instance (
+`elsif CORE_LED_TEST
+vco #(.FDIV(7)) vco_led_test_instance (
+`endif
     .clk     (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
@@ -282,12 +183,14 @@ stereo_echo echo_instance (
     .sample_out0 (cal_out0),
     .sample_out1 (cal_out1),
     .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3)
+    .sample_out3 (cal_out3),
+    .jack(jack)
 );
 `endif
 
 ak4619 ak4619_instance (
     .clk     (clk_12mhz),
+    .rst     (rst),
     .pdn     (P2_3),
     .mclk    (P2_4),
     .bick    (P2_10),
@@ -320,7 +223,31 @@ pmod_i2c_master pmod_i2c_master_instance (
     .scl_oe(i2c_scl_oe),
     .scl_i(P2_1),
     .sda_oe(i2c_sda_oe),
-    .sda_i(P2_2)
+    .sda_i(P2_2),
+
+    // For LED testing, route output channel values
+    // to input and output LEDs so we can set them all.
+`ifdef CORE_LED_TEST
+    .led0(cal_out0[W-1:W-8]),
+    .led1(cal_out1[W-1:W-8]),
+    .led2(cal_out2[W-1:W-8]),
+    .led3(cal_out3[W-1:W-8]),
+`else
+    .led0( cal_in0[W-1:W-8]),
+    .led1( cal_in1[W-1:W-8]),
+    .led2( cal_in2[W-1:W-8]),
+    .led3( cal_in3[W-1:W-8]),
+`endif
+    .led4(cal_out0[W-1:W-8]),
+    .led5(cal_out1[W-1:W-8]),
+    .led6(cal_out2[W-1:W-8]),
+    .led7(cal_out3[W-1:W-8]),
+
+    .jack(jack),
+
+    .eeprom_mfg_code(eeprom_mfg),
+    .eeprom_dev_code(eeprom_dev),
+    .eeprom_serial({eeprom_ser1, eeprom_ser2})
 );
 
 `ifdef UART_SAMPLE_TRANSMITTER
@@ -329,16 +256,28 @@ cal_uart cal_uart_instance (
     .clk (clk_12mhz),
     .tx_o(TX),
 `ifdef UART_SAMPLE_TRANSMIT_RAW_ADC
-     // Used for calibrating the input channels
     .in0(sample_adc0),
     .in1(sample_adc1),
     .in2(sample_adc2),
     .in3(sample_adc3)
-`else
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_CAL_ADC
     .in0(cal_in0),
     .in1(cal_in1),
     .in2(cal_in2),
     .in3(cal_in3)
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_EEPROM
+    .in0(eeprom_mfg),
+    .in1(eeprom_dev),
+    .in2(eeprom_ser1),
+    .in3(eeprom_ser2)
+`endif
+`ifdef UART_SAMPLE_TRANSMIT_JACK
+    .in0(jack),
+    .in1(),
+    .in2(),
+    .in3()
 `endif
 );
 
