@@ -29,6 +29,7 @@ module top #(
     parameter int W = 16 // sample width, bits
 )(
      input   CLK // Assumed 12Mhz
+
     ,output  P2_1
     ,inout   P2_2
     ,output  P2_3
@@ -37,19 +38,43 @@ module top #(
     ,input   P2_8
     ,output  P2_9
     ,output  P2_10
-`ifdef DEBUG_UART
-    // UART and LEDs for samples being transmitted.
-    ,output TX
-    ,output LEDR_N
-    ,output LEDG_N
-`endif
+
+    // Flipped here and in instantiation, ribbon cable.
+    ,output  P1A7
+    ,inout   P1A8
+    ,output  P1A9
+    ,output  P1A10
+    ,output  P1A1
+    ,input   P1A2
+    ,output  P1A3
+    ,output  P1A4
+
+    // Flipped here and in instantiation, ribbon cable.
+    ,output  P1B7
+    ,inout   P1B8
+    ,output  P1B9
+    ,output  P1B10
+    ,output  P1B1
+    ,input   P1B2
+    ,output  P1B3
+    ,output  P1B4
+
+    // Not flipped
+    ,output  P2_1
+    ,inout   P2_2
+    ,output  P2_3
+    ,output  P2_4
+    ,output  P2_7
+    ,input   P2_8
+    ,output  P2_9
+    ,output  P2_10
+
     ,input   BTN_N
 );
 
 logic rst;
 logic clk_12mhz;
 logic clk_24mhz;
-logic sample_clk;
 
 ice40_sysmgr ice40_sysmgr_instance (
     .clk_in(CLK),
@@ -64,204 +89,45 @@ ice40_sysmgr ice40_sysmgr_instance (
     .rst_out(rst)
 );
 
-// Raw samples to/from CODEC
-logic signed [W-1:0] sample_adc0;
-logic signed [W-1:0] sample_adc1;
-logic signed [W-1:0] sample_adc2;
-logic signed [W-1:0] sample_adc3;
-logic signed [W-1:0] sample_dac0;
-logic signed [W-1:0] sample_dac1;
-logic signed [W-1:0] sample_dac2;
-logic signed [W-1:0] sample_dac3;
-
-// Calibrated samples to/from CODEC
-logic signed [W-1:0] cal_in0;
-logic signed [W-1:0] cal_in1;
-logic signed [W-1:0] cal_in2;
-logic signed [W-1:0] cal_in3;
-logic signed [W-1:0] cal_out0;
-logic signed [W-1:0] cal_out1;
-logic signed [W-1:0] cal_out2;
-logic signed [W-1:0] cal_out3;
-
-`ifdef OUTPUT_CALIBRATION
-
-logic signed [W-1:0] force_cal_output;
-assign force_cal_output = BTN_N ? 20000 : -20000;
-assign sample_dac0 = force_cal_output;
-assign sample_dac1 = force_cal_output;
-assign sample_dac2 = force_cal_output;
-assign sample_dac3 = force_cal_output;
-
-`endif
-
-// Jack detection inputs read constantly over I2C.
-// Logic '1' == jack is inserted. Bit 0 is input 0.
-logic [7:0] jack;
-
-// EEPROM data read over I2C during startup.
-logic [7:0] eeprom_mfg;
-logic [7:0] eeprom_dev;
-logic [31:0] eeprom_serial;
-
-cal cal_instance (
-    .clk (clk_12mhz),
-    .sample_clk (sample_clk),
-    // Calibrated inputs are zeroed if jack is unplugged.
-    .jack (jack),
-    // Note: inputs samples are inverted by analog frontend
-    // Should add +1 for precise 2s complement sign change
-    .in0 (~sample_adc0),
-    .in1 (~sample_adc1),
-    .in2 (~sample_adc2),
-    .in3 (~sample_adc3),
-    .in4 (cal_out0),
-    .in5 (cal_out1),
-    .in6 (cal_out2),
-    .in7 (cal_out3),
-    .out0 (cal_in0),
-    .out1 (cal_in1),
-    .out2 (cal_in2),
-    .out3 (cal_in3),
-`ifdef OUTPUT_CALIBRATION
-    // In output calibration mode this is driven from elsewhere.
-    .out4 (),
-    .out5 (),
-    .out6 (),
-    .out7 ()
-`else
-    .out4 (sample_dac0),
-    .out5 (sample_dac1),
-    .out6 (sample_dac2),
-    .out7 (sample_dac3)
-`endif
-);
-
-`ifdef CORE_MIRROR
-assign cal_out0 = cal_in0;
-assign cal_out1 = cal_in1;
-assign cal_out2 = cal_in2;
-assign cal_out3 = cal_in3;
-`else
-`ifdef CORE_SAMPLER
-sampler sampler_instance (
-`elsif CORE_CLKDIV
-clkdiv clkdiv_instance (
-`elsif CORE_SEQSWITCH
-seqswitch seqswitch_instance (
-`elsif CORE_BITCRUSH
-bitcrush bitcrush_instance (
-`elsif CORE_VCA
-vca vca_instance (
-`elsif CORE_FILTER
-filter filter_instance (
-`elsif CORE_VCO
-vco vco_instance (
-`elsif CORE_DELAY_RAW
-delay_raw delay_raw_instance (
-`elsif CORE_PITCH_SHIFT
-pitch_shift pitch_shift_instance (
-`elsif CORE_ECHO
-stereo_echo echo_instance (
-`elsif CORE_LED_TEST
-vco #(.FDIV(7)) vco_led_test_instance (
-`endif
-    .clk     (clk_12mhz),
-    .sample_clk  (sample_clk),
-    .sample_in0 (cal_in0),
-    .sample_in1 (cal_in1),
-    .sample_in2 (cal_in2),
-    .sample_in3 (cal_in3),
-    .sample_out0 (cal_out0),
-    .sample_out1 (cal_out1),
-    .sample_out2 (cal_out2),
-    .sample_out3 (cal_out3),
-    .jack(jack)
-);
-`endif
-
-ak4619 ak4619_instance (
-    .clk     (clk_12mhz),
-    .rst     (rst),
-    .pdn     (P2_3),
-    .mclk    (P2_4),
-    .bick    (P2_10),
-    .lrck    (P2_9),
-    .sdin1   (P2_7),
-    .sdout1  (P2_8),
-    .sample_clk  (sample_clk),
-    .sample_out0 (sample_adc0),
-    .sample_out1 (sample_adc1),
-    .sample_out2 (sample_adc2),
-    .sample_out3 (sample_adc3),
-    .sample_in0 (sample_dac0),
-    .sample_in1 (sample_dac1),
-    .sample_in2 (sample_dac2),
-    .sample_in3 (sample_dac3)
-);
-
-logic i2c_scl_oe;
-logic i2c_sda_oe;
-
-// TODO: switch to explicit tristating IO blocks for this so
-// Yosys throws blocking errors if the flow doesn't support it.
-assign P2_1 = i2c_scl_oe ? 1'b0 : 1'bz;
-assign P2_2 = i2c_sda_oe ? 1'b0 : 1'bz;
-
-pmod_i2c_master pmod_i2c_master_instance (
-    .clk(clk_12mhz),
+pmod pmod_instance1 (
     .rst(rst),
-
-    .scl_oe(i2c_scl_oe),
-    .scl_i(P2_1),
-    .sda_oe(i2c_sda_oe),
-    .sda_i(P2_2),
-
-    // For LED testing, route output channel values
-    // to input and output LEDs so we can set them all.
-`ifdef CORE_LED_TEST
-    .led0(cal_out0[W-1:W-8]),
-    .led1(cal_out1[W-1:W-8]),
-    .led2(cal_out2[W-1:W-8]),
-    .led3(cal_out3[W-1:W-8]),
-`else
-    .led0( cal_in0[W-1:W-8]),
-    .led1( cal_in1[W-1:W-8]),
-    .led2( cal_in2[W-1:W-8]),
-    .led3( cal_in3[W-1:W-8]),
-`endif
-    .led4(cal_out0[W-1:W-8]),
-    .led5(cal_out1[W-1:W-8]),
-    .led6(cal_out2[W-1:W-8]),
-    .led7(cal_out3[W-1:W-8]),
-
-    .jack(jack),
-
-    .eeprom_mfg_code(eeprom_mfg),
-    .eeprom_dev_code(eeprom_dev),
-    .eeprom_serial(eeprom_serial)
+    .clk_12mhz(clk_12mhz),
+    .i2c_scl(P1A7),
+    .i2c_sda(P1A8),
+    .pdn    (P1A9),
+    .mclk   (P1A10),
+    .sdin1  (P1A1),
+    .sdout1 (P1A2),
+    .lrck   (P1A3),
+    .bick   (P1A4)
 );
 
-`ifdef DEBUG_UART
-
-debug_uart debug_uart_instance (
-    .clk (clk_12mhz),
-    .rst (rst),
-    .tx_o(TX),
-    .adc0(sample_adc0),
-    .adc1(sample_adc1),
-    .adc2(sample_adc2),
-    .adc3(sample_adc3),
-    .dac0(sample_dac0),
-    .dac1(sample_dac1),
-    .dac2(sample_dac2),
-    .dac3(sample_dac3),
-    .eeprom_mfg(eeprom_mfg),
-    .eeprom_dev(eeprom_dev),
-    .eeprom_serial(eeprom_serial),
-    .jack(jack)
+pmod pmod_instance2 (
+    .rst(rst),
+    .clk_12mhz(clk_12mhz),
+    .i2c_scl(P1B7),
+    .i2c_sda(P1B8),
+    .pdn    (P1B9),
+    .mclk   (P1B10),
+    .sdin1  (P1B1),
+    .sdout1 (P1B2),
+    .lrck   (P1B3),
+    .bick   (P1B4)
 );
 
-`endif
+/*
+pmod pmod_instance3 (
+    .rst(rst),
+    .clk_12mhz(clk_12mhz),
+    .i2c_scl(P2_1),
+    .i2c_sda(P2_2),
+    .pdn    (P2_3),
+    .mclk   (P2_4),
+    .sdin1  (P2_7),
+    .sdout1 (P2_8),
+    .lrck   (P2_9),
+    .bick   (P2_10)
+);
+*/
 
 endmodule
