@@ -36,6 +36,8 @@ async def test_cal_00(dut):
     cal_mem = []
     with open("cal_mem.hex", "r") as f_cal_mem:
         for line in f_cal_mem.readlines():
+            if '//' in line:
+                continue
             values = line.strip().split(' ')[1:]
             values = [int(x, 16) for x in values]
             cal_mem = cal_mem + values
