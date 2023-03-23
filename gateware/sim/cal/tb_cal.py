@@ -23,6 +23,9 @@ async def test_cal_00(dut):
     clock_sample = Clock(dut.sample_clk, 40*128, units='ns')
     cocotb.start_soon(clock_sample.start())
 
+    # Simulate all jacks connected so the cal core doesn't zero them
+    dut.jack.value = Force(0xFF)
+
     test_values = [
             23173,
             -14928,

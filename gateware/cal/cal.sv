@@ -10,6 +10,9 @@
 // The calibration memory is created by following the calibration process
 // documented in `cal.py`. This module only uses a single multiplier for
 // all channels such that there are plenty left over for user logic.
+//
+// This module also checks jack inputs and sets calibrated samples to zero
+// for any inputs for which a jack is not connected.
 
 `default_nettype none
 
