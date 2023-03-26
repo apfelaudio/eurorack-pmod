@@ -1,7 +1,7 @@
 // Top-level module for using `eurorack-pmod` with Icebreaker FPGA.
 //
-// The defines below allow you to select calibration mode, spit samples out
-// UART, or select one of the user-defined 'cores' (DSP modules).
+// To change the DSP core which is used, modify the module type used
+// by the `dsp_core_instance` entity below.
 
 `default_nettype none
 

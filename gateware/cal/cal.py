@@ -3,7 +3,7 @@
 # I/O calibration utility for EURORACK-PMOD
 #
 # Calibration process:
-# 1. Compile gateware and program FPGA with:
+# 1. Compile gateware and program FPGA with these defines in `top.sv`:
 #    - DEBUG_UART
 #    - OUTPUT_CALIBRATION
 # 2. Connect +/- 5V source to all INPUTS
@@ -20,6 +20,7 @@
 # 11. The (calibrated) inputs are used to figure out the calibration constants for
 #     the (uncalibrated) outputs.
 # 12. Press 'x', copy the calibration string to the cal hex file.
+# 13. Be careful to switch back off the `OUTPUT_CALIBRATION` define :)
 #
 # Note: if you check the output calibration with a multimeter, make sure
 # to add a 100K load unless you calibrate with the CAL_OPEN_LOAD option below.
