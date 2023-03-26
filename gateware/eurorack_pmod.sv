@@ -2,7 +2,8 @@
 // multiple times for multiple PMODs if desired.
 //
 // Contains an instantiation of the I2C driver, calibration module
-// and user-defined DSP core which may be swapped out.
+// and CODEC driver. Calibrated samples to/from this component are
+// handled by external user-defined logic.
 
 `default_nettype none
 
