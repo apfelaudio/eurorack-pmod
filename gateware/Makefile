@@ -1,11 +1,13 @@
 PROJ = top
-ADD_SRC = drivers/pmod_i2c_master.sv \
+ADD_SRC = eurorack_pmod.sv \
+		  drivers/pmod_i2c_master.sv \
 		  drivers/ak4619.sv \
 		  external/no2misc/rtl/uart_tx.v \
 		  external/no2misc/rtl/i2c_master.v \
 		  external/ice40_sysmgr.v \
 		  cal/cal.sv \
 		  cal/debug_uart.sv \
+		  cores/mirror.sv \
 		  cores/clkdiv.sv \
 		  cores/seqswitch.sv \
 		  cores/sampler.sv \
