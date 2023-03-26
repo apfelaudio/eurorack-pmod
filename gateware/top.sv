@@ -20,6 +20,8 @@ module top #(
 )(
      input   CLK // Assumed 12Mhz
 `ifndef EURORACK_PMOD_RIBBON_FLIP
+    // This pinout assumes a ribbon cable is NOT used and
+    // the eurorack-pmod is connected directly to iCEbreaker.
     ,output  P2_1
     ,inout   P2_2
     ,output  P2_3
@@ -29,6 +31,8 @@ module top #(
     ,output  P2_9
     ,output  P2_10
 `else
+    // Most 12-pin IDC ribbon cables will flip the pinout.
+    // This pinout assumes a ribbon cable IS used.
     ,output  P2_1
     ,input   P2_2
     ,output  P2_3
@@ -112,8 +116,6 @@ eurorack_pmod #(
     .rst(rst),
 
 `ifndef EURORACK_PMOD_RIBBON_FLIP
-    // This pinout assumes a ribbon cable is NOT used and
-    // the eurorack-pmod is connected directly to iCEbreaker.
     .i2c_scl(P2_1),
     .i2c_sda(P2_2),
     .pdn    (P2_3),
@@ -123,8 +125,6 @@ eurorack_pmod #(
     .lrck   (P2_9),
     .bick   (P2_10),
 `else
-    // Most 12-pin IDC ribbon cables will flip the pinout.
-    // This pinout assumes a ribbon cable IS used.
     .i2c_scl(P2_7),
     .i2c_sda(P2_8),
     .pdn    (P2_9),

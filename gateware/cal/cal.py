@@ -78,7 +78,7 @@ def decode_raw_samples(n, raw, array_avg):
         lsb = raw[ix*2+1]
         value = (msb << 8) | lsb
         value_tc = twos_comp(value, 16)
-        alpha = 0.1
+        alpha = 0.3
         array_avg[channel] = alpha*value_tc + (1-alpha)*array_avg[channel]
         print(channel, hex(value), value_tc, int(array_avg[channel]))
         ch_tc_values[channel] = value_tc
