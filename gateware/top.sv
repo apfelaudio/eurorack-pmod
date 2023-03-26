@@ -89,7 +89,7 @@ ice40_sysmgr ice40_sysmgr_instance (
     .rst_out(rst)
 );
 
-pmod pmod_instance1 (
+pmod1 pmod_instance1 (
     .rst(rst),
     .clk_12mhz(clk_12mhz),
     .i2c_scl(P1A7),
@@ -102,7 +102,7 @@ pmod pmod_instance1 (
     .bick   (P1A4)
 );
 
-pmod pmod_instance2 (
+pmod2 pmod_instance2 (
     .rst(rst),
     .clk_12mhz(clk_12mhz),
     .i2c_scl(P1B7),

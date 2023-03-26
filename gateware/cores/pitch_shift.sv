@@ -22,7 +22,8 @@ module pitch_shift #(
     output logic signed [W-1:0] sample_out0,
     output logic signed [W-1:0] sample_out1,
     output logic signed [W-1:0] sample_out2,
-    output logic signed [W-1:0] sample_out3
+    output logic signed [W-1:0] sample_out3,
+    input [7:0] jack
 );
 
 transpose transpose_instance (

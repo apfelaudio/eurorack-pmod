@@ -20,7 +20,8 @@ ADD_SRC = drivers/pmod_i2c_master.sv \
 		  cores/stereo_echo.sv \
 		  cores/filter.sv \
 		  cores/filter/filter_svf_pipelined.sv \
-		  pmod.sv
+		  pmod1.sv \
+		  pmod2.sv
 
 PIN_DEF = mk/icebreaker.pcf
 DEVICE = up5k

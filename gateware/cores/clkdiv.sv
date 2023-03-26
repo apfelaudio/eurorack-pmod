@@ -44,20 +44,19 @@ localparam OUT_LO     = `FROM_MV(0);
 // Keeping track of last input state effectively behaves as schmitt inputs.
 logic last_state_hi = 1'b0;
 logic [3:0] div = 0;
+logic [17:0] deep = 0;
+logic last_deep = 0;
 
 always_ff @(posedge sample_clk) begin
-    if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
-        last_state_hi <= 1'b1;
-        // Increment count on every rising edge.
+    deep <= deep + 1;
+    last_deep <= deep[13];
+    if (last_deep != deep[13])
         div <= div + 1;
-    end else if (sample_in0 < SCHMITT_LO && last_state_hi) begin
-        last_state_hi <= 1'b0;
-    end
 end
 
-assign sample_out0 = (div[0] && jack[4]) ? OUT_HI : OUT_LO;
-assign sample_out1 = (div[1] && jack[5]) ? OUT_HI : OUT_LO;
-assign sample_out2 = (div[2] && jack[6]) ? OUT_HI : OUT_LO;
-assign sample_out3 = (div[3] && jack[7]) ? OUT_HI : OUT_LO;
+assign sample_out0 = (!div[0]) ? OUT_HI : OUT_LO;
+assign sample_out1 = (!div[0]) ? OUT_HI : OUT_LO;
+assign sample_out2 = (div[1]) ? OUT_HI : OUT_LO;
+assign sample_out3 = (div[2]) ? OUT_HI : OUT_LO;
 
 endmodule

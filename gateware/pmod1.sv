@@ -1,6 +1,6 @@
 `default_nettype none
 
-module pmod #(
+module pmod1 #(
     parameter W = 16
 )(
     input rst,
@@ -43,7 +43,7 @@ logic [7:0] eeprom_mfg;
 logic [7:0] eeprom_dev;
 logic [31:0] eeprom_serial;
 
-seqswitch core_instance (
+clkdiv core_instance (
     .clk     (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0 (cal_in0),
