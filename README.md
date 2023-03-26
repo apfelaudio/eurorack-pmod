@@ -2,81 +2,85 @@
 
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
-**FPGA-based audio synthesis using open source tools**, compatible with [modular synthesis hardware](https://en.wikipedia.org/wiki/Eurorack). This repository contains hardware and gateware for getting started.
+**Open hardware and gateware for getting started in FPGA-based audio synthesis.** This project is an expansion card (PMOD) for FPGA development boards, allowing them to interface directly with [modular synthesis hardware](https://en.wikipedia.org/wiki/Eurorack). This repository contains hardware and gateware for getting started.
 
-For a high-level overview, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project.
+![assembled eurorack-pmod module R3.0 (front)](docs/img/pmod_top.jpg)
 
-![assembled eurorack-pmod module (front)](docs/img/eurorack-pmod.jpg)
+For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project. Production hardware is named R3+ and has a few improvements (LEDs fully programmable, jack detection, calibration EEPROM).
 
 [Want one?](#manufacturing). More photos can be found [below](#photos). 
 
 ### This project is:
-- The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/).
+- The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/). Design is [certified open hardware](https://certification.oshwa.org/de000135.html).
 - Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
-- (new!) A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
+- A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
 
 ## Hardware details
-- 4HP module compatible with modular synthesizer systems.
+
+![labelled eurorack-pmod 3.0](docs/img/labelled.jpg)
+
+- 3HP module compatible with modular synthesizer systems.
 - PMOD connector compatible with most FPGA development boards.
-- 8 (4 in + 4 out) DC-coupled audio channels with analog LED indicators.
-- CODEC supports 192KHz / 32bit samples on all channels.
-- I/O clamps at +/- 6.5V max, wider is possible with a resistor change.
+- 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported.
+- PWM-controlled, user-programmable red/green LEDs on each output channel.
+- Jack insertion detection on input & output jacks.
+- Calibration EEPROM for unique ID and storing calibration data.
+- I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 ## Gateware details
 - Examples based on Icebreaker FPGA + open-source toolchain.
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
-- Calibration process allows mV-level DC precision.
 
-### Gateware architecture
-![gateware architecture](docs/img/gateware-arch.png)
-
-Links to the most important modules depicted above are provided below.
-
-### Gateware - Getting Started
+## Getting Started
 
 The gateware is automatically built and tested in CI, so it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml). Basically the reality of working with this device is as follows:
 
-1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar.
-2. Calibrate your hardware using the process described in [`gateware/cal/cal.py`](gateware/cal/cal.py). Use this to create your own `gatewarecal/cal_mem.hex` to compensate for any DC biases in the ADCs/DACs. (this step is only necessary if you need sub-50mV accuracy on your inputs/outputs, which is the case if you are tuning oscillators, not so much if you are creating rhythm pulses.
-3. Pick the core you want to use from `gateware/cores` and define the correct one in `gateware/top.sv`. Note, you can only have one enabled at a time unless you add extra connections between them!
+1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar. (Make sure to check the `RIBBON` define in `top.sv` is set correctly!)
+2. Calibrate your hardware using the process described in [`gateware/cal/cal.py`](gateware/cal/cal.py). Use this to create your own `gateware/cal/cal_mem.hex` to compensate for any DC biases in the ADCs/DACs. (this step is only necessary if you need sub-50mV accuracy on your inputs/outputs, which is the case if you are tuning oscillators, not so much if you are creating rhythm pulses.
+3. Pick the core you want to use from `gateware/cores` and use the appropriate one in `gateware/top.sv`. Note, you can only have one enabled at a time unless you add extra connections between them!
 
 # Project structure
 The project is split into 2 directories, [`hardware`](hardware) for the PCB/panel and [`gateware`](gateware) for the FPGA source. Some interesting directories:
 - [`gateware/cores`](gateware/cores): example user core implementations (i.e sequential switch, bitcrusher, filter, vco, vca, sampler etc).
 - [`gateware/top.sv`](gateware/top.sv): top-level gateware with defines for selecting features.
 - [`gateware/cal/cal.py`](gateware/cal/cal.py): tool used to calibrate the hardware after assembly, generating calibration memory.
-- [`gateware/drivers`](gateware/drivers): driver for CODEC used on this board.
-- [`hardware/eurorack-pmod-pcb-flat`](hardware/eurorack-pmod-pcb-flat): KiCAD design files for PCB and front panel.
+- [`gateware/drivers`](gateware/drivers): driver for CODEC and I2C devices used on this board.
+- [`hardware/eurorack-pmod-r3`](hardware/eurorack-pmod-r3): KiCAD design files for PCB and front panel.
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
 
 # Manufacturing
-The current revision (2.2) works fine without any bodges or modifications after assembly according to the supplied gerbers and BOM.
+I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.
 
-**Want a board?** Please fill out this [google form](https://forms.gle/rSEGuKGHPVXYotHRA). If there are enough people interested I may do a small manufacturing run.
+**Want a board?** Please fill out this [google form](https://forms.gle/rSEGuKGHPVXYotHRA). First batch is already in production and will start shipping soon.
 
 
 ## Known limitations
 - Gateware only runs at 96KHz/16bit samples (no reason this can't be improved, just haven't gotten around to it).
 - Selecting different DSP cores requires re-configuring the FPGA. It would be nice to have this runtime-selectable.
-- The op-amps driving the LED indicators are running pretty close to their power limits. They don't get too hot but in a new revision perhaps a pass transistor would be a good idea.
-- Adjacent ADC channels on the same bank (i.e Ch0/1 and Ch2/3) interfere with each other slightly at high DC offset levels. This seems to be an artifact of the CODEC itself (it is not designed to be DC-coupled, but performs the job quite well nontheless). This means that if you feed a constant voltage into e.g. Ch0 and a very slow 10Vpk-pk sine wave into Ch1 then you might see a few mV movement on Ch0's ADC values. This could probably be calibrated out with some effort. But for most applications it probably doesn't matter.
+- Board R3.0 is noisier than I'd like, I suspect the wrong inductors for power/GND isolation was the issue, but I won't know until R3.1 arrives
 
 # Photos
 
 ## Assembled `eurorack-pmod` (front)
-![assembled eurorack-pmod module (front)](docs/img/eurorack-pmod.jpg)
+![assembled eurorack-pmod module (front)](docs/img/leds_front.jpg)
 
-## Assembled `eurorack-pmod` (top)
-![assembled eurorack-pmod module (top)](docs/img/eurorack-pmod-top.jpg)
+## `eurorack-pmod` connected to iCEBreaker
+![eurorack-pmod module and icebreaker](docs/img/pmod_top_with_icebreaker.jpg)
+
+## Assembled `eurorack-pmod` (back)
+![assembled eurorack-pmod module (back)](docs/img/pmod_backright.jpg)
 
 ## `eurorack-pmod` In system (with LEDs on)
-![assembled eurorack-pmod module (in system)](docs/img/eurorack-pmod-system.jpg)
+![assembled eurorack-pmod module (in system)](docs/img/pmod_insystem.jpg)
 
 # License
+
+[![OSHW logo](docs/img/oshw.svg)](https://certification.oshwa.org/de000135.html)
+
 Hardware and gateware are released under the CERN Open-Hardware License V2 `CERN-OHL-S`, mirrored in the LICENSE text in this repository.
 
 If you wish to license parts of this design in a commercial product without a reciprocal open-source license, or you have a ground-breaking idea for a module we could work on together, feel free to contact me directly. See sebholzapfel.com.
 
-*Copyright (C) 2022 Sebastian Holzapfel*
+*Copyright (C) 2022,2023 Sebastian Holzapfel*
 
 The above LICENSE and copyright notice does NOT apply to imported artifacts in this repository (i.e datasheets, third-party footprints).
