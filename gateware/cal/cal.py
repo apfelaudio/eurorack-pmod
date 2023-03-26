@@ -31,7 +31,11 @@ import time
 import numpy as np
 import keyboard
 
-SERIAL_PORT = '/dev/ttyUSB1'
+if len(sys.argv) != 2:
+    print("Usage: ./cal.py /dev/ttyX (serial port of FPGA board)")
+    sys.exit(-1)
+
+SERIAL_PORT = sys.argv[1]
 
 # Input calibration is aiming for N counts per volt
 COUNT_PER_VOLT = 4000
@@ -54,7 +58,6 @@ def twos_comp(val, bits):
 ser = serial.Serial(SERIAL_PORT, 1000000)
 
 adc_avg = np.zeros(4)
-dac_avg = np.zeros(4)
 p5v_adc_avg = np.zeros(4)
 n5v_adc_avg = np.zeros(4)
 p5v_dac_fb_avg = np.zeros(4)
@@ -106,8 +109,6 @@ while True:
 
     print("\nRaw ADC samples:")
     decode_raw_samples(4, raw[9:], adc_avg)
-    print("\nRaw DAC samples:")
-    decode_raw_samples(4, raw[9+8:], dac_avg)
 
     if keyboard.is_pressed('o'):
         input_cal = False

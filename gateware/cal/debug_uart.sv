@@ -21,11 +21,7 @@ module debug_uart #(
     input signed [W-1:0] adc0,
     input signed [W-1:0] adc1,
     input signed [W-1:0] adc2,
-    input signed [W-1:0] adc3,
-    input signed [W-1:0] dac0,
-    input signed [W-1:0] dac1,
-    input signed [W-1:0] dac2,
-    input signed [W-1:0] dac3
+    input signed [W-1:0] adc3
 );
 
 localparam MAGIC1 = 8'hBE,
@@ -74,14 +70,6 @@ always_ff @(posedge clk) begin
             14: dout <= 8'((adc2 & 16'h00FF));
             15: dout <= 8'((adc3 & 16'hFF00) >> 8);
             16: dout <= 8'((adc3 & 16'h00FF));
-            17: dout <= 8'((dac0 & 16'hFF00) >> 8);
-            18: dout <= 8'((dac0 & 16'h00FF));
-            19: dout <= 8'((dac1 & 16'hFF00) >> 8);
-            20: dout <= 8'((dac1 & 16'h00FF));
-            21: dout <= 8'((dac2 & 16'hFF00) >> 8);
-            22: dout <= 8'((dac2 & 16'h00FF));
-            23: dout <= 8'((dac3 & 16'hFF00) >> 8);
-            24: dout <= 8'((dac3 & 16'h00FF));
             default: begin
                 // Should never get here
             end
