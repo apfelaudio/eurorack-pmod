@@ -6,3 +6,5 @@ sim/*/sim_build
 *.bin
 *.json
 *.log
+*.config
+*.svf

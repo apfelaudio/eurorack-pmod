@@ -6,48 +6,33 @@
 `default_nettype none
 
 // Transmit debug information over UART
-`define DEBUG_UART
+//`define DEBUG_UART
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
 //`define OUTPUT_CALIBRATION
 
-// Enable to flip PMOD pin mappings to fix pinout for an IDC ribbon.
-`define EURORACK_PMOD_RIBBON_FLIP
-
 module top #(
     parameter int W = 16 // sample width, bits
 )(
      input   CLK // Assumed 12Mhz
-`ifndef EURORACK_PMOD_RIBBON_FLIP
     // This pinout assumes a ribbon cable is NOT used and
-    // the eurorack-pmod is connected directly to iCEbreaker.
-    ,output  P2_1
-    ,inout   P2_2
-    ,output  P2_3
-    ,output  P2_4
-    ,output  P2_7
-    ,input   P2_8
-    ,output  P2_9
-    ,output  P2_10
-`else
-    // Most 12-pin IDC ribbon cables will flip the pinout.
-    // This pinout assumes a ribbon cable IS used.
-    ,output  P2_1
-    ,input   P2_2
-    ,output  P2_3
-    ,output  P2_4
-    ,output  P2_7
-    ,inout   P2_8
-    ,output  P2_9
-    ,output  P2_10
-`endif
+    // the eurorack-pmod is connected directly to ColorLight dev board.
+    ,inout   PMOD_P2A_IO5
+    ,inout   PMOD_P2A_IO6
+    ,output  PMOD_P2A_IO7
+    ,output  PMOD_P2A_IO8
+    ,output  PMOD_P2A_IO1
+    ,input   PMOD_P2A_IO2
+    ,output  PMOD_P2A_IO3
+    ,output  PMOD_P2A_IO4
 `ifdef DEBUG_UART
     ,output TX
 `endif
-    ,input   BTN_N
+    //,input   BTN_N
 );
 
+logic [15:0] startup_delay = 0;
 logic rst;
 logic clk_12mhz;
 logic clk_24mhz; // Not currently used.
@@ -74,6 +59,7 @@ logic signed [W-1:0] pmod2_debug_adc3;
 `endif
 
 // PLL bringup and reset state management / debouncing.
+/*
 ice40_sysmgr ice40_sysmgr_instance (
     .clk_in(CLK),
 `ifndef OUTPUT_CALIBRATION
@@ -87,6 +73,19 @@ ice40_sysmgr ice40_sysmgr_instance (
     .clk_1x_out(clk_12mhz),
     .rst_out(rst)
 );
+*/
+
+always @(posedge CLK) begin
+    clk_12mhz <= ~clk_12mhz;
+    if (startup_delay < 16'hF000) begin
+        startup_delay <= startup_delay + 1;
+        // We have to emit a reset on startup for some
+        // components to initialize correctly!.
+        rst <= 1'b1;
+    end else begin
+        rst <= 1'b0;
+    end
+end
 
 // DSP core which processes calibrated samples. This can be
 // modified or swapped out by one of the example cores.
@@ -106,8 +105,26 @@ mirror #( // 'mirror' just sends inputs straight to outputs.
     .jack        (pmod2_jack)
 );
 
+logic i2c_scl_oe;
+logic i2c_scl_i;
+logic i2c_sda_oe;
+logic i2c_sda_i;
 
-// A `eurorack-pmod` connected to iCEbreaker PMOD2 port.
+TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_scl (
+    .I(1'b0),
+    .T(~i2c_scl_oe),
+    .B(PMOD_P2A_IO1),
+    .O(i2c_scl_i)
+);
+
+TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_sda (
+    .I(1'b0),
+    .T(~i2c_sda_oe),
+    .B(PMOD_P2A_IO2),
+    .O(i2c_sda_i)
+);
+
+// A `eurorack-pmod` connected to ColorLight PMOD2A port.
 eurorack_pmod #(
     .W(W),
     .CAL_MEM_FILE("cal/cal_mem.hex")
@@ -115,25 +132,16 @@ eurorack_pmod #(
     .clk_12mhz(clk_12mhz),
     .rst(rst),
 
-`ifndef EURORACK_PMOD_RIBBON_FLIP
-    .i2c_scl(P2_1),
-    .i2c_sda(P2_2),
-    .pdn    (P2_3),
-    .mclk   (P2_4),
-    .sdin1  (P2_7),
-    .sdout1 (P2_8),
-    .lrck   (P2_9),
-    .bick   (P2_10),
-`else
-    .i2c_scl(P2_7),
-    .i2c_sda(P2_8),
-    .pdn    (P2_9),
-    .mclk   (P2_10),
-    .sdin1  (P2_1),
-    .sdout1 (P2_2),
-    .lrck   (P2_3),
-    .bick   (P2_4),
-`endif
+    .i2c_scl_oe(i2c_scl_oe),
+    .i2c_scl_i (i2c_scl_i),
+    .i2c_sda_oe(i2c_sda_oe),
+    .i2c_sda_i (i2c_sda_i),
+    .pdn    (PMOD_P2A_IO3),
+    .mclk   (PMOD_P2A_IO4),
+    .sdin1  (PMOD_P2A_IO5),
+    .sdout1 (PMOD_P2A_IO6),
+    .lrck   (PMOD_P2A_IO7),
+    .bick   (PMOD_P2A_IO8),
 
     .sample_clk   (pmod2_sample_clk),
     .cal_in0      (pmod2_in0),

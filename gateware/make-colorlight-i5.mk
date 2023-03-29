@@ -4,7 +4,6 @@ ADD_SRC = eurorack_pmod.sv \
 		  drivers/ak4619.sv \
 		  external/no2misc/rtl/uart_tx.v \
 		  external/no2misc/rtl/i2c_master.v \
-		  external/ice40_sysmgr.v \
 		  cal/cal.sv \
 		  cal/debug_uart.sv \
 		  cores/mirror.sv \
@@ -23,10 +22,11 @@ ADD_SRC = eurorack_pmod.sv \
 		  cores/filter.sv \
 		  cores/filter/filter_svf_pipelined.sv
 
-PIN_DEF = mk/icebreaker.pcf
-DEVICE = up5k
-PACKAGE = sg48
+PIN_DEF = mk/colorlight_i5.lpf
+DEVICE = 25k
+PACKAGE = CABGA381
 
-prog: iceprog
+include ./mk/main_ecp5.mk
 
-include ./mk/main.mk
+prog: top.bin
+	openFPGALoader -b colorlight-i5 top.bin
