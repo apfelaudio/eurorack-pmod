@@ -2,6 +2,7 @@ PROJ = top
 ADD_SRC = eurorack_pmod.sv \
 		  drivers/pmod_i2c_master.sv \
 		  drivers/ak4619.sv \
+		  external/ecp5_sysmgr.v \
 		  external/no2misc/rtl/uart_tx.v \
 		  external/no2misc/rtl/i2c_master.v \
 		  cal/cal.sv \

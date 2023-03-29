@@ -1,4 +1,4 @@
-// Top-level module for using `eurorack-pmod` with Icebreaker FPGA.
+// Top-level module for using `eurorack-pmod` with ECP5 // Colorlight i5.
 //
 // To change the DSP core which is used, modify the module type used
 // by the `dsp_core_instance` entity below.
@@ -6,7 +6,7 @@
 `default_nettype none
 
 // Transmit debug information over UART
-//`define DEBUG_UART
+`define DEBUG_UART
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -15,9 +15,9 @@
 module top #(
     parameter int W = 16 // sample width, bits
 )(
-     input   CLK // Assumed 12Mhz
-    // This pinout assumes a ribbon cable is NOT used and
-    // the eurorack-pmod is connected directly to ColorLight dev board.
+     input   CLK // Assumed 25Mhz for Colorlight i5
+    // This pinout assumes a ribbon cable IS used and the PMOD is
+    // connected through an IDC ribbon to the dev board.
     ,inout   PMOD_P2A_IO5
     ,inout   PMOD_P2A_IO6
     ,output  PMOD_P2A_IO7
@@ -26,17 +26,21 @@ module top #(
     ,input   PMOD_P2A_IO2
     ,output  PMOD_P2A_IO3
     ,output  PMOD_P2A_IO4
-`ifdef DEBUG_UART
-    ,output TX
-`endif
-    //,input   BTN_N
+    // Button used for reset and output cal. Assumed momentary, pressed == HIGH.
+    // You can use any random PMOD that has a button on it.
+    ,input   PMOD_P2B_IO7
+    // UART used for debug information and for calibration.
+    ,output  UART_TX
 );
 
-logic [15:0] startup_delay = 0;
 logic rst;
 logic clk_12mhz;
-logic clk_24mhz; // Not currently used.
 
+// Button signal to be used as a reset, unless we are in output 
+logic button;
+assign button = PMOD_P2B_IO7;
+
+// Signals between eurorack_pmod instance and user-defined DSP core.
 logic pmod2_sample_clk;
 logic signed [W-1:0] pmod2_in0;
 logic signed [W-1:0] pmod2_in1;
@@ -51,6 +55,13 @@ logic [7:0]  pmod2_eeprom_dev;
 logic [31:0] pmod2_eeprom_serial;
 logic [7:0]  pmod2_jack;
 
+// Tristated I2C signals must be broken out at the top level as
+// ECP5 flow does not support tristate signals in nested modules.
+logic pmod2_i2c_scl_oe;
+logic pmod2_i2c_scl_i;
+logic pmod2_i2c_sda_oe;
+logic pmod2_i2c_sda_i;
+
 `ifdef DEBUG_UART
 logic signed [W-1:0] pmod2_debug_adc0;
 logic signed [W-1:0] pmod2_debug_adc1;
@@ -59,33 +70,18 @@ logic signed [W-1:0] pmod2_debug_adc3;
 `endif
 
 // PLL bringup and reset state management / debouncing.
-/*
-ice40_sysmgr ice40_sysmgr_instance (
+ecp5_sysmgr ecp5_sysmgr_instance (
     .clk_in(CLK),
 `ifndef OUTPUT_CALIBRATION
     // Normally, the uButton is used as a global reset button.
-    .rst_in(~BTN_N),
+    .rst_in(button),
 `else
     // For output calibration the button is used elsewhere.
     .rst_in(1'b0),
 `endif
-    .clk_2x_out(clk_24mhz),
-    .clk_1x_out(clk_12mhz),
+    .clk_12m(clk_12mhz),
     .rst_out(rst)
 );
-*/
-
-always @(posedge CLK) begin
-    clk_12mhz <= ~clk_12mhz;
-    if (startup_delay < 16'hF000) begin
-        startup_delay <= startup_delay + 1;
-        // We have to emit a reset on startup for some
-        // components to initialize correctly!.
-        rst <= 1'b1;
-    end else begin
-        rst <= 1'b0;
-    end
-end
 
 // DSP core which processes calibrated samples. This can be
 // modified or swapped out by one of the example cores.
@@ -105,23 +101,18 @@ mirror #( // 'mirror' just sends inputs straight to outputs.
     .jack        (pmod2_jack)
 );
 
-logic i2c_scl_oe;
-logic i2c_scl_i;
-logic i2c_sda_oe;
-logic i2c_sda_i;
-
-TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_scl (
+TRELLIS_IO #(.DIR("BIDIR")) pmod2_i2c_tristate_scl (
     .I(1'b0),
-    .T(~i2c_scl_oe),
+    .T(~pmod2_i2c_scl_oe),
     .B(PMOD_P2A_IO1),
-    .O(i2c_scl_i)
+    .O(pmod2_i2c_scl_i)
 );
 
-TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_sda (
+TRELLIS_IO #(.DIR("BIDIR")) pmod2_i2c_tristate_sda (
     .I(1'b0),
-    .T(~i2c_sda_oe),
+    .T(~pmod2_i2c_sda_oe),
     .B(PMOD_P2A_IO2),
-    .O(i2c_sda_i)
+    .O(pmod2_i2c_sda_i)
 );
 
 // A `eurorack-pmod` connected to ColorLight PMOD2A port.
@@ -132,10 +123,10 @@ eurorack_pmod #(
     .clk_12mhz(clk_12mhz),
     .rst(rst),
 
-    .i2c_scl_oe(i2c_scl_oe),
-    .i2c_scl_i (i2c_scl_i),
-    .i2c_sda_oe(i2c_sda_oe),
-    .i2c_sda_i (i2c_sda_i),
+    .i2c_scl_oe(pmod2_i2c_scl_oe),
+    .i2c_scl_i (pmod2_i2c_scl_i),
+    .i2c_sda_oe(pmod2_i2c_sda_oe),
+    .i2c_sda_i (pmod2_i2c_sda_i),
     .pdn    (PMOD_P2A_IO3),
     .mclk   (PMOD_P2A_IO4),
     .sdin1  (PMOD_P2A_IO5),
@@ -163,7 +154,7 @@ eurorack_pmod #(
     .sample_adc2(pmod2_debug_adc2),
     .sample_adc3(pmod2_debug_adc3),
 `ifdef OUTPUT_CALIBRATION
-    .force_dac_output(BTN_N ? 20000 : -20000)
+    .force_dac_output(button ? -20000 : 20000)
 `else
     .force_dac_output(0) // Do not force output.
 `endif
@@ -183,7 +174,7 @@ eurorack_pmod #(
 debug_uart debug_uart_instance (
     .clk (clk_12mhz),
     .rst (rst),
-    .tx_o(TX),
+    .tx_o(UART_TX),
     .adc0(pmod2_debug_adc0),
     .adc1(pmod2_debug_adc1),
     .adc2(pmod2_debug_adc2),
