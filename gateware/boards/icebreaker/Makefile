@@ -1,7 +1,5 @@
 PROJ = top
 
-CORE ?= mirror
-
 DEVICE = up5k
 PACKAGE = sg48
 PIN_DEF = ./boards/icebreaker/pinmap.pcf
