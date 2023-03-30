@@ -12,7 +12,7 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 
 ### This project is:
 - The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/). Design is [certified open hardware](https://certification.oshwa.org/de000135.html).
-- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) and Colorlight i5 (ECP5 part). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
+- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) and Colorlight i5 / i9 (ECP5 part). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 - A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
 
 ## Hardware details
@@ -28,7 +28,7 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 - I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 ## Gateware details
-- Examples based on Icebreaker FPGA (iCE40 part) or Colorlight i5 (ECP5 part).
+- Examples based on Icebreaker FPGA (iCE40 part) or Colorlight i5 / i9 (ECP5 part).
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 
 ## Getting Started

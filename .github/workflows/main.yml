@@ -29,6 +29,19 @@ jobs:
           name: eurorack-pmod-bitstream.bin
           path: gateware/top.bin
 
+  build-bitstream-colorlight-i9:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make BOARD=colorlight_i9 -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: eurorack-pmod-bitstream.bin
+          path: gateware/top.bin
+
   run-tests:
     runs-on: ubuntu-latest
     steps:
