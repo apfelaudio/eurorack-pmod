@@ -14,7 +14,7 @@ module sampler #(
     parameter W = 16,
     parameter FP_OFFSET = 2,
     parameter N_SAMPLES = 12'h690,
-    parameter PATH_SAMPLES = "sampler_data/clap.hex"
+    parameter PATH_SAMPLES = "util/sampler_data/clap.hex"
 )(
     input clk,
     input sample_clk,

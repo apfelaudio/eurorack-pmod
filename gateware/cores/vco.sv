@@ -6,9 +6,9 @@
 
 module vco #(
     parameter W = 16,
-    parameter V_OCT_LUT_PATH = "vco/v_oct_lut.hex",
+    parameter V_OCT_LUT_PATH = "util/vco/v_oct_lut.hex",
     parameter V_OCT_LUT_SIZE = 512,
-    parameter WAVETABLE_PATH = "vco/wavetable.hex",
+    parameter WAVETABLE_PATH = "util/vco/wavetable.hex",
     parameter WAVETABLE_SIZE = 256,
     parameter FDIV = 0 // Divide output frequency by 1 << FDIV.
                        // Useful if you want to use this as an LFO.

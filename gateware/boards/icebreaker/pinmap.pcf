@@ -1,0 +1,19 @@
+# 12 MHz clock
+set_io -nowarn CLK        35
+set_frequency CLK 12
+
+# UART and button for debugging
+set_io -nowarn UART_TX           9
+# Reset button is pressed == low so we need to invert it.
+set_io -nowarn RESET_BUTTON      10
+
+# PMOD 2, assuming horizontal flip (ribbon cable
+# between eurorack-pmod and PMOD connector IS in place).
+set_io -nowarn PMOD_SDIN1     27
+set_io -nowarn PMOD_SDOUT1    25
+set_io -nowarn PMOD_LRCK      21
+set_io -nowarn PMOD_BICK      19
+set_io -nowarn PMOD_I2C_SCL   26
+set_io -nowarn PMOD_I2C_SDA   23
+set_io -nowarn PMOD_PDN       20
+set_io -nowarn PMOD_MCLK      18

@@ -1,12 +1,6 @@
-// Top-level module for using `eurorack-pmod` with ECP5 // Colorlight i5.
-//
-// To change the DSP core which is used, modify the module type used
-// by the `dsp_core_instance` entity below.
+// Top-level example module for using `eurorack-pmod`.
 
 `default_nettype none
-
-// Transmit debug information over UART
-`define DEBUG_UART
 
 // Force the output DAC to a specific value depending on
 // the position of the uButton (necessary for output cal).
@@ -15,20 +9,18 @@
 module top #(
     parameter int W = 16 // sample width, bits
 )(
-     input   CLK // Assumed 25Mhz for Colorlight i5
-    // This pinout assumes a ribbon cable IS used and the PMOD is
-    // connected through an IDC ribbon to the dev board.
-    ,inout   PMOD_P2A_IO5
-    ,inout   PMOD_P2A_IO6
-    ,output  PMOD_P2A_IO7
-    ,output  PMOD_P2A_IO8
-    ,output  PMOD_P2A_IO1
-    ,input   PMOD_P2A_IO2
-    ,output  PMOD_P2A_IO3
-    ,output  PMOD_P2A_IO4
+     input   CLK
+    ,inout   PMOD_I2C_SDA
+    ,inout   PMOD_I2C_SCL
+    ,output  PMOD_LRCK
+    ,output  PMOD_BICK
+    ,output  PMOD_SDIN1
+    ,input   PMOD_SDOUT1
+    ,output  PMOD_PDN
+    ,output  PMOD_MCLK
     // Button used for reset and output cal. Assumed momentary, pressed == HIGH.
     // You can use any random PMOD that has a button on it.
-    ,input   PMOD_P2B_IO7
+    ,input   RESET_BUTTON
     // UART used for debug information and for calibration.
     ,output  UART_TX
 );
@@ -36,41 +28,46 @@ module top #(
 logic rst;
 logic clk_12mhz;
 
-// Button signal to be used as a reset, unless we are in output 
+// Button signal is used for resets, unless we are input calibration
+// mode in which case it is used for setting the output cal values.
 logic button;
-assign button = PMOD_P2B_IO7;
+`ifdef INVERT_BUTTON
+assign button = ~RESET_BUTTON;
+`else
+assign button = RESET_BUTTON;
+`endif
 
 // Signals between eurorack_pmod instance and user-defined DSP core.
-logic pmod2_sample_clk;
-logic signed [W-1:0] pmod2_in0;
-logic signed [W-1:0] pmod2_in1;
-logic signed [W-1:0] pmod2_in2;
-logic signed [W-1:0] pmod2_in3;
-logic signed [W-1:0] pmod2_out0;
-logic signed [W-1:0] pmod2_out1;
-logic signed [W-1:0] pmod2_out2;
-logic signed [W-1:0] pmod2_out3;
-logic [7:0]  pmod2_eeprom_mfg;
-logic [7:0]  pmod2_eeprom_dev;
-logic [31:0] pmod2_eeprom_serial;
-logic [7:0]  pmod2_jack;
+logic sample_clk;
+logic signed [W-1:0] in0;
+logic signed [W-1:0] in1;
+logic signed [W-1:0] in2;
+logic signed [W-1:0] in3;
+logic signed [W-1:0] out0;
+logic signed [W-1:0] out1;
+logic signed [W-1:0] out2;
+logic signed [W-1:0] out3;
+logic [7:0]  eeprom_mfg;
+logic [7:0]  eeprom_dev;
+logic [31:0] eeprom_serial;
+logic [7:0]  jack;
 
 // Tristated I2C signals must be broken out at the top level as
 // ECP5 flow does not support tristate signals in nested modules.
-logic pmod2_i2c_scl_oe;
-logic pmod2_i2c_scl_i;
-logic pmod2_i2c_sda_oe;
-logic pmod2_i2c_sda_i;
+logic i2c_scl_oe;
+logic i2c_scl_i;
+logic i2c_sda_oe;
+logic i2c_sda_i;
 
-`ifdef DEBUG_UART
-logic signed [W-1:0] pmod2_debug_adc0;
-logic signed [W-1:0] pmod2_debug_adc1;
-logic signed [W-1:0] pmod2_debug_adc2;
-logic signed [W-1:0] pmod2_debug_adc3;
-`endif
+// Signals only used for the debug UART.
+logic signed [W-1:0] debug_adc0;
+logic signed [W-1:0] debug_adc1;
+logic signed [W-1:0] debug_adc2;
+logic signed [W-1:0] debug_adc3;
 
 // PLL bringup and reset state management / debouncing.
-ecp5_sysmgr ecp5_sysmgr_instance (
+sysmgr sysmgr_instance (
+    // The input clock frequency might be different for different boards.
     .clk_in(CLK),
 `ifndef OUTPUT_CALIBRATION
     // Normally, the uButton is used as a global reset button.
@@ -83,107 +80,103 @@ ecp5_sysmgr ecp5_sysmgr_instance (
     .rst_out(rst)
 );
 
-// DSP core which processes calibrated samples. This can be
-// modified or swapped out by one of the example cores.
-mirror #( // 'mirror' just sends inputs straight to outputs.
+// DSP core which processes calibrated samples. This can be chosen
+// by passing different DSP_CORE values to 'make' at build time.
+`SELECTED_DSP_CORE #(
     .W(W)
-) pmod2_dsp_core_instance (
+) dsp_core_instance (
     .clk         (clk_12mhz),
-    .sample_clk  (pmod2_sample_clk),
-    .sample_in0  (pmod2_in0),
-    .sample_in1  (pmod2_in1),
-    .sample_in2  (pmod2_in2),
-    .sample_in3  (pmod2_in3),
-    .sample_out0 (pmod2_out0),
-    .sample_out1 (pmod2_out1),
-    .sample_out2 (pmod2_out2),
-    .sample_out3 (pmod2_out3),
-    .jack        (pmod2_jack)
+    .sample_clk  (sample_clk),
+    .sample_in0  (in0),
+    .sample_in1  (in1),
+    .sample_in2  (in2),
+    .sample_in3  (in3),
+    .sample_out0 (out0),
+    .sample_out1 (out1),
+    .sample_out2 (out2),
+    .sample_out3 (out3),
+    .jack        (jack)
 );
 
-TRELLIS_IO #(.DIR("BIDIR")) pmod2_i2c_tristate_scl (
+`ifdef ECP5
+// ECP5 requires direct IO block instantiation for tristating / I2C
+TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_scl (
     .I(1'b0),
-    .T(~pmod2_i2c_scl_oe),
-    .B(PMOD_P2A_IO1),
-    .O(pmod2_i2c_scl_i)
+    .T(~i2c_scl_oe),
+    .B(PMOD_I2C_SCL),
+    .O(i2c_scl_i)
 );
-
-TRELLIS_IO #(.DIR("BIDIR")) pmod2_i2c_tristate_sda (
+TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_sda (
     .I(1'b0),
-    .T(~pmod2_i2c_sda_oe),
-    .B(PMOD_P2A_IO2),
-    .O(pmod2_i2c_sda_i)
+    .T(~i2c_sda_oe),
+    .B(PMOD_I2C_SDA),
+    .O(i2c_sda_i)
 );
+`else
+// For iCE40 this is not necessary.
+assign PMOD_I2C_SCL = i2c_scl_oe ? 1'b0 : 1'bz;
+assign PMOD_I2C_SDA = i2c_sda_oe ? 1'b0 : 1'bz;
+assign i2c_scl_i = PMOD_I2C_SCL;
+assign i2c_sda_i = PMOD_I2C_SDA;
+`endif
 
-// A `eurorack-pmod` connected to ColorLight PMOD2A port.
 eurorack_pmod #(
     .W(W),
     .CAL_MEM_FILE("cal/cal_mem.hex")
-) eurorack_pmod2 (
+) eurorack_pmod1 (
     .clk_12mhz(clk_12mhz),
     .rst(rst),
 
-    .i2c_scl_oe(pmod2_i2c_scl_oe),
-    .i2c_scl_i (pmod2_i2c_scl_i),
-    .i2c_sda_oe(pmod2_i2c_sda_oe),
-    .i2c_sda_i (pmod2_i2c_sda_i),
-    .pdn    (PMOD_P2A_IO3),
-    .mclk   (PMOD_P2A_IO4),
-    .sdin1  (PMOD_P2A_IO5),
-    .sdout1 (PMOD_P2A_IO6),
-    .lrck   (PMOD_P2A_IO7),
-    .bick   (PMOD_P2A_IO8),
+    .i2c_scl_oe(i2c_scl_oe),
+    .i2c_scl_i (i2c_scl_i),
+    .i2c_sda_oe(i2c_sda_oe),
+    .i2c_sda_i (i2c_sda_i),
+    .pdn    (PMOD_PDN),
+    .mclk   (PMOD_MCLK),
+    .sdin1  (PMOD_SDIN1),
+    .sdout1 (PMOD_SDOUT1),
+    .lrck   (PMOD_LRCK),
+    .bick   (PMOD_BICK),
 
-    .sample_clk   (pmod2_sample_clk),
-    .cal_in0      (pmod2_in0),
-    .cal_in1      (pmod2_in1),
-    .cal_in2      (pmod2_in2),
-    .cal_in3      (pmod2_in3),
-    .cal_out0     (pmod2_out0),
-    .cal_out1     (pmod2_out1),
-    .cal_out2     (pmod2_out2),
-    .cal_out3     (pmod2_out3),
-    .jack         (pmod2_jack),
-    .eeprom_mfg   (pmod2_eeprom_mfg),
-    .eeprom_dev   (pmod2_eeprom_dev),
-    .eeprom_serial(pmod2_eeprom_serial),
+    .sample_clk   (sample_clk),
+    .cal_in0      (in0),
+    .cal_in1      (in1),
+    .cal_in2      (in2),
+    .cal_in3      (in3),
+    .cal_out0     (out0),
+    .cal_out1     (out1),
+    .cal_out2     (out2),
+    .cal_out3     (out3),
+    .jack         (jack),
+    .eeprom_mfg   (eeprom_mfg),
+    .eeprom_dev   (eeprom_dev),
+    .eeprom_serial(eeprom_serial),
 
-`ifdef DEBUG_UART
-    .sample_adc0(pmod2_debug_adc0),
-    .sample_adc1(pmod2_debug_adc1),
-    .sample_adc2(pmod2_debug_adc2),
-    .sample_adc3(pmod2_debug_adc3),
+    .sample_adc0(debug_adc0),
+    .sample_adc1(debug_adc1),
+    .sample_adc2(debug_adc2),
+    .sample_adc3(debug_adc3),
 `ifdef OUTPUT_CALIBRATION
     .force_dac_output(button ? -20000 : 20000)
 `else
     .force_dac_output(0) // Do not force output.
 `endif
-`else
-    // Do not connect debug signals if debug UART disabled.
-    .sample_adc0(),
-    .sample_adc1(),
-    .sample_adc2(),
-    .sample_adc3(),
-    .force_dac_output(0) // Do not force output.
-`endif
 );
 
-`ifdef DEBUG_UART
 // Helper module to serialize some interesting state to a UART
 // for bringup and calibration purposes.
 debug_uart debug_uart_instance (
     .clk (clk_12mhz),
     .rst (rst),
     .tx_o(UART_TX),
-    .adc0(pmod2_debug_adc0),
-    .adc1(pmod2_debug_adc1),
-    .adc2(pmod2_debug_adc2),
-    .adc3(pmod2_debug_adc3),
-    .eeprom_mfg(pmod2_eeprom_mfg),
-    .eeprom_dev(pmod2_eeprom_dev),
-    .eeprom_serial(pmod2_eeprom_serial),
-    .jack(pmod2_jack)
+    .adc0(debug_adc0),
+    .adc1(debug_adc1),
+    .adc2(debug_adc2),
+    .adc3(debug_adc3),
+    .eeprom_mfg(eeprom_mfg),
+    .eeprom_dev(eeprom_dev),
+    .eeprom_serial(eeprom_serial),
+    .jack(jack)
 );
-`endif
 
 endmodule

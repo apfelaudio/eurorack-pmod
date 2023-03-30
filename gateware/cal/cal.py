@@ -4,7 +4,6 @@
 #
 # Calibration process:
 # 1. Compile gateware and program FPGA with these defines in `top.sv`:
-#    - DEBUG_UART
 #    - OUTPUT_CALIBRATION
 # 2. Connect +/- 5V source to all INPUTS
 # 3. Run `sudo ./cal.py`
