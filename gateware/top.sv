@@ -99,6 +99,7 @@ sysmgr sysmgr_instance (
 );
 
 `ifdef ECP5
+`ifndef VERILATOR_LINT_ONLY
 // ECP5 requires direct IO block instantiation for tristating / I2C
 TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_scl (
     .I(1'b0),
@@ -112,6 +113,7 @@ TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_sda (
     .B(PMOD_I2C_SDA),
     .O(i2c_sda_i)
 );
+`endif
 `else
 // For iCE40 this is not necessary.
 assign PMOD_I2C_SCL = i2c_scl_oe ? 1'b0 : 1'bz;

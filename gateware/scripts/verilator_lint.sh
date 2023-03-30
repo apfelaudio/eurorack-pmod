@@ -1,10 +1,24 @@
 #!/bin/bash -e
 
-# Lint the entire ICE40 design.
+# Lint an entire ICE40 design.
 verilator --lint-only -DVERILATOR_LINT_ONLY \
     -DICE40 \
     -DSELECTED_DSP_CORE=mirror \
     -Iboards/icebreaker \
+    -Ical \
+    -Idrivers \
+    -Iexternal \
+    -Iexternal/no2misc/rtl \
+    -Icores \
+    -Icores/util \
+    -Wno-INITIALDLY \
+    top.sv
+
+# Lint an entire ECP5 design.
+verilator --lint-only -DVERILATOR_LINT_ONLY \
+    -DECP5 \
+    -DSELECTED_DSP_CORE=mirror \
+    -Iboards/colorlight_i5 \
     -Ical \
     -Idrivers \
     -Iexternal \

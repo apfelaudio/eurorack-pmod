@@ -17,6 +17,8 @@ wire pll_reset;
 wire rst_i;
 reg [7:0] rst_cnt;
 
+`ifndef VERILATOR_LINT_ONLY
+
 // You can re-generate this using `ecppll` tool. Be careful, the default settings
 // disable PLLRST_ENA and use a different FEEDBK_PATH, make sure they remain.
 
@@ -59,6 +61,8 @@ EHXPLLL #(
         .ENCLKOP(1'b0),
         .LOCK(pll_lock)
 );
+
+`endif
 
 // PLL reset generation
 assign pll_reset = rst_in;

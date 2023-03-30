@@ -1,8 +1,12 @@
 `default_nettype none
 
 module sysmgr (
+    // Assumed 12Mhz CLK input on iCEbreaker
 	input  wire clk_in,
 	input  wire rst_in,
+    // Actually the output here is the same frequency as the input
+    // but we leave all this PLL logic here as you might need to scale
+    // the clock down to 12m on different boards.
 	output wire clk_12m,
 	output wire rst_out
 );
@@ -11,25 +15,13 @@ module sysmgr (
 	wire pll_lock;
 	wire pll_reset_n;
 
+    // This 2x output is not actually used for now.
 	wire clk_2x_i;
 	wire clk_1x_i;
 	wire rst_i;
 	reg [7:0] rst_cnt;
 
 	// PLL instance
-`ifdef SIM
-	reg toggle = 1'b0;
-
-	initial
-		rst_cnt <= 8'h80;
-
-	always @(posedge clk_in)
-		toggle <= ~toggle;
-
-	assign clk_1x_i = toggle;
-	assign clk_2x_i = clk_in;
-	assign pll_lock = pll_reset_n;
-`else
 `ifndef VERILATOR_LINT_ONLY
 	SB_PLL40_2F_PAD #(
 		.DIVR(4'b0000),
@@ -56,7 +48,6 @@ module sysmgr (
 		.SDO(),
 		.SCLK(1'b0)
 	);
-`endif
 `endif
 
 	assign clk_12m = clk_1x_i;
