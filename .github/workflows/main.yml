@@ -3,14 +3,27 @@ name: build & test
 on: [push, pull_request]
 
 jobs:
-  build-bitstream:
+  build-bitstream-icebreaker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make -C gateware
+      - run: make BOARD=icebreaker -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: eurorack-pmod-bitstream.bin
+          path: gateware/top.bin
+
+  build-bitstream-colorlight-i5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make BOARD=colorlight_i5 -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: eurorack-pmod-bitstream.bin

@@ -1,32 +1,29 @@
-PROJ = top
-ADD_SRC = eurorack_pmod.sv \
-		  drivers/pmod_i2c_master.sv \
-		  drivers/ak4619.sv \
-		  external/no2misc/rtl/uart_tx.v \
-		  external/no2misc/rtl/i2c_master.v \
-		  external/ice40_sysmgr.v \
-		  cal/cal.sv \
-		  cal/debug_uart.sv \
-		  cores/mirror.sv \
-		  cores/clkdiv.sv \
-		  cores/seqswitch.sv \
-		  cores/sampler.sv \
-		  cores/bitcrush.sv \
-		  cores/vca.sv \
-		  cores/vco.sv \
-		  cores/delay_raw.sv \
-		  cores/delayline.sv \
-		  cores/transpose.sv \
-		  cores/pitch_shift.sv \
-		  cores/echo.sv \
-		  cores/stereo_echo.sv \
-		  cores/filter.sv \
-		  cores/filter/filter_svf_pipelined.sv
+ALL_BOARDS = $(shell ls boards)
+ALL_CORES = $(shell basename --suffix=.sv -- cores/*.sv)
 
-PIN_DEF = mk/icebreaker.pcf
-DEVICE = up5k
-PACKAGE = sg48
+all prog:
+ifeq ($(BOARD),)
+	@echo "Valid BOARD values are: $(ALL_BOARDS)".
+	@echo "Valid CORE values are: $(ALL_CORES)".
+	@echo "For example:"
+	@echo "  $$ make clean"
+	@echo "  $$ # Build bitstream with specific core and program it"
+	@echo "  $$ make BOARD=icebreaker CORE=stereo_echo prog"
+	@exit 1
+endif
+ifeq ($(wildcard ./boards/$(BOARD)/Makefile),)
+	@echo "Target '$(BOARD)' does not exist in 'boards/'"
+	@echo "Valid targets are: $(ALL_BOARDS)".
+	@exit 2
+endif
+	mkdir -p build/$(BOARD)
+	# For now we always force a re-build since we can pass different DSP cores
+	# through environment vars and we need a re-build to happen in this case.
+	$(MAKE) -B -f boards/$(BOARD)/Makefile BUILD=build/$(BOARD) $(MAKECMDGOALS)
 
-prog: iceprog
+clean:
+	rm -rf build/
 
-include ./mk/main.mk
+.SECONDARY:
+.PHONY: all prog clean
+.DEFAULT_GOAL := all

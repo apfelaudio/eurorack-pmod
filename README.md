@@ -12,7 +12,7 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 
 ### This project is:
 - The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/). Design is [certified open hardware](https://certification.oshwa.org/de000135.html).
-- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
+- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) and Colorlight i5 (ECP5 part). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 - A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
 
 ## Hardware details
@@ -28,16 +28,15 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 - I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 ## Gateware details
-- Examples based on Icebreaker FPGA + open-source toolchain.
+- Examples based on Icebreaker FPGA (iCE40 part) or Colorlight i5 (ECP5 part).
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 
 ## Getting Started
 
-The gateware is automatically built and tested in CI, so it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml). Basically the reality of working with this device is as follows:
-
-1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar. (Make sure to check the `RIBBON` define in `top.sv` is set correctly!)
+0. Install the OSS FPGA CAD flow. The gateware is automatically built and tested in CI, so it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml).
+1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar. (Double check that the pin mappings are correct, some ribbon cables will swap them on you)
+2. Try some of the examples. From the `gateware` directory, type `make` to see valid commands. By default it will compile a bitstream with the 'mirror' core, which just sends inputs to outputs.
 2. Calibrate your hardware using the process described in [`gateware/cal/cal.py`](gateware/cal/cal.py). Use this to create your own `gateware/cal/cal_mem.hex` to compensate for any DC biases in the ADCs/DACs. (this step is only necessary if you need sub-50mV accuracy on your inputs/outputs, which is the case if you are tuning oscillators, not so much if you are creating rhythm pulses.
-3. Pick the core you want to use from `gateware/cores` and use the appropriate one in `gateware/top.sv`. Note, you can only have one enabled at a time unless you add extra connections between them!
 
 # Project structure
 The project is split into 2 directories, [`hardware`](hardware) for the PCB/panel and [`gateware`](gateware) for the FPGA source. Some interesting directories:

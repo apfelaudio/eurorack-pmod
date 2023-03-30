@@ -18,14 +18,16 @@ module eurorack_pmod #(
     //
     // Pin # referenced to iCEbreaker PMOD connector if NO ribbon
     // cable is used (i.e pins are not flipped).
-    output i2c_scl, // Pin 1
-    inout  i2c_sda, // Pin 2
-    output pdn,     // Pin 3
-    output mclk,    // Pin 4
-    output sdin1,   // Pin 7
-    input  sdout1,  // Pin 8
-    output lrck,    // Pin 9
-    output bick,    // Pin 10
+	output i2c_scl_oe, // Pin 1 (tristate: 1 == LO, 0 == HiZ)
+	input  i2c_scl_i,  // Pin 1 (tristate in)
+	output i2c_sda_oe, // Pin 2 (tristate: 1 == LO, 0 == HiZ)
+	input  i2c_sda_i,  // Pin 2 (tristate in)
+    output pdn,        // Pin 3
+    output mclk,       // Pin 4
+    output sdin1,      // Pin 7
+    input  sdout1,     // Pin 8
+    output lrck,       // Pin 9
+    output bick,       // Pin 10
 
     // Signals to exchange information to/from user-defined DSP core.
     //
@@ -65,14 +67,6 @@ logic signed [W-1:0] sample_dac0;
 logic signed [W-1:0] sample_dac1;
 logic signed [W-1:0] sample_dac2;
 logic signed [W-1:0] sample_dac3;
-
-// I2C output assignment / tristating.
-// TODO: switch to explicit tristating IO blocks for this so
-// Yosys throws blocking errors if the flow doesn't support it.
-logic i2c_scl_oe;
-logic i2c_sda_oe;
-assign i2c_scl = i2c_scl_oe ? 1'b0 : 1'bz;
-assign i2c_sda = i2c_sda_oe ? 1'b0 : 1'bz;
 
 // Raw sample calibrator, both for input and output channels.
 // Compensates for DC bias in CODEC, gain differences, resistor
@@ -132,9 +126,9 @@ pmod_i2c_master pmod_i2c_master_instance (
     .rst(rst),
 
     .scl_oe(i2c_scl_oe),
-    .scl_i(i2c_scl),
+    .scl_i(i2c_scl_i),
     .sda_oe(i2c_sda_oe),
-    .sda_i(i2c_sda),
+    .sda_i(i2c_sda_i),
 
     // LEDs directly linked to input/output sample values
     // for now, although they could do whatever we want.
