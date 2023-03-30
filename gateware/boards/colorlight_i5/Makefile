@@ -1,7 +1,5 @@
 PROJ = top
 
-CORE ?= mirror
-
 DEVICE = 25k
 PACKAGE = CABGA381
 PIN_DEF = ./boards/colorlight_i5/pinmap.lpf
