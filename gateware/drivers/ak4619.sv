@@ -41,12 +41,12 @@ logic [1:0] channel;
 logic [4:0] bit_counter;
 
 assign pdn         = ~rst;
-assign bick        = clk;
 assign mclk        = clk;
-assign lrck        = clkdiv[6];   // 12MHz >> 7 == 93.75KHz
+assign bick        = clkdiv[0];
+assign lrck        = clkdiv[7];   // 12MHz >> 8 == 46.875KHz sample rate
 
-assign channel     = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
-assign bit_counter = clkdiv[4:0];
+assign channel     = clkdiv[7:6]; // 0 == L (Ch0), 1 == R (Ch1)
+assign bit_counter = clkdiv[5:1];
 assign sample_clk  = lrck;
 
 always_ff @(negedge sample_clk) begin
