@@ -4,8 +4,8 @@
 AC // 0x01 Audio I/F Format
 1C // 0x02 Audio I/F Format
 00 // 0x03 System Clock Setting
-22 // 0x04 MIC AMP Gain
-22 // 0x05 MIC AMP Gain
+44 // 0x04 MIC AMP Gain
+44 // 0x05 MIC AMP Gain
 30 // 0x06 ADC1 Lch Digital Volume
 30 // 0x07 ADC1 Rch Digital Volume
 30 // 0x08 ADC2 Lch Digital Volume
