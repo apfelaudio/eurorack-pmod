@@ -1,10 +1,15 @@
 # Eurorack PMOD
 
+**Assembled boards now available!** [get one **here :)**](https://lectronz.com/stores/apfelaudio)
+
+**Eurorack PMOD** makes it easy for you to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). It is an expansion board for FPGA development boards that allows them to interface with a Eurorack hardware synthesizer. This board exposes 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported, at a -8V to +8V swing, amongst many more features. R3.1 hardware looks like this:
+
+![assembled eurorack-pmod module R3.0 (panel)](docs/img/panel.jpg)
+![assembled eurorack-pmod module R3.0 (top)](docs/img/pmod_top.jpg)
+
+
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
-**Open hardware and gateware for getting started in FPGA-based audio synthesis.** This project is an expansion card (PMOD) for FPGA development boards, allowing them to interface directly with [modular synthesis hardware](https://en.wikipedia.org/wiki/Eurorack). This repository contains hardware and gateware for getting started.
-
-![assembled eurorack-pmod module R3.0 (front)](docs/img/pmod_top.jpg)
 
 For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project. Production hardware is named R3+ and has a few improvements (LEDs fully programmable, jack detection, calibration EEPROM).
 
@@ -15,11 +20,35 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 - Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) and Colorlight i5 / i9 (ECP5 part). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 - A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
 
+## Included examples
+This repository contains a bunch of example DSP cores which are continuously being updated:
+- Bitcrusher
+- Filter (high pass / low pass / band pass)
+- Clock divider
+- .wav sampler
+- Pitch shifter
+- Sequential routing switch
+- Echo/delay effect
+- VCA (voltage controlled amplifier)
+- VCO (voltage controlled oscillator)
+
+These examples can all run out of the box on the development boards listed below. The repository currently only supports a Linux-based development environment, however porting to Mac / Windows should be fairly trivial and maybe the community can do it :).
+
+## Choosing an FPGA development board
+An FPGA development board itself is NOT included! Essentially anything iCE40 or ECP5 based that has a PMOD connector will support the open-source tools and the examples in this project. Just make sure you have enough LUTS, >3K is enough to do interesting things.
+
+The following development boards have been tested with `eurorack-pmod` and are supported by the examples in the github repository
+- iCEbreaker (iCE40 based)
+- Colorlight i5 (ECP5 based)
+- Colorlight i9 (ECP5 based)
+
 ## Hardware details
 
 ![labelled eurorack-pmod 3.0](docs/img/labelled.jpg)
 
 - 3HP module compatible with modular synthesizer systems.
+    - Module depth is 47mm with both ribbon cables attached
+    - This fits nicely in e.g. a 4MS POD 48X (pictured below).
 - PMOD connector compatible with most FPGA development boards.
 - 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported.
 - PWM-controlled, user-programmable red/green LEDs on each output channel.
@@ -28,7 +57,7 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 - I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 ## Gateware details
-- Examples based on Icebreaker FPGA (iCE40 part) or Colorlight i5 / i9 (ECP5 part).
+- Examples based on Icebreaker (iCE40 part) / Colorlight i5 / i9 (ECP5 part).
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 
 ## Getting Started
@@ -48,15 +77,16 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
 
 # Manufacturing
-I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.
 
-**Want a board?** Please fill out this [google form](https://forms.gle/rSEGuKGHPVXYotHRA). First batch is already in production and will start shipping soon.
+**Assembled boards now available!** [get one **here :)**](https://lectronz.com/stores/apfelaudio)
+
+Update: R3.1 (first production release) is fully functional with 1 rework, see github issues for up-to-date information.
+
+Note: I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.
 
 
 ## Known limitations
-- Gateware only runs at 96KHz/16bit samples (no reason this can't be improved, just haven't gotten around to it).
-- Selecting different DSP cores requires re-configuring the FPGA. It would be nice to have this runtime-selectable.
-- Board R3.0 is noisier than I'd like, I suspect the wrong inductors for power/GND isolation was the issue, but I won't know until R3.1 arrives
+- Moved to github issues
 
 # Photos
 
@@ -64,12 +94,6 @@ I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tes
 ![assembled eurorack-pmod module (front)](docs/img/leds_front.jpg)
 
 ## `eurorack-pmod` connected to iCEBreaker
-![eurorack-pmod module and icebreaker](docs/img/pmod_top_with_icebreaker.jpg)
-
-## Assembled `eurorack-pmod` (back)
-![assembled eurorack-pmod module (back)](docs/img/pmod_backright.jpg)
-
-## `eurorack-pmod` In system (with LEDs on)
 ![assembled eurorack-pmod module (in system)](docs/img/pmod_insystem.jpg)
 
 # License
