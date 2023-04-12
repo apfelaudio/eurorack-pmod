@@ -7,10 +7,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make BOARD=icebreaker CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: icebreaker.bin
+          path: gateware/build/icebreaker/top.bin
+
+  windows-build-icebreaker:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          install: >-
+            git
+            make
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - run: git submodule update --init gateware/external/no2misc
+      - run: |
+          export PATH=$PATH:/d/a/_temp/oss-cad-suite/bin
+          export PATH=$PATH:/d/a/_temp/oss-cad-suite/lib
+          yosys --version
+          make BOARD=icebreaker CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: icebreaker.bin
@@ -20,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make BOARD=colorlight_i5 CORE=mirror -C gateware
@@ -29,11 +53,11 @@ jobs:
           name: colorlight-i5.bin
           path: gateware/build/colorlight_i5/top.bin
 
-  ubuntu-colorlight-i9:
+  ubuntu-build-colorlight-i9:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make BOARD=colorlight_i9 CORE=mirror -C gateware
@@ -46,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: cocotb-config -v
       - run: cd gateware/sim && ./00_run.sh
@@ -55,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v1
+      - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: verilator --version
       - run: cd gateware && scripts/verilator_lint.sh
