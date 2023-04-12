@@ -3,44 +3,44 @@ name: build & test
 on: [push, pull_request]
 
 jobs:
-  build-bitstream-icebreaker:
+  ubuntu-build-icebreaker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=icebreaker -C gateware
+      - run: make BOARD=icebreaker CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
-          name: eurorack-pmod-bitstream.bin
-          path: gateware/top.bin
+          name: icebreaker.bin
+          path: gateware/build/icebreaker/top.bin
 
-  build-bitstream-colorlight-i5:
+  ubuntu-build-colorlight-i5:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=colorlight_i5 -C gateware
+      - run: make BOARD=colorlight_i5 CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
-          name: eurorack-pmod-bitstream.bin
-          path: gateware/top.bin
+          name: colorlight-i5.bin
+          path: gateware/build/colorlight_i5/top.bin
 
-  build-bitstream-colorlight-i9:
+  ubuntu-colorlight-i9:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v1
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=colorlight_i9 -C gateware
+      - run: make BOARD=colorlight_i9 CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
-          name: eurorack-pmod-bitstream.bin
-          path: gateware/top.bin
+          name: colorlight-i9.bin
+          path: gateware/build/colorlight_i9/top.bin
 
   run-tests:
     runs-on: ubuntu-latest
