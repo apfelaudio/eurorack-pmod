@@ -26,12 +26,22 @@ module filter #(
     input [7:0] jack
 );
 
+
+logic signed[W-1:0] dc_blocked;
+
+dc_block #(.W(W)) dc_block_inst(
+    .sample_clk(sample_clk),
+    .sample_in(sample_in0),
+    .sample_out(dc_blocked)
+);
+
 karlsen_lpf #(.W(W)) lpf_inst(
     .rst(rst),
     .clk(clk),
     .sample_clk(sample_clk),
-    .in(sample_in0),
+    .in(dc_blocked),
     .out(sample_out0),
+    .g(sample_in1)
 );
 
 endmodule
