@@ -32,7 +32,7 @@ This repository contains a bunch of example DSP cores which are continuously bei
 - VCA (voltage controlled amplifier)
 - VCO (voltage controlled oscillator)
 
-These examples can all run out of the box on the development boards listed below. The repository currently only supports a Linux-based development environment, however porting to Mac / Windows should be fairly trivial and maybe the community can do it :).
+These examples can all run out of the box on the development boards listed below.
 
 ## Choosing an FPGA development board
 An FPGA development board itself is NOT included! Essentially anything iCE40 or ECP5 based that has a PMOD connector will support the open-source tools and the examples in this project. Just make sure you have enough LUTS, >3K is enough to do interesting things.
@@ -62,9 +62,16 @@ The following development boards have been tested with `eurorack-pmod` and are s
 
 ## Getting Started
 
-0. Install the OSS FPGA CAD flow. The gateware is automatically built and tested in CI, so it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml).
-1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar. (Double check that the pin mappings are correct, some ribbon cables will swap them on you)
-2. Try some of the examples. From the `gateware` directory, type `make` to see valid commands. By default it will compile a bitstream with the 'mirror' core, which just sends inputs to outputs.
+For now, I have tested builds on Linux and Windows (under MSYS2). Both are tested in CI.
+
+0. Install the [OSS FPGA CAD flow](https://github.com/yosyshq/oss-cad-suite-build).
+    - You may be able to get yosys / verilator from other package managers but I recommend using the [releases from YosysHQ](https://github.com/yosyshq/oss-cad-suite-build) so you're using the same binaries that CI is using.
+    - On Linux, once the YosysHQ suite is installed and in PATH, you should be able to just use `make` in the gateware directory.
+    - On Windows, CI is using MSYS2 with MINGW64 shell. Install MSYS2, MINGW64, extract the oss-cad-suite from YosysHQ and add it to PATH. Then you should be able to use `make` in the gateware directory.
+    - Note: The gateware is automatically built and tested in CI, so for either platform it may be helpful to look at [`.github/workflows/main.yml`](.github/workflows/main.yml).
+
+1. Build or obtain `eurorack-pmod` hardware and connect it to your FPGA development board using a ribbon cable or similar. (Double check that the pin mappings are correct, some ribbon cables will swap them on you! Default pinmaps are for the ribbon cables I shipped with hardware, you need to flip the pinmaps for a direct connection PMOD -> FPGA)
+2. Try some of the examples. From the `gateware` directory, type `make` to see valid commands. By default if you do not select a CORE it will compile a bitstream with the 'mirror' core, which just sends inputs to outputs.
 2. Calibrate your hardware using the process described in [`gateware/cal/cal.py`](gateware/cal/cal.py). Use this to create your own `gateware/cal/cal_mem.hex` to compensate for any DC biases in the ADCs/DACs. (this step is only necessary if you need sub-50mV accuracy on your inputs/outputs, which is the case if you are tuning oscillators, not so much if you are creating rhythm pulses.
 
 # Project structure
