@@ -13,9 +13,9 @@
 `default_nettype none
 
 module pmod_i2c_master #(
-    parameter CODEC_CFG  = "ak4619-cfg.hex",
+    parameter CODEC_CFG  = "drivers/ak4619-cfg.hex",
     parameter CODEC_CFG_BYTES = 16'd23,
-    parameter LED_CFG  = "pca9635-cfg.hex",
+    parameter LED_CFG  = "drivers/pca9635-cfg.hex",
     parameter LED_CFG_BYTES = 16'd26
 )(
     input  clk,

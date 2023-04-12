@@ -9,7 +9,7 @@
 
 module eurorack_pmod #(
     parameter W = 16, // sample width, bits
-    parameter CAL_MEM_FILE = "cal_mem.hex"
+    parameter CAL_MEM_FILE = "cal/cal_mem.hex"
 )(
     input clk_12mhz,   // Assumed 12MHz
     input rst,
