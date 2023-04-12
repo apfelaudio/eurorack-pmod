@@ -38,3 +38,4 @@ verilator --lint-only -Icores vca.sv
 verilator --lint-only -Icores vco.sv
 verilator --lint-only -Icores -Icores/util pitch_shift.sv
 verilator --lint-only -Icores -Icores/util stereo_echo.sv
+verilator --lint-only -Icores -Icores/util dc_block.sv
