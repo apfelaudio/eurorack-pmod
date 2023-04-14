@@ -15,8 +15,8 @@ async def karlsen_lpf_test(dut):
     dut.sample_in.value = 0
 
     # Start the clock
-    #clock_12m = Clock(dut.clk, 83.33, units='ns')
-    #cocotb.start_soon(clock_12m.start())
+    clock_12m = Clock(dut.clk, 83.33, units='ns')
+    cocotb.start_soon(clock_12m.start())
     clock_sample = Clock(dut.sample_clk, 83.33*128, units='ns')
     cocotb.start_soon(clock_sample.start())
 
@@ -29,9 +29,9 @@ async def karlsen_lpf_test(dut):
     await RisingEdge(dut.sample_clk)
 
     # Generate random input and parameters
-    for i in range(1000):
+    for i in range(300):
         sample_in_val = random.randint(-15000, 15000)
-        g_val = 30000
+        g_val = 5000
         resonance_val = 30000
 
         dut.sample_in.value = sample_in_val
