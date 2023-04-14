@@ -39,8 +39,8 @@ karlsen_lpf #(.W(W)) lpf_inst(
     .rst(rst),
     .clk(clk),
     .sample_clk(sample_clk),
-    .in(dc_blocked),
-    .out(sample_out0),
+    .sample_in(dc_blocked),
+    .sample_out(sample_out0),
     .g(sample_in1),
     .resonance(sample_in2)
 );
