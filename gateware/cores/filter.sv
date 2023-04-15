@@ -1,17 +1,17 @@
-// Audio-rate state-variable filter
+// Audio-rate low-pass filter with resonance + saturation
 //
 // Mapping:
 // - Input 0: Audio input
-// - Input 1: Frequency cutoff (about -5V to 5V)
+// - Input 1: Frequency cutoff (0V muted, 10V open)
+// - Input 2: Resonance (0V none, 10V close to self-oscillation)
 // - Input 2/3: Unused
-// - Output 0: Highpass out
-// - Output 1: Lowpass out
-// - Output 2: Bandpass out
-// - Output 3: Notch out
+// - Output 0: Lowpass out
+// - Output 1-3: Unused
 
 module filter #(
     parameter W = 16
 )(
+    input rst,
     input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,
@@ -25,18 +25,14 @@ module filter #(
     input [7:0] jack
 );
 
-filter_svf_pipelined #(.SAMPLE_BITS(W)) filter_svf_inst(
+karlsen_lpf_pipelined #(.W(W)) lpf_inst(
+    .rst(rst),
     .clk(clk),
-    .in(sample_in0),
     .sample_clk(sample_clk),
-    .out_highpass(sample_out0),
-    .out_lowpass(sample_out1),
-    .out_bandpass(sample_out2),
-    .out_notch(sample_out3),
-    // Scale so -5V to 5V is (very) roughly 100Hz -> 10Khz.
-    .F((-sample_in1>>>1) - 15000),
-    // TODO: control this from another input?
-    .Q1(-32000)
+    .sample_in(sample_in0),
+    .sample_out(sample_out0),
+    .g(sample_in1),
+    .resonance(sample_in2)
 );
 
 endmodule

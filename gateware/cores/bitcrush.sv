@@ -12,6 +12,7 @@
 module bitcrush #(
     parameter W = 16
 )(
+    input rst,
     input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,

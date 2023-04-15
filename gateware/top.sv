@@ -85,6 +85,7 @@ sysmgr sysmgr_instance (
 `SELECTED_DSP_CORE #(
     .W(W)
 ) dsp_core_instance (
+    .rst         (rst),
     .clk         (clk_12mhz),
     .sample_clk  (sample_clk),
     .sample_in0  (in0),

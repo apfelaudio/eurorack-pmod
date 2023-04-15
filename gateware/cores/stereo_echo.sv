@@ -19,6 +19,7 @@ module stereo_echo #(
     // ECHO_LEN (effective) = ECHO_LEN * (2 << DECIMATE)
     parameter DECIMATE = 2
 )(
+    input rst,
     input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,

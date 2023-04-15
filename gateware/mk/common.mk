@@ -15,9 +15,9 @@ SRC_COMMON = eurorack_pmod.sv \
 		     cores/pitch_shift.sv \
 		     cores/stereo_echo.sv \
 		     cores/filter.sv \
-		     cores/util/filter/filter_svf_pipelined.sv \
+		     cores/util/filter/karlsen_lpf_pipelined.sv \
+		     cores/util/filter/karlsen_lpf.sv \
 		     cores/util/transpose.sv \
 		     cores/util/echo.sv \
 		     cores/util/delayline.sv \
-		     cores/util/delay_raw.sv \
 			 cores/util/dc_block.sv
