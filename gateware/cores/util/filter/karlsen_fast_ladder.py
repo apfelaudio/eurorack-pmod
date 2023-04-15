@@ -1,5 +1,8 @@
 #!/bin/python3
 
+# A python prototype of the low-pass filter that was used to see how it sounds
+# before implementing it in verilog and then pipelining it.
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -14,7 +17,7 @@ v = 0.0
 
 def apply_filter(input_signal, fs, cutoff_freq, resonance):
     """
-    Implements the Karlsen Fast Ladder III low-pass filter.
+    Implements the Karlsen Fast Ladder low-pass filter.
 
     https://www.musicdsp.org/en/latest/Filters/240-karlsen-fast-ladder.html
 
@@ -35,7 +38,6 @@ def apply_filter(input_signal, fs, cutoff_freq, resonance):
 
     # Calculate filter coefficients
     g = np.tan(np.pi * cutoff_freq / fs)
-
 
     # Initialize output array
     output_signal = np.zeros_like(input_signal)

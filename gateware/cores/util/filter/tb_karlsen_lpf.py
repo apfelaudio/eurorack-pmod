@@ -1,3 +1,10 @@
+#!/bin/python3
+#
+# CocoTB testbench for the Karlsen LPF. This should eventually live in `sim/`
+# in CI when it actually has some pass/fail criteria. I just used this to
+# excite the non-pipelined and pipelined versions and inspect internal states
+# in GTKWave. The makefile in this directory runs this.
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, RisingEdge, FallingEdge
@@ -31,7 +38,7 @@ async def karlsen_lpf_test(dut):
     # Generate random input and parameters
     for i in range(300):
         sample_in_val = random.randint(-15000, 15000)
-        g_val = 5000
+        g_val = 20000
         resonance_val = 30000
 
         dut.sample_in.value = sample_in_val

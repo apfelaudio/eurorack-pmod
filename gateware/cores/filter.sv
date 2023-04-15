@@ -1,13 +1,12 @@
-// Audio-rate state-variable filter
+// Audio-rate low-pass filter with resonance + saturation
 //
 // Mapping:
 // - Input 0: Audio input
-// - Input 1: Frequency cutoff (about -5V to 5V)
+// - Input 1: Frequency cutoff (0V muted, 10V open)
+// - Input 2: Resonance (0V none, 10V close to self-oscillation)
 // - Input 2/3: Unused
-// - Output 0: Highpass out
-// - Output 1: Lowpass out
-// - Output 2: Bandpass out
-// - Output 3: Notch out
+// - Output 0: Lowpass out
+// - Output 1-3: Unused
 
 module filter #(
     parameter W = 16

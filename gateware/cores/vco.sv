@@ -13,6 +13,7 @@ module vco #(
     parameter FDIV = 0 // Divide output frequency by 1 << FDIV.
                        // Useful if you want to use this as an LFO.
 )(
+    input rst,
     input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,

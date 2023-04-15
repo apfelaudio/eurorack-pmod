@@ -16,6 +16,7 @@ module sampler #(
     parameter N_SAMPLES = 12'h690,
     parameter PATH_SAMPLES = "cores/util/sampler_data/clap.hex"
 )(
+    input rst,
     input clk,
     input sample_clk,
     input signed [W-1:0] sample_in0,
