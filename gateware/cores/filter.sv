@@ -8,6 +8,8 @@
 // - Output 0: Lowpass out
 // - Output 1-3: Unused
 
+`default_nettype none
+
 module filter #(
     parameter W = 16
 )(

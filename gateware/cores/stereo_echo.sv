@@ -10,6 +10,8 @@
 // - Output 2: Audio input 1 (mirrored)
 // - Output 3: Audio input 1 (echo)
 
+`default_nettype none
+
 module stereo_echo #(
     parameter W = 16,
     // Length of the echo buffers in samples.

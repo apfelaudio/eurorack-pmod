@@ -29,16 +29,17 @@ verilator --lint-only -DVERILATOR_LINT_ONLY \
     top.sv
 
 # Lint each core which can be selected
-verilator --lint-only -Icores mirror.sv
-verilator --lint-only -Icores bitcrush.sv
-verilator --lint-only -Icores clkdiv.sv
-verilator --lint-only -Icores sampler.sv
-verilator --lint-only -Icores seqswitch.sv
-verilator --lint-only -Icores vca.sv
-verilator --lint-only -Icores vco.sv
+verilator --lint-only cores/mirror.sv
+verilator --lint-only cores/bitcrush.sv
+verilator --lint-only cores/clkdiv.sv
+verilator --lint-only cores/sampler.sv
+verilator --lint-only cores/seqswitch.sv
+verilator --lint-only cores/vca.sv
+verilator --lint-only -Icores/util cores/pitch_shift.sv
+verilator --lint-only -Icores/util cores/stereo_echo.sv
+verilator --lint-only -Icores/util/filter cores/filter.sv
+verilator --lint-only -Icores/util/vco -Icores/util/filter cores/vco.sv
 verilator --lint-only cores/util/filter/karlsen_lpf.sv
 verilator --lint-only cores/util/filter/karlsen_lpf_pipelined.sv
-verilator --lint-only -Icores -Icores/util/filter filter.sv
-verilator --lint-only -Icores -Icores/util pitch_shift.sv
-verilator --lint-only -Icores -Icores/util stereo_echo.sv
-verilator --lint-only -Icores -Icores/util dc_block.sv
+verilator --lint-only cores/util/vco/wavetable_vco.sv
+verilator --lint-only -Icores/util dc_block.sv
