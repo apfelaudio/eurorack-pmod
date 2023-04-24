@@ -10,14 +10,43 @@ module top #(
     parameter int W = 16 // sample width, bits
 )(
      input   CLK
-    ,inout   PMOD_I2C_SDA
-    ,inout   PMOD_I2C_SCL
-    ,output  PMOD_LRCK
-    ,output  PMOD_BICK
-    ,output  PMOD_SDIN1
-    ,input   PMOD_SDOUT1
-    ,output  PMOD_PDN
-    ,output  PMOD_MCLK
+
+    ,inout   PMOD_P2A_I2C_SDA
+    ,inout   PMOD_P2A_I2C_SCL
+    ,output  PMOD_P2A_LRCK
+    ,output  PMOD_P2A_BICK
+    ,output  PMOD_P2A_SDIN1
+    ,input   PMOD_P2A_SDOUT1
+    ,output  PMOD_P2A_PDN
+    ,output  PMOD_P2A_MCLK
+
+    ,inout   PMOD_P2B_I2C_SDA
+    ,inout   PMOD_P2B_I2C_SCL
+    ,output  PMOD_P2B_LRCK
+    ,output  PMOD_P2B_BICK
+    ,output  PMOD_P2B_SDIN1
+    ,input   PMOD_P2B_SDOUT1
+    ,output  PMOD_P2B_PDN
+    ,output  PMOD_P2B_MCLK
+
+    ,inout   PMOD_P3A_I2C_SDA
+    ,inout   PMOD_P3A_I2C_SCL
+    ,output  PMOD_P3A_LRCK
+    ,output  PMOD_P3A_BICK
+    ,output  PMOD_P3A_SDIN1
+    ,input   PMOD_P3A_SDOUT1
+    ,output  PMOD_P3A_PDN
+    ,output  PMOD_P3A_MCLK
+
+    ,inout   PMOD_P3B_I2C_SDA
+    ,inout   PMOD_P3B_I2C_SCL
+    ,output  PMOD_P3B_LRCK
+    ,output  PMOD_P3B_BICK
+    ,output  PMOD_P3B_SDIN1
+    ,input   PMOD_P3B_SDOUT1
+    ,output  PMOD_P3B_PDN
+    ,output  PMOD_P3B_MCLK
+
     // Button used for reset and output cal. Assumed momentary, pressed == HIGH.
     // You can use any random PMOD that has a button on it.
     ,input   RESET_BUTTON
@@ -27,159 +56,360 @@ module top #(
 
 logic rst;
 logic clk_12mhz;
-
-// Button signal is used for resets, unless we are input calibration
-// mode in which case it is used for setting the output cal values.
-logic button;
-`ifdef INVERT_BUTTON
-assign button = ~RESET_BUTTON;
-`else
-assign button = RESET_BUTTON;
-`endif
-
-// Signals between eurorack_pmod instance and user-defined DSP core.
 logic sample_clk;
-logic signed [W-1:0] in0;
-logic signed [W-1:0] in1;
-logic signed [W-1:0] in2;
-logic signed [W-1:0] in3;
-logic signed [W-1:0] out0;
-logic signed [W-1:0] out1;
-logic signed [W-1:0] out2;
-logic signed [W-1:0] out3;
-logic [7:0]  eeprom_mfg;
-logic [7:0]  eeprom_dev;
-logic [31:0] eeprom_serial;
-logic [7:0]  jack;
 
-// Tristated I2C signals must be broken out at the top level as
-// ECP5 flow does not support tristate signals in nested modules.
-logic i2c_scl_oe;
-logic i2c_scl_i;
-logic i2c_sda_oe;
-logic i2c_sda_i;
+// Signals for PMOD_P2A
+logic signed [W-1:0] p2a_in0;
+logic signed [W-1:0] p2a_in1;
+logic signed [W-1:0] p2a_in2;
+logic signed [W-1:0] p2a_in3;
+logic signed [W-1:0] p2a_out0;
+logic signed [W-1:0] p2a_out1;
+logic signed [W-1:0] p2a_out2;
+logic signed [W-1:0] p2a_out3;
+logic [7:0]          p2a_jack;
+logic                p2a_i2c_scl_oe;
+logic                p2a_i2c_scl_i;
+logic                p2a_i2c_sda_oe;
+logic                p2a_i2c_sda_i;
 
-// Signals only used for the debug UART.
-logic signed [W-1:0] debug_adc0;
-logic signed [W-1:0] debug_adc1;
-logic signed [W-1:0] debug_adc2;
-logic signed [W-1:0] debug_adc3;
+// Signals for PMOD_P2B
+logic signed [W-1:0] p2b_in0;
+logic signed [W-1:0] p2b_in1;
+logic signed [W-1:0] p2b_in2;
+logic signed [W-1:0] p2b_in3;
+logic signed [W-1:0] p2b_out0;
+logic signed [W-1:0] p2b_out1;
+logic signed [W-1:0] p2b_out2;
+logic signed [W-1:0] p2b_out3;
+logic [7:0]          p2b_jack;
+logic                p2b_i2c_scl_oe;
+logic                p2b_i2c_scl_i;
+logic                p2b_i2c_sda_oe;
+logic                p2b_i2c_sda_i;
+
+// Signals for PMOD_P3A
+logic signed [W-1:0] p3a_in0;
+logic signed [W-1:0] p3a_in1;
+logic signed [W-1:0] p3a_in2;
+logic signed [W-1:0] p3a_in3;
+logic signed [W-1:0] p3a_out0;
+logic signed [W-1:0] p3a_out1;
+logic signed [W-1:0] p3a_out2;
+logic signed [W-1:0] p3a_out3;
+logic [7:0]          p3a_jack;
+logic                p3a_i2c_scl_oe;
+logic                p3a_i2c_scl_i;
+logic                p3a_i2c_sda_oe;
+logic                p3a_i2c_sda_i;
+
+// Signals for PMOD_P3B
+logic signed [W-1:0] p3b_in0;
+logic signed [W-1:0] p3b_in1;
+logic signed [W-1:0] p3b_in2;
+logic signed [W-1:0] p3b_in3;
+logic signed [W-1:0] p3b_out0;
+logic signed [W-1:0] p3b_out1;
+logic signed [W-1:0] p3b_out2;
+logic signed [W-1:0] p3b_out3;
+logic [7:0]          p3b_jack;
+logic                p3b_i2c_scl_oe;
+logic                p3b_i2c_scl_i;
+logic                p3b_i2c_sda_oe;
+logic                p3b_i2c_sda_i;
 
 // PLL bringup and reset state management / debouncing.
 sysmgr sysmgr_instance (
     // The input clock frequency might be different for different boards.
     .clk_in(CLK),
-`ifndef OUTPUT_CALIBRATION
-    // Normally, the uButton is used as a global reset button.
-    .rst_in(button),
-`else
-    // For output calibration the button is used elsewhere.
     .rst_in(1'b0),
-`endif
     .clk_12m(clk_12mhz),
     .rst_out(rst)
 );
 
-// DSP core which processes calibrated samples. This can be chosen
-// by passing different DSP_CORE values to 'make' at build time.
-`SELECTED_DSP_CORE #(
+mirror #(
     .W(W)
-) dsp_core_instance (
+) core_p2a (
     .rst         (rst),
     .clk         (clk_12mhz),
     .sample_clk  (sample_clk),
-    .sample_in0  (in0),
-    .sample_in1  (in1),
-    .sample_in2  (in2),
-    .sample_in3  (in3),
-    .sample_out0 (out0),
-    .sample_out1 (out1),
-    .sample_out2 (out2),
-    .sample_out3 (out3),
-    .jack        (jack)
+    .sample_in0  (p2a_in0),
+    .sample_in1  (p2a_in1),
+    .sample_in2  (p2a_in2),
+    .sample_in3  (p2a_in3),
+    .sample_out0 (p2a_out0),
+    .sample_out1 (p2a_out1),
+    .sample_out2 (p2a_out2),
+    .sample_out3 (p2a_out3),
+    .jack        (p2a_jack)
 );
 
-`ifdef ECP5
-`ifndef VERILATOR_LINT_ONLY
-// ECP5 requires direct IO block instantiation for tristating / I2C
-TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_scl (
-    .I(1'b0),
-    .T(~i2c_scl_oe),
-    .B(PMOD_I2C_SCL),
-    .O(i2c_scl_i)
+mirror #(
+    .W(W)
+) core_p2b (
+    .rst         (rst),
+    .clk         (clk_12mhz),
+    .sample_clk  (sample_clk),
+    .sample_in0  (p2b_in0),
+    .sample_in1  (p2b_in1),
+    .sample_in2  (p2b_in2),
+    .sample_in3  (p2b_in3),
+    .sample_out0 (p2b_out0),
+    .sample_out1 (p2b_out1),
+    .sample_out2 (p2b_out2),
+    .sample_out3 (p2b_out3),
+    .jack        (p2b_jack)
 );
-TRELLIS_IO #(.DIR("BIDIR")) i2c_tristate_sda (
-    .I(1'b0),
-    .T(~i2c_sda_oe),
-    .B(PMOD_I2C_SDA),
-    .O(i2c_sda_i)
+
+mirror #(
+    .W(W)
+) core_p3a (
+    .rst         (rst),
+    .clk         (clk_12mhz),
+    .sample_clk  (sample_clk),
+    .sample_in0  (p3a_in0),
+    .sample_in1  (p3a_in1),
+    .sample_in2  (p3a_in2),
+    .sample_in3  (p3a_in3),
+    .sample_out0 (p3a_out0),
+    .sample_out1 (p3a_out1),
+    .sample_out2 (p3a_out2),
+    .sample_out3 (p3a_out3),
+    .jack        (p3a_jack)
 );
-`endif
-`else
-// For iCE40 this is not necessary.
-assign PMOD_I2C_SCL = i2c_scl_oe ? 1'b0 : 1'bz;
-assign PMOD_I2C_SDA = i2c_sda_oe ? 1'b0 : 1'bz;
-assign i2c_scl_i = PMOD_I2C_SCL;
-assign i2c_sda_i = PMOD_I2C_SDA;
-`endif
+
+mirror #(
+    .W(W)
+) core_p3b (
+    .rst         (rst),
+    .clk         (clk_12mhz),
+    .sample_clk  (sample_clk),
+    .sample_in0  (p3b_in0),
+    .sample_in1  (p3b_in1),
+    .sample_in2  (p3b_in2),
+    .sample_in3  (p3b_in3),
+    .sample_out0 (p3b_out0),
+    .sample_out1 (p3b_out1),
+    .sample_out2 (p3b_out2),
+    .sample_out3 (p3b_out3),
+    .jack        (p3b_jack)
+);
 
 eurorack_pmod #(
     .W(W),
     .CAL_MEM_FILE("cal/cal_mem.hex")
-) eurorack_pmod1 (
+) pmod_p2a_inst (
     .clk_12mhz(clk_12mhz),
     .rst(rst),
-
-    .i2c_scl_oe(i2c_scl_oe),
-    .i2c_scl_i (i2c_scl_i),
-    .i2c_sda_oe(i2c_sda_oe),
-    .i2c_sda_i (i2c_sda_i),
-    .pdn    (PMOD_PDN),
-    .mclk   (PMOD_MCLK),
-    .sdin1  (PMOD_SDIN1),
-    .sdout1 (PMOD_SDOUT1),
-    .lrck   (PMOD_LRCK),
-    .bick   (PMOD_BICK),
-
     .sample_clk   (sample_clk),
-    .cal_in0      (in0),
-    .cal_in1      (in1),
-    .cal_in2      (in2),
-    .cal_in3      (in3),
-    .cal_out0     (out0),
-    .cal_out1     (out1),
-    .cal_out2     (out2),
-    .cal_out3     (out3),
-    .jack         (jack),
-    .eeprom_mfg   (eeprom_mfg),
-    .eeprom_dev   (eeprom_dev),
-    .eeprom_serial(eeprom_serial),
 
-    .sample_adc0(debug_adc0),
-    .sample_adc1(debug_adc1),
-    .sample_adc2(debug_adc2),
-    .sample_adc3(debug_adc3),
-`ifdef OUTPUT_CALIBRATION
-    .force_dac_output(button ? -20000 : 20000)
-`else
+    .i2c_scl_oe(p2a_i2c_scl_oe),
+    .i2c_scl_i (p2a_i2c_scl_i),
+    .i2c_sda_oe(p2a_i2c_sda_oe),
+    .i2c_sda_i (p2a_i2c_sda_i),
+    .pdn    (PMOD_P2A_PDN),
+    .mclk   (PMOD_P2A_MCLK),
+    .sdin1  (PMOD_P2A_SDIN1),
+    .sdout1 (PMOD_P2A_SDOUT1),
+    .lrck   (PMOD_P2A_LRCK),
+    .bick   (PMOD_P2A_BICK),
+
+    .cal_in0      (p2a_in0),
+    .cal_in1      (p2a_in1),
+    .cal_in2      (p2a_in2),
+    .cal_in3      (p2a_in3),
+    .cal_out0     (p2a_out0),
+    .cal_out1     (p2a_out1),
+    .cal_out2     (p2a_out2),
+    .cal_out3     (p2a_out3),
+    .jack         (p2a_jack),
+
+    /* Unused debug stuff */
+    .eeprom_mfg    (),
+    .eeprom_dev    (),
+    .eeprom_serial (),
+    .sample_adc0   (),
+    .sample_adc1   (),
+    .sample_adc2   (),
+    .sample_adc3   (),
     .force_dac_output(0) // Do not force output.
-`endif
 );
 
-// Helper module to serialize some interesting state to a UART
-// for bringup and calibration purposes.
-debug_uart debug_uart_instance (
-    .clk (clk_12mhz),
-    .rst (rst),
-    .tx_o(UART_TX),
-    .adc0(debug_adc0),
-    .adc1(debug_adc1),
-    .adc2(debug_adc2),
-    .adc3(debug_adc3),
-    .eeprom_mfg(eeprom_mfg),
-    .eeprom_dev(eeprom_dev),
-    .eeprom_serial(eeprom_serial),
-    .jack(jack)
+eurorack_pmod #(
+    .W(W),
+    .CAL_MEM_FILE("cal/cal_mem.hex")
+) pmod_p2b_inst (
+    .clk_12mhz(clk_12mhz),
+    .rst(rst),
+    .sample_clk   (),
+
+    .i2c_scl_oe(p2b_i2c_scl_oe),
+    .i2c_scl_i (p2b_i2c_scl_i),
+    .i2c_sda_oe(p2b_i2c_sda_oe),
+    .i2c_sda_i (p2b_i2c_sda_i),
+    .pdn    (PMOD_P2B_PDN),
+    .mclk   (PMOD_P2B_MCLK),
+    .sdin1  (PMOD_P2B_SDIN1),
+    .sdout1 (PMOD_P2B_SDOUT1),
+    .lrck   (PMOD_P2B_LRCK),
+    .bick   (PMOD_P2B_BICK),
+
+    .cal_in0      (p2b_in0),
+    .cal_in1      (p2b_in1),
+    .cal_in2      (p2b_in2),
+    .cal_in3      (p2b_in3),
+    .cal_out0     (p2b_out0),
+    .cal_out1     (p2b_out1),
+    .cal_out2     (p2b_out2),
+    .cal_out3     (p2b_out3),
+    .jack         (p2b_jack),
+
+    /* Unused debug stuff */
+    .eeprom_mfg    (),
+    .eeprom_dev    (),
+    .eeprom_serial (),
+    .sample_adc0   (),
+    .sample_adc1   (),
+    .sample_adc2   (),
+    .sample_adc3   (),
+    .force_dac_output(0) // Do not force output.
 );
+
+eurorack_pmod #(
+    .W(W),
+    .CAL_MEM_FILE("cal/cal_mem.hex")
+) pmod_p3a_inst (
+    .clk_12mhz(clk_12mhz),
+    .rst(rst),
+    .sample_clk   (),
+
+    .i2c_scl_oe(p3a_i2c_scl_oe),
+    .i2c_scl_i (p3a_i2c_scl_i),
+    .i2c_sda_oe(p3a_i2c_sda_oe),
+    .i2c_sda_i (p3a_i2c_sda_i),
+    .pdn    (PMOD_P3A_PDN),
+    .mclk   (PMOD_P3A_MCLK),
+    .sdin1  (PMOD_P3A_SDIN1),
+    .sdout1 (PMOD_P3A_SDOUT1),
+    .lrck   (PMOD_P3A_LRCK),
+    .bick   (PMOD_P3A_BICK),
+
+    .cal_in0      (p3a_in0),
+    .cal_in1      (p3a_in1),
+    .cal_in2      (p3a_in2),
+    .cal_in3      (p3a_in3),
+    .cal_out0     (p3a_out0),
+    .cal_out1     (p3a_out1),
+    .cal_out2     (p3a_out2),
+    .cal_out3     (p3a_out3),
+    .jack         (p3a_jack),
+
+    /* Unused debug stuff */
+    .eeprom_mfg    (),
+    .eeprom_dev    (),
+    .eeprom_serial (),
+    .sample_adc0   (),
+    .sample_adc1   (),
+    .sample_adc2   (),
+    .sample_adc3   (),
+    .force_dac_output(0) // Do not force output.
+);
+
+eurorack_pmod #(
+    .W(W),
+    .CAL_MEM_FILE("cal/cal_mem.hex")
+) pmod_p3b_inst (
+    .clk_12mhz(clk_12mhz),
+    .rst(rst),
+    .sample_clk   (),
+
+    .i2c_scl_oe(p3b_i2c_scl_oe),
+    .i2c_scl_i (p3b_i2c_scl_i),
+    .i2c_sda_oe(p3b_i2c_sda_oe),
+    .i2c_sda_i (p3b_i2c_sda_i),
+    .pdn    (PMOD_P3B_PDN),
+    .mclk   (PMOD_P3B_MCLK),
+    .sdin1  (PMOD_P3B_SDIN1),
+    .sdout1 (PMOD_P3B_SDOUT1),
+    .lrck   (PMOD_P3B_LRCK),
+    .bick   (PMOD_P3B_BICK),
+
+    .cal_in0      (p3b_in0),
+    .cal_in1      (p3b_in1),
+    .cal_in2      (p3b_in2),
+    .cal_in3      (p3b_in3),
+    .cal_out0     (p3b_out0),
+    .cal_out1     (p3b_out1),
+    .cal_out2     (p3b_out2),
+    .cal_out3     (p3b_out3),
+    .jack         (p3b_jack),
+
+    /* Unused debug stuff */
+    .eeprom_mfg    (),
+    .eeprom_dev    (),
+    .eeprom_serial (),
+    .sample_adc0   (),
+    .sample_adc1   (),
+    .sample_adc2   (),
+    .sample_adc3   (),
+    .force_dac_output(0) // Do not force output.
+);
+
+`ifdef ECP5
+`ifndef VERILATOR_LINT_ONLY
+// Tristating for PMOD_P2A
+TRELLIS_IO #(.DIR("BIDIR")) p2a_i2c_tristate_scl (
+    .I(1'b0),
+    .T(~p2a_i2c_scl_oe),
+    .B(PMOD_P2A_I2C_SCL),
+    .O(p2a_i2c_scl_i)
+);
+TRELLIS_IO #(.DIR("BIDIR")) p2a_i2c_tristate_sda (
+    .I(1'b0),
+    .T(~p2a_i2c_sda_oe),
+    .B(PMOD_P2A_I2C_SDA),
+    .O(p2a_i2c_sda_i)
+);
+// Tristating for PMOD_P2B
+TRELLIS_IO #(.DIR("BIDIR")) p2b_i2c_tristate_scl (
+    .I(1'b0),
+    .T(~p2b_i2c_scl_oe),
+    .B(PMOD_P2B_I2C_SCL),
+    .O(p2b_i2c_scl_i)
+);
+TRELLIS_IO #(.DIR("BIDIR")) p2b_i2c_tristate_sda (
+    .I(1'b0),
+    .T(~p2b_i2c_sda_oe),
+    .B(PMOD_P2B_I2C_SDA),
+    .O(p2b_i2c_sda_i)
+);
+// Tristating for PMOD_P3A
+TRELLIS_IO #(.DIR("BIDIR")) p3a_i2c_tristate_scl (
+    .I(1'b0),
+    .T(~p3a_i2c_scl_oe),
+    .B(PMOD_P3A_I2C_SCL),
+    .O(p3a_i2c_scl_i)
+);
+TRELLIS_IO #(.DIR("BIDIR")) p3a_i2c_tristate_sda (
+    .I(1'b0),
+    .T(~p3a_i2c_sda_oe),
+    .B(PMOD_P3A_I2C_SDA),
+    .O(p3a_i2c_sda_i)
+);
+// Tristating for PMOD_P3B
+TRELLIS_IO #(.DIR("BIDIR")) p3b_i2c_tristate_scl (
+    .I(1'b0),
+    .T(~p3b_i2c_scl_oe),
+    .B(PMOD_P3B_I2C_SCL),
+    .O(p3b_i2c_scl_i)
+);
+TRELLIS_IO #(.DIR("BIDIR")) p3b_i2c_tristate_sda (
+    .I(1'b0),
+    .T(~p3b_i2c_sda_oe),
+    .B(PMOD_P3B_I2C_SDA),
+    .O(p3b_i2c_sda_i)
+);
+`endif
+`endif
 
 endmodule
