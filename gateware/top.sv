@@ -127,7 +127,7 @@ sysmgr sysmgr_instance (
     .rst_out(rst)
 );
 
-mirror #(
+vco #(
     .W(W)
 ) core_p2a (
     .rst         (rst),
@@ -144,7 +144,7 @@ mirror #(
     .jack        (p2a_jack)
 );
 
-mirror #(
+filter #(
     .W(W)
 ) core_p2b (
     .rst         (rst),
@@ -161,7 +161,7 @@ mirror #(
     .jack        (p2b_jack)
 );
 
-mirror #(
+pitch_shift #(
     .W(W)
 ) core_p3a (
     .rst         (rst),
@@ -178,7 +178,7 @@ mirror #(
     .jack        (p3a_jack)
 );
 
-mirror #(
+stereo_echo #(
     .W(W)
 ) core_p3b (
     .rst         (rst),
