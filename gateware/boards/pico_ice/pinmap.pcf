@@ -1,0 +1,17 @@
+# No clock. using internal HFOSC
+
+# NOTE: this UART needs to be forwarded by the RP2040 FW!
+set_io -nowarn UART_TX           26
+# Reset button is pressed == low so we need to invert it.
+set_io -nowarn RESET_BUTTON      10
+
+# ICE_PMOD_1 (closest USB), assuming horizontal flip (ribbon cable
+# between eurorack-pmod and PMOD connector IS in place).
+set_io -nowarn PMOD_SDIN1     4
+set_io -nowarn PMOD_SDOUT1    2
+set_io -nowarn PMOD_LRCK      47
+set_io -nowarn PMOD_BICK      45
+set_io -nowarn PMOD_I2C_SCL   3
+set_io -nowarn PMOD_I2C_SDA   48
+set_io -nowarn PMOD_PDN       46
+set_io -nowarn PMOD_MCLK      44

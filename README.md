@@ -17,7 +17,7 @@ For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://y
 
 ### This project is:
 - The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/). Design is [certified open hardware](https://certification.oshwa.org/de000135.html).
-- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) and Colorlight i5 / i9 (ECP5 part). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
+- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) but many more boards are supported (see below). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 - A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
 
 ## Included examples
@@ -41,6 +41,7 @@ The following development boards have been tested with `eurorack-pmod` and are s
 - iCEbreaker (iCE40 based)
 - Colorlight i5 (ECP5 based)
 - Colorlight i9 (ECP5 based)
+- pico-ice from TinyVision (iCE40 based)
 
 ## Hardware details
 
@@ -57,7 +58,7 @@ The following development boards have been tested with `eurorack-pmod` and are s
 - I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 ## Gateware details
-- Examples based on Icebreaker (iCE40 part) / Colorlight i5 / i9 (ECP5 part).
+- Examples based on iCE40 and ECP5 based FPGAs supported by open-source tools.
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
 
 ## Getting Started

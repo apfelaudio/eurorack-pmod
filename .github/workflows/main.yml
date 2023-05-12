@@ -66,6 +66,19 @@ jobs:
           name: ubuntu-build-colorlight-i9.bin
           path: gateware/build/colorlight_i9/top.bin
 
+  ubuntu-build-pico-ice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make BOARD=pico_ice CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-build-pico-ice.bin
+          path: gateware/build/pico_ice/top.bin
+
   run-tests:
     runs-on: ubuntu-latest
     steps:

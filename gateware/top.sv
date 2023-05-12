@@ -9,20 +9,22 @@
 module top #(
     parameter int W = 16 // sample width, bits
 )(
-     input   CLK
-    ,inout   PMOD_I2C_SDA
-    ,inout   PMOD_I2C_SCL
-    ,output  PMOD_LRCK
-    ,output  PMOD_BICK
-    ,output  PMOD_SDIN1
-    ,input   PMOD_SDOUT1
-    ,output  PMOD_PDN
-    ,output  PMOD_MCLK
+`ifndef INTERNAL_CLOCK
+    input   CLK,
+`endif
+    inout   PMOD_I2C_SDA,
+    inout   PMOD_I2C_SCL,
+    output  PMOD_LRCK,
+    output  PMOD_BICK,
+    output  PMOD_SDIN1,
+    input   PMOD_SDOUT1,
+    output  PMOD_PDN,
+    output  PMOD_MCLK,
     // Button used for reset and output cal. Assumed momentary, pressed == HIGH.
     // You can use any random PMOD that has a button on it.
-    ,input   RESET_BUTTON
+    input   RESET_BUTTON,
     // UART used for debug information and for calibration.
-    ,output  UART_TX
+    output  UART_TX
 );
 
 logic rst;
@@ -67,8 +69,11 @@ logic signed [W-1:0] debug_adc3;
 
 // PLL bringup and reset state management / debouncing.
 sysmgr sysmgr_instance (
-    // The input clock frequency might be different for different boards.
+`ifndef INTERNAL_CLOCK
+    // Warning: the input clock frequency might be different for different boards.
+    // Make sure to adjust sysmgr / PLLs for your board as such.
     .clk_in(CLK),
+`endif
 `ifndef OUTPUT_CALIBRATION
     // Normally, the uButton is used as a global reset button.
     .rst_in(button),
