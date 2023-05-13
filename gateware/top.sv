@@ -196,6 +196,7 @@ apa102 led_strip_instance (
     .strobe(apa102_strobe)
 );
 
+
 always_ff @(posedge clk_12mhz or posedge rst)
 begin
     if(rst)
@@ -221,13 +222,22 @@ begin
                     // strobe! Or latch one clock later?
                     apa102_strobe <= 1'b1;
                     px_count <= px_count + 1;
+                    /*
                     if (px_count == (16'sd128+16'(in0>>>8))) begin
                         px_red   <= 8'hFF;
                         px_green <= 8'h0;
                         px_blue  <= 8'h0;
                     end else begin
                         px_red   <= 8'h0;
-                        px_green <= 8'h0;
+                        px_green <= in0[15:11];
+                        px_blue  <= 8'h0;
+                    end
+                    */
+                    px_red   <= ((in0 > 0) ? (in0 >>> 8) : 0);
+                    px_green <= ((in1 > 0) ? (in1 >>> 8) : 0);
+                    if (px_count == (16'sd128+16'(in2>>>8))) begin
+                        px_blue  <= 8'hFF;
+                    end else begin
                         px_blue  <= 8'h0;
                     end
                 end else begin
