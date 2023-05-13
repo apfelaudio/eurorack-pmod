@@ -42,3 +42,4 @@ verilator --lint-only -Icores -Icores/util/filter filter.sv
 verilator --lint-only -Icores -Icores/util pitch_shift.sv
 verilator --lint-only -Icores -Icores/util stereo_echo.sv
 verilator --lint-only -Icores -Icores/util dc_block.sv
+verilator --lint-only -Icores/util apa102.sv
