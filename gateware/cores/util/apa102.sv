@@ -1,4 +1,7 @@
 // Simple verilog module to control an APA102 LED strip.
+//
+// Used by strobing a CMD_SOF, then as many CMD_PIXELS as you have LEDs, then a CMD_EOF.
+// The LED pixel values are latched when strobe goes high.
 
 `default_nettype none
 
@@ -24,7 +27,7 @@ module apa102 (
   // Internal variables
   logic [1:0] cur_cmd;
   logic [31:0] pixel_latch;
-  logic [7:0] bit_counter;
+  logic [9:0] bit_counter;
 
   always_ff @(posedge clk or posedge reset)
   begin
@@ -55,7 +58,9 @@ module apa102 (
 
         CMD_EOF: begin
           led_data <= 1'b1;
-          bit_counter <= 128;
+          // Warning: this assumes maximum 128*2 = 512 LEDs.
+          // We should probably just count the number of CMD_PIXELS.
+          bit_counter <= 256;
         end
 
         default: begin

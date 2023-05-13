@@ -17,3 +17,7 @@ set_io -nowarn PMOD_I2C_SCL   26
 set_io -nowarn PMOD_I2C_SDA   23
 set_io -nowarn PMOD_PDN       20
 set_io -nowarn PMOD_MCLK      18
+
+# PMOD 1A
+set_io -nowarn LED_STRIP_DATA       4 # Labelled pin 1
+set_io -nowarn LED_STRIP_CLK        3 # Labelled pin 7

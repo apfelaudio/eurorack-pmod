@@ -23,6 +23,9 @@ module top #(
     ,input   RESET_BUTTON
     // UART used for debug information and for calibration.
     ,output  UART_TX
+    // APA102 LED strip
+    ,output  LED_STRIP_DATA
+    ,output  LED_STRIP_CLK
 );
 
 logic rst;
@@ -165,6 +168,74 @@ eurorack_pmod #(
     .force_dac_output(0) // Do not force output.
 `endif
 );
+
+localparam APA102_CMD_NONE  = 2'b00;
+localparam APA102_CMD_SOF   = 2'b01;
+localparam APA102_CMD_PIXEL = 2'b10;
+localparam APA102_CMD_EOF   = 2'b11;
+
+logic [1:0] apa102_cmd;
+logic apa102_busy;
+logic apa102_strobe;
+logic [7:0] apa102_red;
+logic [7:0] led_state;
+logic [15:0] px_count;
+
+apa102 led_strip_instance (
+    .clk(clk_12mhz),
+    .reset(rst),
+    .led_data(LED_STRIP_DATA),
+    .led_clk(LED_STRIP_CLK),
+    .pixel_red(apa102_red),
+    .pixel_green(8'h00),
+    .pixel_blue(8'h00),
+    .cmd(apa102_cmd),
+    .busy(apa102_busy),
+    .strobe(apa102_strobe)
+);
+
+always_ff @(posedge clk_12mhz or posedge rst)
+begin
+    if(rst)
+    begin
+        apa102_strobe <= 1'b0;
+        apa102_cmd <= APA102_CMD_NONE;
+        led_state <= 0;
+        px_count <= 0;
+    end
+    else if (!apa102_busy && !apa102_strobe)
+    begin
+        case (led_state)
+            0: begin
+                apa102_cmd <= APA102_CMD_SOF;
+                apa102_strobe <= 1'b1;
+                led_state <= 1;
+                px_count <= 0;
+            end
+            1: begin
+                if (px_count != 300) begin
+                    apa102_cmd <= APA102_CMD_PIXEL;
+                    apa102_strobe <= 1'b1;
+                    px_count <= px_count + 1;
+                end else begin
+                    led_state <= 2;
+                end
+            end
+            2: begin
+                apa102_cmd <= APA102_CMD_EOF;
+                apa102_strobe <= 1'b1;
+                led_state <= 3;
+            end
+            default: begin
+                led_state <= 0;
+            end
+        endcase
+    end
+    else
+    begin
+        apa102_strobe <= 1'b0;
+    end
+end
 
 // Helper module to serialize some interesting state to a UART
 // for bringup and calibration purposes.
