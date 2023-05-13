@@ -177,7 +177,9 @@ localparam APA102_CMD_EOF   = 2'b11;
 logic [1:0] apa102_cmd;
 logic apa102_busy;
 logic apa102_strobe;
-logic [7:0] apa102_red;
+logic [7:0] px_red;
+logic [7:0] px_green;
+logic [7:0] px_blue;
 logic [7:0] led_state;
 logic [15:0] px_count;
 
@@ -186,9 +188,9 @@ apa102 led_strip_instance (
     .reset(rst),
     .led_data(LED_STRIP_DATA),
     .led_clk(LED_STRIP_CLK),
-    .pixel_red(apa102_red),
-    .pixel_green(8'h00),
-    .pixel_blue(8'h00),
+    .pixel_red(px_red),
+    .pixel_green(px_green),
+    .pixel_blue(px_blue),
     .cmd(apa102_cmd),
     .busy(apa102_busy),
     .strobe(apa102_strobe)
@@ -215,8 +217,19 @@ begin
             1: begin
                 if (px_count != 300) begin
                     apa102_cmd <= APA102_CMD_PIXEL;
+                    // WARNING: Should I actually set the pixel before the
+                    // strobe! Or latch one clock later?
                     apa102_strobe <= 1'b1;
                     px_count <= px_count + 1;
+                    if (px_count == (16'sd128+16'(in0>>>8))) begin
+                        px_red   <= 8'hFF;
+                        px_green <= 8'h0;
+                        px_blue  <= 8'h0;
+                    end else begin
+                        px_red   <= 8'h0;
+                        px_green <= 8'h0;
+                        px_blue  <= 8'h0;
+                    end
                 end else begin
                     led_state <= 2;
                 end
