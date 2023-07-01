@@ -57,6 +57,23 @@ The following development boards have been tested with `eurorack-pmod` and are s
 - Calibration EEPROM for unique ID and storing calibration data.
 - I/O is about +/- 8V capable, wider is possible with a resistor change.
 
+## PMOD Pinout
+
+The PMOD pinout is on the silkscreen on the back side of the board. Details are below. Note that Pin 1 is the SQUARE pad.
+
+1) SDI (AK4619VN SDIN1)
+2) SCL (I2C SCL for AK4619VN CODEC, EEPROM, LED + JACK IO expanders)
+3) SDO (AK4619VN SDOUT1)
+4) SDA (I2C SDA)
+5) LRCK (CODEC clock line)
+6) PDN (CODEC power down, also connected to LED output enable and JACK reset line -- HIGH means everything is on)
+7) BICK (CODEC clock line)
+8) MCLK (CODEC clock line)
+9) GND
+10) GND
+11) 3V3 IN
+12) 3V3 IN
+
 ## Gateware details
 - Examples based on iCE40 and ECP5 based FPGAs supported by open-source tools.
 - User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
