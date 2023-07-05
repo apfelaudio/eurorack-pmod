@@ -9,7 +9,9 @@
 
 module eurorack_pmod #(
     parameter W = 16, // sample width, bits
-    parameter CAL_MEM_FILE = "cal/cal_mem.hex"
+    parameter CAL_MEM_FILE = "cal/cal_mem.hex",
+    parameter CODEC_CFG_FILE  = "drivers/ak4619-cfg.hex",
+    parameter LED_CFG_FILE  = "drivers/pca9635-cfg.hex"
 )(
     input clk_12mhz,   // Assumed 12MHz
     input rst,
@@ -121,7 +123,10 @@ ak4619 ak4619_instance (
 );
 
 // I2C transceiver and driver for all connected slaves.
-pmod_i2c_master pmod_i2c_master_instance (
+pmod_i2c_master #(
+    .CODEC_CFG(CODEC_CFG_FILE),
+    .LED_CFG(LED_CFG_FILE),
+) pmod_i2c_master_instance (
     .clk(clk_12mhz),
     .rst(rst),
 
