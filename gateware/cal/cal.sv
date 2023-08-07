@@ -14,8 +14,6 @@
 // This module also checks jack inputs and sets calibrated samples to zero
 // for any inputs for which a jack is not connected.
 
-`default_nettype none
-
 module cal #(
     parameter W = 16, // sample width
     parameter CAL_MEM_FILE = "cal/cal_mem.hex"

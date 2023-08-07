@@ -10,8 +10,6 @@
 // than pure Verilog, however I wanted to make it possible to use all
 // functions of the board without having to resort to using a softcore.
 
-`default_nettype none
-
 module pmod_i2c_master #(
     parameter CODEC_CFG  = "drivers/ak4619-cfg.hex",
     parameter CODEC_CFG_BYTES = 16'd23,

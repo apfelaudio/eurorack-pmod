@@ -5,8 +5,6 @@
 //
 // Currently 93.75KHz/16bit samples.
 
-`default_nettype none
-
 module ak4619 #(
     parameter W = 16 // sample width, bits
 )(
