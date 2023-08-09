@@ -5,68 +5,70 @@
 // and CODEC driver. Calibrated samples to/from this component are
 // handled by external user-defined logic.
 
+`default_nettype none
+
 module eurorack_pmod #(
     parameter W = 16, // sample width, bits
     parameter CAL_MEM_FILE = "cal/cal_mem.hex",
     parameter CODEC_CFG_FILE  = "drivers/ak4619-cfg.hex",
     parameter LED_CFG_FILE  = "drivers/pca9635-cfg.hex"
 )(
-    input clk_12mhz,   // Assumed 12MHz
-    input rst,
+    input wire clk_12mhz,   // Assumed 12MHz
+    input wire rst,
 
     // Signals to/from eurorack-pmod hardware.
     //
     // Pin # referenced to iCEbreaker PMOD connector if NO ribbon
     // cable is used (i.e pins are not flipped).
-	output i2c_scl_oe, // Pin 1 (tristate: 1 == LO, 0 == HiZ)
-	input  i2c_scl_i,  // Pin 1 (tristate in)
-	output i2c_sda_oe, // Pin 2 (tristate: 1 == LO, 0 == HiZ)
-	input  i2c_sda_i,  // Pin 2 (tristate in)
-    output pdn,        // Pin 3
-    output mclk,       // Pin 4
-    output sdin1,      // Pin 7
-    input  sdout1,     // Pin 8
-    output lrck,       // Pin 9
-    output bick,       // Pin 10
+	output wire i2c_scl_oe, // Pin 1 (tristate: 1 == LO, 0 == HiZ)
+	input  wire i2c_scl_i,  // Pin 1 (tristate in)
+	output wire i2c_sda_oe, // Pin 2 (tristate: 1 == LO, 0 == HiZ)
+	input  wire i2c_sda_i,  // Pin 2 (tristate in)
+    output wire pdn,        // Pin 3
+    output wire mclk,       // Pin 4
+    output wire sdin1,      // Pin 7
+    input  wire sdout1,     // Pin 8
+    output wire lrck,       // Pin 9
+    output wire bick,       // Pin 10
 
     // Signals to exchange information to/from user-defined DSP core.
     //
     // Driven by ak4619_instance, 93.75Khz.
-    output sample_clk,
+    output wire sample_clk,
     // Calibrated samples to/from CODEC at sample_clk.
-    output signed [W-1:0] cal_in0,
-    output signed [W-1:0] cal_in1,
-    output signed [W-1:0] cal_in2,
-    output signed [W-1:0] cal_in3,
-    input signed [W-1:0] cal_out0,
-    input signed [W-1:0] cal_out1,
-    input signed [W-1:0] cal_out2,
-    input signed [W-1:0] cal_out3,
+    output wire signed [W-1:0] cal_in0,
+    output wire signed [W-1:0] cal_in1,
+    output wire signed [W-1:0] cal_in2,
+    output wire signed [W-1:0] cal_in3,
+    input wire signed [W-1:0] cal_out0,
+    input wire signed [W-1:0] cal_out1,
+    input wire signed [W-1:0] cal_out2,
+    input wire signed [W-1:0] cal_out3,
     // EEPROM data read over I2C during startup.
-    output [7:0] eeprom_mfg,
-    output [7:0] eeprom_dev,
-    output [31:0] eeprom_serial,
+    output wire [7:0] eeprom_mfg,
+    output wire [7:0] eeprom_dev,
+    output wire [31:0] eeprom_serial,
     // Jack detection inputs read constantly over I2C.
     // Logic '1' == jack is inserted. Bit 0 is input 0.
-    output [7:0] jack,
+    output wire [7:0] jack,
 
     // Signals used for bringup / debug / calibration.
     //
     // Raw samples from the CODEC ADCs
-    output signed [W-1:0] sample_adc0,
-    output signed [W-1:0] sample_adc1,
-    output signed [W-1:0] sample_adc2,
-    output signed [W-1:0] sample_adc3,
+    output wire signed [W-1:0] sample_adc0,
+    output wire signed [W-1:0] sample_adc1,
+    output wire signed [W-1:0] sample_adc2,
+    output wire signed [W-1:0] sample_adc3,
     // Used for output calibration. If nonzero, all DAC outputs
     // are directly set to this value.
-    input signed [W-1:0] force_dac_output
+    input wire signed [W-1:0] force_dac_output
 );
 
 // Raw samples to/from CODEC
-logic signed [W-1:0] sample_dac0;
-logic signed [W-1:0] sample_dac1;
-logic signed [W-1:0] sample_dac2;
-logic signed [W-1:0] sample_dac3;
+wire signed [W-1:0] sample_dac0;
+wire signed [W-1:0] sample_dac1;
+wire signed [W-1:0] sample_dac2;
+wire signed [W-1:0] sample_dac3;
 
 // Raw sample calibrator, both for input and output channels.
 // Compensates for DC bias in CODEC, gain differences, resistor

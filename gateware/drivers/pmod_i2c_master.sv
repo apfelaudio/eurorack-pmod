@@ -10,41 +10,43 @@
 // than pure Verilog, however I wanted to make it possible to use all
 // functions of the board without having to resort to using a softcore.
 
+`default_nettype none
+
 module pmod_i2c_master #(
     parameter CODEC_CFG  = "drivers/ak4619-cfg.hex",
     parameter CODEC_CFG_BYTES = 16'd23,
     parameter LED_CFG  = "drivers/pca9635-cfg.hex",
     parameter LED_CFG_BYTES = 16'd26
 )(
-    input  clk,
-    input  rst,
+    input  wire clk,
+    input  wire rst,
 
     // I2C signals to be routed to PMOD IO.
-	output scl_oe,
-	input  scl_i,
-	output sda_oe,
-	input  sda_i,
+	output wire scl_oe,
+	input  wire scl_i,
+	output wire sda_oe,
+	input  wire sda_i,
 
     // Signed LED values, -128 (max red) to 127 (max green).
     // The hardware actually allows lighting both LEDs simultaneously,
     // but for now this interface is good enough for visualizing
     // the analog input and output channels.
-    input signed [7:0] led0,
-    input signed [7:0] led1,
-    input signed [7:0] led2,
-    input signed [7:0] led3,
-    input signed [7:0] led4,
-    input signed [7:0] led5,
-    input signed [7:0] led6,
-    input signed [7:0] led7,
+    input wire signed [7:0] led0,
+    input wire signed [7:0] led1,
+    input wire signed [7:0] led2,
+    input wire signed [7:0] led3,
+    input wire signed [7:0] led4,
+    input wire signed [7:0] led5,
+    input wire signed [7:0] led6,
+    input wire signed [7:0] led7,
 
     // Jack detection outputs, 1 == inserted. (bit 0 is input 0, bit 4 is output 0).
-    output logic [7:0] jack,
+    output reg [7:0] jack,
 
     // Data read from EEPROM after reset.
-    output logic [7:0]  eeprom_mfg_code,
-    output logic [7:0]  eeprom_dev_code,
-    output logic [31:0] eeprom_serial
+    output reg [7:0]  eeprom_mfg_code,
+    output reg [7:0]  eeprom_dev_code,
+    output reg [31:0] eeprom_serial
 );
 
 // Overall state machine of this core.
@@ -71,31 +73,31 @@ localparam [1:0] I2CMASTER_START = 2'b00,
                  I2CMASTER_READ  = 2'b11;
 
 // BRAMS initialized with register values which controller should write.
-logic [7:0] codec_config [0:CODEC_CFG_BYTES-1];
+reg [7:0] codec_config [0:CODEC_CFG_BYTES-1];
 initial $readmemh(CODEC_CFG, codec_config);
-logic [7:0] led_config [0:LED_CFG_BYTES-1];
+reg [7:0] led_config [0:LED_CFG_BYTES-1];
 initial $readmemh(LED_CFG, led_config);
 
 // State tracking for this core and position into `{led/codec}_config`
-logic [3:0] i2c_state;
-logic [15:0] i2c_config_pos;
+reg [3:0] i2c_state;
+reg [15:0] i2c_config_pos;
 
 // Outbound signals to `i2c_master` core.
-logic [7:0] data_in;
-logic       ack_in;
-logic [1:0] cmd;
-logic       stb;
+reg [7:0] data_in;
+reg       ack_in;
+reg [1:0] cmd;
+reg       stb;
 
 // Inbound signals from `i2c_master` core.
-logic [7:0] data_out;
-logic       ack_out;
-logic       err_out;
-logic       ready;
+wire [7:0] data_out;
+wire       ack_out;
+wire       err_out;
+wire       ready;
 
 // Used for startup delay.
-logic [23:0] delay_cnt;
+reg [23:0] delay_cnt;
 
-always_ff @(posedge clk) begin
+always @(posedge clk) begin
     if (rst) begin
         i2c_config_pos <= 0;
         i2c_state <= I2C_DELAY1;
@@ -168,7 +170,7 @@ always_ff @(posedge clk) begin
                     // Shift out all bytes in the CODEC configuration in
                     // one long transaction until we are finished.
                     if (i2c_config_pos != CODEC_CFG_BYTES) begin
-                        data_in <= codec_config[5'(i2c_config_pos)];
+                        data_in <= codec_config[i2c_config_pos];
                         cmd <= I2CMASTER_WRITE;
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
@@ -191,7 +193,7 @@ always_ff @(posedge clk) begin
                             i2c_state <= I2C_JACK1;
                         end
                         default: begin
-                            data_in <= led_config[5'(i2c_config_pos)];
+                            data_in <= led_config[i2c_config_pos];
                             cmd <= I2CMASTER_WRITE;
                         end
                         // Override PWM values from led configuration.

@@ -5,38 +5,40 @@
 //
 // Currently 93.75KHz/16bit samples.
 
+`default_nettype none
+
 module ak4619 #(
     parameter W = 16 // sample width, bits
 )(
-    input  clk,   // Assumed 12MHz
-    input  rst,
-    output pdn,
-    output mclk,
-    output bick,
-    output lrck,
+    input  wire clk,   // Assumed 12MHz
+    input  wire rst,
+    output wire pdn,
+    output wire mclk,
+    output wire bick,
+    output wire lrck,
     output reg sdin1,
-    input  sdout1,
+    input  wire sdout1,
 
-    output sample_clk,
+    output wire sample_clk,
     output reg signed [W-1:0] sample_out0,
     output reg signed [W-1:0] sample_out1,
     output reg signed [W-1:0] sample_out2,
     output reg signed [W-1:0] sample_out3,
-    input  signed [W-1:0] sample_in0,
-    input  signed [W-1:0] sample_in1,
-    input  signed [W-1:0] sample_in2,
-    input  signed [W-1:0] sample_in3
+    input  wire signed [W-1:0] sample_in0,
+    input  wire signed [W-1:0] sample_in1,
+    input  wire signed [W-1:0] sample_in2,
+    input  wire signed [W-1:0] sample_in3
 );
 
-localparam int N_CHANNELS = 4;
+localparam N_CHANNELS = 4;
 
-logic signed [(W*N_CHANNELS)-1:0] dac_words;
-logic signed [W-1:0] adc_words [N_CHANNELS];
+reg signed [(W*N_CHANNELS)-1:0] dac_words;
+reg signed [W-1:0] adc_words [0:N_CHANNELS-1];
 
-logic sdout1_latched    = 1'b0;
-logic [7:0] clkdiv      = 8'd0;
-logic [1:0] channel;
-logic [4:0] bit_counter;
+reg sdout1_latched    = 1'b0;
+reg [7:0] clkdiv      = 8'd0;
+wire [1:0] channel;
+wire [4:0] bit_counter;
 
 assign pdn         = ~rst;
 assign bick        = clk;
@@ -47,7 +49,7 @@ assign channel     = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
 assign bit_counter = clkdiv[4:0];
 assign sample_clk  = lrck;
 
-always_ff @(negedge sample_clk) begin
+always @(negedge sample_clk) begin
     dac_words = {sample_in3, sample_in2,
                  sample_in1, sample_in0};
     sample_out0  <= adc_words[0];
@@ -56,7 +58,7 @@ always_ff @(negedge sample_clk) begin
     sample_out3  <= adc_words[3];
 end
 
-always_ff @(negedge clk) begin
+always @(negedge clk) begin
     // Clock out 16 bits
     if (bit_counter <= (W-1)) begin
         case (channel)
@@ -79,7 +81,7 @@ always_ff @(negedge clk) begin
     clkdiv <= clkdiv + 1;
 end
 
-always_ff @(posedge clk) begin
+always @(posedge clk) begin
     sdout1_latched <= sdout1;
 end
 

@@ -14,29 +14,31 @@
 // This module also checks jack inputs and sets calibrated samples to zero
 // for any inputs for which a jack is not connected.
 
+`default_nettype none
+
 module cal #(
     parameter W = 16, // sample width
     parameter CAL_MEM_FILE = "cal/cal_mem.hex"
 )(
-    input clk, // 12Mhz
-    input sample_clk,
-    input [7:0] jack,
-    input signed [W-1:0] in0,
-    input signed [W-1:0] in1,
-    input signed [W-1:0] in2,
-    input signed [W-1:0] in3,
-    input signed [W-1:0] in4,
-    input signed [W-1:0] in5,
-    input signed [W-1:0] in6,
-    input signed [W-1:0] in7,
-    output logic signed [W-1:0] out0,
-    output logic signed [W-1:0] out1,
-    output logic signed [W-1:0] out2,
-    output logic signed [W-1:0] out3,
-    output logic signed [W-1:0] out4,
-    output logic signed [W-1:0] out5,
-    output logic signed [W-1:0] out6,
-    output logic signed [W-1:0] out7
+    input wire clk, // 12Mhz
+    input wire sample_clk,
+    input wire [7:0] jack,
+    input wire signed [W-1:0] in0,
+    input wire signed [W-1:0] in1,
+    input wire signed [W-1:0] in2,
+    input wire signed [W-1:0] in3,
+    input wire signed [W-1:0] in4,
+    input wire signed [W-1:0] in5,
+    input wire signed [W-1:0] in6,
+    input wire signed [W-1:0] in7,
+    output reg signed [W-1:0] out0,
+    output reg signed [W-1:0] out1,
+    output reg signed [W-1:0] out2,
+    output reg signed [W-1:0] out3,
+    output reg signed [W-1:0] out4,
+    output reg signed [W-1:0] out5,
+    output reg signed [W-1:0] out6,
+    output reg signed [W-1:0] out7
 );
 
 localparam N_CHANNELS = 8;
@@ -50,20 +52,20 @@ localparam CAL_ST_LATCH     = 3'd0,
            CAL_ST_OUT       = 3'd5,
            CAL_ST_HALT      = 3'd6;
 
-localparam int signed CLAMPL = -32'sd32000;
-localparam int signed CLAMPH =  32'sd32000;
+localparam CLAMPL = -32'sd32000;
+localparam CLAMPH =  32'sd32000;
 
-logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
-logic signed [(2*W)-1:0] out     [N_CHANNELS];
-logic        [2:0]       ch      = 0;
-logic        [2:0]       state   = CAL_ST_ZERO;
-logic               l_sample_clk = 1'd0;
+reg signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
+reg signed [(2*W)-1:0] out     [0:N_CHANNELS-1];
+reg        [2:0]       ch      = 0;
+reg        [2:0]       state   = CAL_ST_ZERO;
+reg               l_sample_clk = 1'd0;
 
 // Calibration memory for 8 channels stored as
 // 2 bytes shift, 2 bytes multiply * 8 channels.
 initial $readmemh(CAL_MEM_FILE, cal_mem);
 
-always_ff @(posedge clk) begin
+always @(posedge clk) begin
 
     // On rising sample_clk.
     if (sample_clk && (l_sample_clk != sample_clk)) begin
@@ -76,19 +78,19 @@ always_ff @(posedge clk) begin
     case (state)
         CAL_ST_LATCH: begin
             case (ch)
-                0: out[0] <= 32'(in0);
-                1: out[1] <= 32'(in1);
-                2: out[2] <= 32'(in2);
-                3: out[3] <= 32'(in3);
-                4: out[4] <= 32'(in4);
-                5: out[5] <= 32'(in5);
-                6: out[6] <= 32'(in6);
-                7: out[7] <= 32'(in7);
+                0: out[0] <= in0;
+                1: out[1] <= in1;
+                2: out[2] <= in2;
+                3: out[3] <= in3;
+                4: out[4] <= in4;
+                5: out[5] <= in5;
+                6: out[6] <= in6;
+                7: out[7] <= in7;
             endcase
             if (ch == LAST_CH_IX) state <= CAL_ST_ZERO;
         end
         CAL_ST_ZERO: begin
-            out[ch] <= (out[ch] - 32'(cal_mem[{ch, 1'b0}]));
+            out[ch] <= (out[ch] - cal_mem[{ch, 1'b0}]);
             if (ch == LAST_CH_IX) state <= CAL_ST_MULTIPLY;
         end
         CAL_ST_MULTIPLY: begin
