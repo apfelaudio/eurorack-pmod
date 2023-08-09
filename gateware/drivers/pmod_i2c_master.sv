@@ -61,19 +61,6 @@ localparam I2C_DELAY1        = 0,
            I2C_JACK2         = 8, // >>--/
            I2C_IDLE          = 9;
 
-
-logic [3:0] i2c_state = I2C_DELAY1;
-
-// Index into i2c config memories
-logic [15:0] i2c_config_pos = 0;
-
-// Logic for startup configuration of CODEC over I2C.
-logic [7:0] codec_config [0:CODEC_CFG_BYTES-1];
-initial $readmemh(CODEC_CFG, codec_config);
-
-// Logic for startup configuration of LEDs over I2C.
-logic [7:0] led_config [0:LED_CFG_BYTES-1];
-initial $readmemh(LED_CFG, led_config);
 // Index at which PWM values start in the led config.
 localparam PCA9635_PWM0 = 4;
 
@@ -83,11 +70,21 @@ localparam [1:0] I2CMASTER_START = 2'b00,
                  I2CMASTER_WRITE = 2'b10,
                  I2CMASTER_READ  = 2'b11;
 
+// BRAMS initialized with register values which controller should write.
+logic [7:0] codec_config [0:CODEC_CFG_BYTES-1];
+initial $readmemh(CODEC_CFG, codec_config);
+logic [7:0] led_config [0:LED_CFG_BYTES-1];
+initial $readmemh(LED_CFG, led_config);
+
+// State tracking for this core and position into `{led/codec}_config`
+logic [3:0] i2c_state;
+logic [15:0] i2c_config_pos;
+
 // Outbound signals to `i2c_master` core.
 logic [7:0] data_in;
 logic       ack_in;
 logic [1:0] cmd;
-logic       stb = 1'b0;
+logic       stb;
 
 // Inbound signals from `i2c_master` core.
 logic [7:0] data_out;
@@ -100,8 +97,10 @@ logic [23:0] delay_cnt;
 
 always_ff @(posedge clk) begin
     if (rst) begin
+        i2c_config_pos <= 0;
         i2c_state <= I2C_DELAY1;
         delay_cnt <= 0;
+        stb <= 1'b0;
     end else begin
         delay_cnt <= delay_cnt + 1;
         if (ready && ~stb) begin
