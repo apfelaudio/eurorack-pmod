@@ -2,6 +2,7 @@ PROJ = top
 
 DEVICE = 25k
 PACKAGE = CABGA381
+SPEEDGRADE = 6
 PIN_DEF = ./boards/colorlight_i5/pinmap.lpf
 ADD_DEFINES = -DSELECTED_DSP_CORE=$(CORE)
 
