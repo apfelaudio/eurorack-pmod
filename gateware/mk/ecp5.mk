@@ -11,7 +11,7 @@ $(BUILD)/%.json: %.v $(ADD_SRC) $(ADD_DEPS)
 %.config: $(PIN_DEF) %.json
 	nextpnr-ecp5 --$(DEVICE) \
 	$(if $(PACKAGE),--package $(PACKAGE)) \
-	--speed 6 \
+	--speed $(SPEEDGRADE) \
 	--json $(filter-out $<,$^) \
 	--lpf $< \
 	--textcfg $@ \

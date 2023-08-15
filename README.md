@@ -39,6 +39,7 @@ An FPGA development board itself is NOT included! Essentially anything iCE40 or 
 
 The following development boards have been tested with `eurorack-pmod` and are supported by the examples in the github repository
 - iCEbreaker (iCE40 based)
+- ECPIX-5 (ECP5 based)
 - Colorlight i5 (ECP5 based)
 - Colorlight i9 (ECP5 based)
 - pico-ice from TinyVision (iCE40 based)
