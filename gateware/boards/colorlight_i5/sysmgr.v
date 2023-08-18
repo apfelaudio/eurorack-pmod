@@ -4,18 +4,23 @@ module sysmgr (
     // Assumed 25Mhz for Colorlight i5.
 	input  wire clk_in,
 	input  wire rst_in,
-	output wire clk_12m,
+	output wire clk_256fs,
+	output wire clk_fs,
 	output wire rst_out
 );
 
-// Signals
 wire clk_fb;
-
 wire pll_lock;
 wire pll_reset;
-
 wire rst_i;
+
 reg [7:0] rst_cnt;
+reg [7:0] clkdiv;
+
+assign pll_reset = rst_in;
+assign rst_i = ~rst_cnt[7];
+assign rst_out = rst_i;
+assign clk_fs = clkdiv[7];
 
 `ifndef VERILATOR_LINT_ONLY
 
@@ -49,7 +54,7 @@ EHXPLLL #(
         .RST(pll_reset),
         .STDBY(1'b0),
         .CLKI(clk_in),
-        .CLKOS(clk_12m),
+        .CLKOS(clk_256fs),
         .CLKFB(clk_fb),
         .CLKINTFB(clk_fb),
         .PHASESEL0(1'b0),
@@ -64,17 +69,16 @@ EHXPLLL #(
 
 `endif
 
-// PLL reset generation
-assign pll_reset = rst_in;
-// Logic reset generation
 always @(posedge clk_in)
     if (!pll_lock)
         rst_cnt <= 8'h0;
     else if (~rst_cnt[7])
         rst_cnt <= rst_cnt + 1;
 
-assign rst_i = ~rst_cnt[7];
-
-assign rst_out = rst_i;
+always @(posedge clk_256fs)
+    if (rst_i)
+        clkdiv <= 8'h00;
+    else
+        clkdiv <= clkdiv + 1;
 
 endmodule // sysmgr

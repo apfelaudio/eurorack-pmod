@@ -14,18 +14,20 @@ async def clock_out_word(dut, word):
 
 async def clock_in_word(dut):
     word = 0x0000
-    for i in range(16+1):
+    for i in range(16):
         await RisingEdge(dut.bick)
-        word |= dut.sdin1.value << (16-i)
-    for i in range(15):
+        word |= dut.sdin1.value << (15-i)
+    for i in range(16):
         await RisingEdge(dut.bick)
     return word
 
 @cocotb.test()
 async def test_ak4619_00(dut):
 
-    clock = Clock(dut.clk, 83, units='ns')
-    cocotb.start_soon(clock.start())
+    clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
+    clk_fs = Clock(dut.clk_fs, 83*256, units='ns')
+    cocotb.start_soon(clk_256fs.start())
+    cocotb.start_soon(clk_fs.start(start_high=False))
 
     TEST_L0 = 0xFC14
     TEST_R0 = 0xAD0F
@@ -34,7 +36,7 @@ async def test_ak4619_00(dut):
 
     dut.sdout1.value = 0
 
-    await FallingEdge(dut.sample_clk)
+    await FallingEdge(dut.clk_fs)
     await clock_out_word(dut, TEST_L0)
     await clock_out_word(dut, TEST_R0)
     await clock_out_word(dut, TEST_L1)
@@ -42,8 +44,8 @@ async def test_ak4619_00(dut):
 
     # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
-    await RisingEdge(dut.sample_clk)
-    await FallingEdge(dut.sample_clk)
+    await RisingEdge(dut.clk_fs)
+    await FallingEdge(dut.clk_fs)
     print("Data clocked from sdout1 present at sample_outX:")
     print(hex(dut.sample_out0.value))
     print(hex(dut.sample_out1.value))
@@ -60,8 +62,8 @@ async def test_ak4619_00(dut):
     dut.sample_in2.value = Force(TEST_L1)
     dut.sample_in3.value = Force(TEST_R1)
 
-    await FallingEdge(dut.sample_clk)
-    await FallingEdge(dut.sample_clk)
+    await FallingEdge(dut.clk_fs)
+    await FallingEdge(dut.clk_fs)
 
     result_l0 = await clock_in_word(dut)
     result_r0 = await clock_in_word(dut)
@@ -84,4 +86,4 @@ async def test_ak4619_00(dut):
     dut.sample_in2.value = Release()
     dut.sample_in3.value = Release()
 
-    await FallingEdge(dut.sample_clk)
+    await FallingEdge(dut.clk_fs)

@@ -13,7 +13,8 @@ module eurorack_pmod #(
     parameter CODEC_CFG_FILE  = "drivers/ak4619-cfg.hex",
     parameter LED_CFG_FILE  = "drivers/pca9635-cfg.hex"
 )(
-    input clk_12mhz,   // Assumed 12MHz
+    input clk_256fs,
+    input clk_fs,
     input rst,
 
     // Signals to/from eurorack-pmod hardware.
@@ -33,8 +34,6 @@ module eurorack_pmod #(
 
     // Signals to exchange information to/from user-defined DSP core.
     //
-    // Driven by ak4619_instance, 93.75Khz.
-    output sample_clk,
     // Calibrated samples to/from CODEC at sample_clk.
     output signed [W-1:0] cal_in0,
     output signed [W-1:0] cal_in1,
@@ -77,8 +76,8 @@ cal #(
     .W(W),
     .CAL_MEM_FILE(CAL_MEM_FILE)
 )cal_instance (
-    .clk (clk_12mhz),
-    .sample_clk (sample_clk),
+    .clk_256fs (clk_256fs),
+    .clk_fs (clk_fs),
     // Calibrated inputs are zeroed if jack is unplugged.
     .jack (jack),
     // Note: inputs samples are inverted by analog frontend
@@ -103,7 +102,8 @@ cal #(
 
 // CODEC ser-/deserialiser. Also derives sample clock.
 ak4619 ak4619_instance (
-    .clk     (clk_12mhz),
+    .clk_256fs     (clk_256fs),
+    .clk_fs  (clk_fs),
     .rst     (rst),
     .pdn     (pdn),
     .mclk    (mclk),
@@ -111,7 +111,6 @@ ak4619 ak4619_instance (
     .lrck    (lrck),
     .sdin1   (sdin1),
     .sdout1  (sdout1),
-    .sample_clk  (sample_clk),
     .sample_out0 (sample_adc0),
     .sample_out1 (sample_adc1),
     .sample_out2 (sample_adc2),
@@ -125,9 +124,9 @@ ak4619 ak4619_instance (
 // I2C transceiver and driver for all connected slaves.
 pmod_i2c_master #(
     .CODEC_CFG(CODEC_CFG_FILE),
-    .LED_CFG(LED_CFG_FILE),
+    .LED_CFG(LED_CFG_FILE)
 ) pmod_i2c_master_instance (
-    .clk(clk_12mhz),
+    .clk(clk_256fs),
     .rst(rst),
 
     .scl_oe(i2c_scl_oe),

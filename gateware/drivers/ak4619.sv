@@ -3,14 +3,23 @@
 // Currently assumes the device is configured in the audio
 // interface mode specified in ak4619-cfg.hex.
 //
-// Currently 93.75KHz/16bit samples.
+// The following registers are most important:
+//  - FS == 0b000, which means:
+//      - MCLK = 256*Fs,
+//      - BICK = 128*Fs,
+//      - Fs must fall within 8kHz <= Fs <= 48Khz.
+// - TDM == 0b1 and DCF == 0b010, which means:
+//      - TDM128 mode I2S compatible.
+//
 
 `default_nettype none
 
 module ak4619 #(
     parameter W = 16 // sample width, bits
 )(
-    input  clk,   // Assumed 12MHz
+    input  clk_256fs,
+    input  clk_fs,
+
     input  rst,
     output pdn,
     output mclk,
@@ -19,7 +28,6 @@ module ak4619 #(
     output reg sdin1,
     input  sdout1,
 
-    output sample_clk,
     output reg signed [W-1:0] sample_out0,
     output reg signed [W-1:0] sample_out1,
     output reg signed [W-1:0] sample_out2,
@@ -41,15 +49,14 @@ logic [1:0] channel;
 logic [4:0] bit_counter;
 
 assign pdn         = ~rst;
-assign bick        = clk;
-assign mclk        = clk;
-assign lrck        = clkdiv[6];   // 12MHz >> 7 == 93.75KHz
+assign bick        = clkdiv[0];
+assign mclk        = clk_256fs;
+assign lrck        = clk_fs;
 
-assign channel     = clkdiv[6:5]; // 0 == L (Ch0), 1 == R (Ch1)
-assign bit_counter = clkdiv[4:0];
-assign sample_clk  = lrck;
+assign channel     = clkdiv[7:6]; // 0 == L (Ch0), 1 == R (Ch1)
+assign bit_counter = clkdiv[5:1];
 
-always_ff @(negedge sample_clk) begin
+always_ff @(negedge clk_fs) begin
     dac_words = {sample_in3, sample_in2,
                  sample_in1, sample_in0};
     sample_out0  <= adc_words[0];
@@ -58,7 +65,7 @@ always_ff @(negedge sample_clk) begin
     sample_out3  <= adc_words[3];
 end
 
-always_ff @(negedge clk) begin
+always_ff @(negedge clk_256fs) begin
     // Clock out 16 bits
     if (bit_counter <= (W-1)) begin
         case (channel)
@@ -81,7 +88,7 @@ always_ff @(negedge clk) begin
     clkdiv <= clkdiv + 1;
 end
 
-always_ff @(posedge clk) begin
+always_ff @(posedge clk_256fs) begin
     sdout1_latched <= sdout1;
 end
 
