@@ -43,8 +43,8 @@ localparam int N_CHANNELS = 4;
 logic signed [(W*N_CHANNELS)-1:0] dac_words;
 logic signed [W-1:0] adc_words [N_CHANNELS];
 
-logic sdout1_latched    = 1'b0;
-logic [7:0] clkdiv      = 8'd0;
+logic [7:0] clkdiv;
+
 logic [1:0] channel;
 logic [4:0] bit_counter;
 
@@ -53,7 +53,7 @@ assign bick        = clkdiv[0];
 assign mclk        = clk_256fs;
 assign lrck        = clkdiv[7];
 
-assign channel     = clkdiv[7:6]; // 0 == L (Ch0), 1 == R (Ch1)
+assign channel     = clkdiv[7:6]; // 0, 1, 2, 3 == L, R, L, R
 assign bit_counter = clkdiv[5:1];
 
 always_ff @(negedge clk_fs) begin
@@ -65,31 +65,31 @@ always_ff @(negedge clk_fs) begin
     sample_out3  <= adc_words[3];
 end
 
-always_ff @(negedge clk_256fs) begin
-    // Clock out 16 bits
-    if (bit_counter <= (W-1)) begin
-        case (channel)
-            0: sdin1 <= dac_words[(1*W)-1-bit_counter];
-            1: sdin1 <= dac_words[(2*W)-1-bit_counter];
-            2: sdin1 <= dac_words[(3*W)-1-bit_counter];
-            3: sdin1 <= dac_words[(4*W)-1-bit_counter];
-        endcase
-    end else begin
-        sdin1 <= 0;
-    end
-    // Clock in 16 bits
-    if (bit_counter == 0) begin
-        adc_words[channel] <= 0;
-    end
-    if (bit_counter <= W) begin
-        adc_words[channel][W - bit_counter] <= sdout1_latched;
-    end
-
-    clkdiv <= clkdiv + 1;
-end
-
 always_ff @(posedge clk_256fs) begin
-    sdout1_latched <= sdout1;
+    clkdiv <= clkdiv + 1;
+    if (rst) begin
+        clkdiv <= 8'h0;
+    end else if (bick) begin // HI -> LO
+        // Clock in W bits
+        if (bit_counter == 0) begin
+            adc_words[channel] <= 0;
+        end
+        if (bit_counter <= W) begin
+            adc_words[channel][W - bit_counter - 1] <= sdout1;
+        end
+    end else begin
+        // Clock out W bits
+        if (bit_counter <= (W-1)) begin
+            case (channel)
+                0: sdin1 <= dac_words[(1*W)-1-bit_counter];
+                1: sdin1 <= dac_words[(2*W)-1-bit_counter];
+                2: sdin1 <= dac_words[(3*W)-1-bit_counter];
+                3: sdin1 <= dac_words[(4*W)-1-bit_counter];
+            endcase
+        end else begin
+            sdin1 <= 0;
+        end
+    end
 end
 
 `ifdef COCOTB_SIM

@@ -5,20 +5,17 @@ from cocotb.handle import Force, Release
 
 
 async def clock_out_word(dut, word):
-    for i in range(16):
-        await FallingEdge(dut.bick)
-        dut.sdout1.value = (word >> (0xF-i)) & 1
-    for i in range(16):
-        await FallingEdge(dut.bick)
-        dut.sdout1.value = 0
+    await FallingEdge(dut.bick)
+    for i in range(32):
+        await RisingEdge(dut.bick)
+        dut.sdout1.value = (word >> (0x1F-i)) & 1
 
 async def clock_in_word(dut):
-    word = 0x0000
-    for i in range(16):
-        await RisingEdge(dut.bick)
-        word |= dut.sdin1.value << (15-i)
-    for i in range(16):
-        await RisingEdge(dut.bick)
+    word = 0x00000000
+    await RisingEdge(dut.bick)
+    for i in range(32):
+        await FallingEdge(dut.bick)
+        word |= dut.sdin1.value << (0x1F-i)
     return word
 
 @cocotb.test()
@@ -29,12 +26,17 @@ async def test_ak4619_00(dut):
     cocotb.start_soon(clk_256fs.start())
     cocotb.start_soon(clk_fs.start(start_high=False))
 
-    TEST_L0 = 0xFC14
-    TEST_R0 = 0xAD0F
-    TEST_L1 = 0xDEAD
-    TEST_R1 = 0xBEEF
+    TEST_L0 = 0xFC140000
+    TEST_R0 = 0xAD0F0000
+    TEST_L1 = 0xDEAD0000
+    TEST_R1 = 0xBEEF0000
 
     dut.sdout1.value = 0
+
+    dut.rst.value = 1
+    await RisingEdge(dut.clk_256fs)
+    await RisingEdge(dut.clk_256fs)
+    dut.rst.value = 0
 
     await FallingEdge(dut.clk_fs)
     await clock_out_word(dut, TEST_L0)
@@ -52,18 +54,18 @@ async def test_ak4619_00(dut):
     print(hex(dut.sample_out2.value))
     print(hex(dut.sample_out3.value))
 
-    assert dut.sample_out0.value == TEST_L0
-    assert dut.sample_out1.value == TEST_R0
-    assert dut.sample_out2.value == TEST_L1
-    assert dut.sample_out3.value == TEST_R1
+    assert dut.sample_out0.value == TEST_L0 >> 16
+    assert dut.sample_out1.value == TEST_R0 >> 16
+    assert dut.sample_out2.value == TEST_L1 >> 16
+    assert dut.sample_out3.value == TEST_R1 >> 16
 
-    dut.sample_in0.value = Force(TEST_L0)
-    dut.sample_in1.value = Force(TEST_R0)
-    dut.sample_in2.value = Force(TEST_L1)
-    dut.sample_in3.value = Force(TEST_R1)
+    dut.sample_in0.value = Force(TEST_L0 >> 16)
+    dut.sample_in1.value = Force(TEST_R0 >> 16)
+    dut.sample_in2.value = Force(TEST_L1 >> 16)
+    dut.sample_in3.value = Force(TEST_R1 >> 16)
 
-    await FallingEdge(dut.clk_fs)
-    await FallingEdge(dut.clk_fs)
+    await FallingEdge(dut.lrck)
+    await FallingEdge(dut.lrck)
 
     result_l0 = await clock_in_word(dut)
     result_r0 = await clock_in_word(dut)
