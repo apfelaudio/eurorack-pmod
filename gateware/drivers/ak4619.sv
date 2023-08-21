@@ -51,7 +51,7 @@ logic [4:0] bit_counter;
 assign pdn         = ~rst;
 assign bick        = clkdiv[0];
 assign mclk        = clk_256fs;
-assign lrck        = clk_fs;
+assign lrck        = clkdiv[7];
 
 assign channel     = clkdiv[7:6]; // 0 == L (Ch0), 1 == R (Ch1)
 assign bit_counter = clkdiv[5:1];
