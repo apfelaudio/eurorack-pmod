@@ -13,6 +13,7 @@ module sysmgr (
 	reg [7:0] rst_cnt = 8'h80;
     reg [7:0] clkdiv;
 
+    assign clk_256fs = clk_12m;
     assign clk_fs = clkdiv[7];
 	assign rst_i = rst_cnt[7];
 
