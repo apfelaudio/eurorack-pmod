@@ -39,12 +39,12 @@ module ak4619 #(
 );
 
 localparam int N_CHANNELS = 4;
+localparam int TDM_W = 32;
 
-logic signed [(W*N_CHANNELS)-1:0] dac_words;
-logic signed [W-1:0] adc_words [N_CHANNELS];
+logic signed [(TDM_W*N_CHANNELS)-1:0] dac_words;
+logic signed [(TDM_W*N_CHANNELS)-1:0] adc_words;
 
 logic [7:0] clkdiv;
-
 logic [1:0] channel;
 logic [4:0] bit_counter;
 
@@ -54,15 +54,17 @@ assign mclk        = clk_256fs;
 assign lrck        = clkdiv[7];
 
 assign channel     = clkdiv[7:6]; // 0, 1, 2, 3 == L, R, L, R
-assign bit_counter = clkdiv[5:1];
+assign bit_counter = (TDM_W-1)-clkdiv[5:1];
 
 always_ff @(negedge clk_fs) begin
-    dac_words = {sample_in3, sample_in2,
-                 sample_in1, sample_in0};
-    sample_out0  <= adc_words[0];
-    sample_out1  <= adc_words[1];
-    sample_out2  <= adc_words[2];
-    sample_out3  <= adc_words[3];
+    dac_words[(TDM_W*1)-1:(TDM_W*0)] <= {sample_in0, 16'd0};
+    dac_words[(TDM_W*2)-1:(TDM_W*1)] <= {sample_in1, 16'd0};
+    dac_words[(TDM_W*3)-1:(TDM_W*2)] <= {sample_in2, 16'd0};
+    dac_words[(TDM_W*4)-1:(TDM_W*3)] <= {sample_in3, 16'd0};
+    sample_out0 <= adc_words[TDM_W*1:(TDM_W*1)-W];
+    sample_out1 <= adc_words[TDM_W*2:(TDM_W*2)-W];
+    sample_out2 <= adc_words[TDM_W*3:(TDM_W*3)-W];
+    sample_out3 <= adc_words[TDM_W*4:(TDM_W*4)-W];
 end
 
 always_ff @(posedge clk_256fs) begin
@@ -70,25 +72,9 @@ always_ff @(posedge clk_256fs) begin
     if (rst) begin
         clkdiv <= 8'h0;
     end else if (bick) begin // HI -> LO
-        // Clock in W bits
-        if (bit_counter == 0) begin
-            adc_words[channel] <= 0;
-        end
-        if (bit_counter <= W) begin
-            adc_words[channel][W - bit_counter - 1] <= sdout1;
-        end
+        adc_words[{channel, bit_counter}] <= sdout1;
     end else begin
-        // Clock out W bits
-        if (bit_counter <= (W-1)) begin
-            case (channel)
-                0: sdin1 <= dac_words[(1*W)-1-bit_counter];
-                1: sdin1 <= dac_words[(2*W)-1-bit_counter];
-                2: sdin1 <= dac_words[(3*W)-1-bit_counter];
-                3: sdin1 <= dac_words[(4*W)-1-bit_counter];
-            endcase
-        end else begin
-            sdin1 <= 0;
-        end
+        sdin1 <= dac_words[{channel, bit_counter}];
     end
 end
 
