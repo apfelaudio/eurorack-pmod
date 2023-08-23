@@ -7,7 +7,8 @@ module sysmgr (
     // Actually the output here is the same frequency as the input
     // but we leave all this PLL logic here as you might need to scale
     // the clock down to 12m on different boards.
-	output wire clk_12m,
+	output wire clk_256fs,
+	output wire clk_fs,
 	output wire rst_out
 );
 
@@ -19,7 +20,14 @@ module sysmgr (
 	wire clk_2x_i;
 	wire clk_1x_i;
 	wire rst_i;
+
 	reg [7:0] rst_cnt;
+	reg [7:0] clkdiv;
+
+	assign clk_256fs = clk_1x_i;
+	assign pll_reset_n = ~rst_in;
+	assign rst_i = rst_cnt[7];
+	assign clk_fs = clkdiv[7];
 
 	// PLL instance
 `ifndef VERILATOR_LINT_ONLY
@@ -50,11 +58,6 @@ module sysmgr (
 	);
 `endif
 
-	assign clk_12m = clk_1x_i;
-
-	// PLL reset generation
-	assign pll_reset_n = ~rst_in;
-
 	// Logic reset generation
 	always @(posedge clk_1x_i or negedge pll_lock)
 		if (!pll_lock)
@@ -62,7 +65,12 @@ module sysmgr (
 		else if (rst_cnt[7])
 			rst_cnt <= rst_cnt + 1;
 
-	assign rst_i = rst_cnt[7];
+    always @(posedge clk_256fs)
+        if (rst_i)
+            clkdiv <= 8'h00;
+        else
+            clkdiv <= clkdiv + 1;
+
 
 `ifndef VERILATOR_LINT_ONLY
 	SB_GB rst_gbuf_I (
