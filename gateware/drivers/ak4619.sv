@@ -47,6 +47,7 @@ logic signed [(TDM_W*N_CHANNELS)-1:0] adc_words;
 logic [7:0] clkdiv;
 logic [1:0] channel;
 logic [4:0] bit_counter;
+logic last_lrck;
 
 assign pdn         = ~rst;
 assign bick        = clkdiv[0];
@@ -54,23 +55,24 @@ assign mclk        = clk_256fs;
 assign lrck        = clkdiv[7];
 
 assign channel     = clkdiv[7:6]; // 0, 1, 2, 3 == L, R, L, R
-assign bit_counter = (TDM_W-1)-clkdiv[5:1];
-
-always_ff @(negedge clk_fs) begin
-    dac_words[(TDM_W*1)-1:(TDM_W*0)] <= {sample_in0, 16'd0};
-    dac_words[(TDM_W*2)-1:(TDM_W*1)] <= {sample_in1, 16'd0};
-    dac_words[(TDM_W*3)-1:(TDM_W*2)] <= {sample_in2, 16'd0};
-    dac_words[(TDM_W*4)-1:(TDM_W*3)] <= {sample_in3, 16'd0};
-    sample_out0 <= adc_words[TDM_W*1:(TDM_W*1)-W];
-    sample_out1 <= adc_words[TDM_W*2:(TDM_W*2)-W];
-    sample_out2 <= adc_words[TDM_W*3:(TDM_W*3)-W];
-    sample_out3 <= adc_words[TDM_W*4:(TDM_W*4)-W];
-end
+assign bit_counter = 5'(TDM_W-1)-clkdiv[5:1];
 
 always_ff @(posedge clk_256fs) begin
     clkdiv <= clkdiv + 1;
+    last_lrck <= lrck;
     if (rst) begin
         clkdiv <= 8'h0;
+    // Latch and update all sample_in/sample_out ports on falling LRCK.
+    end else if (last_lrck && ~lrck) begin
+        dac_words[(TDM_W*1)-1:(TDM_W*0)] <= {sample_in0, 16'd0};
+        dac_words[(TDM_W*2)-1:(TDM_W*1)] <= {sample_in1, 16'd0};
+        dac_words[(TDM_W*3)-1:(TDM_W*2)] <= {sample_in2, 16'd0};
+        dac_words[(TDM_W*4)-1:(TDM_W*3)] <= {sample_in3, 16'd0};
+        sample_out0 <= adc_words[TDM_W*1-1:(TDM_W*1)-W];
+        sample_out1 <= adc_words[TDM_W*2-1:(TDM_W*2)-W];
+        sample_out2 <= adc_words[TDM_W*3-1:(TDM_W*3)-W];
+        sample_out3 <= adc_words[TDM_W*4-1:(TDM_W*4)-W];
+        sdin1 <= sample_in0[W-1];
     end else if (bick) begin // HI -> LO
         adc_words[{channel, bit_counter}] <= sdout1;
     end else begin
