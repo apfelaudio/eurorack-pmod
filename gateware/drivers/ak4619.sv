@@ -55,7 +55,7 @@ assign mclk        = clk_256fs;
 assign lrck        = clkdiv[7];
 
 assign channel     = clkdiv[7:6]; // 0, 1, 2, 3 == L, R, L, R
-assign bit_counter = 5'(TDM_W-1)-clkdiv[5:1];
+assign bit_counter = 5'(TDM_W)-clkdiv[5:1];
 
 always_ff @(posedge clk_256fs) begin
     clkdiv <= clkdiv + 1;

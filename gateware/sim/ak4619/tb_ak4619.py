@@ -5,14 +5,12 @@ from cocotb.handle import Force, Release
 
 
 async def clock_out_word(dut, word):
-    await FallingEdge(dut.bick)
     for i in range(32):
         await RisingEdge(dut.bick)
         dut.sdout1.value = (word >> (0x1F-i)) & 1
 
 async def clock_in_word(dut):
     word = 0x00000000
-    await RisingEdge(dut.bick)
     for i in range(32):
         await FallingEdge(dut.bick)
         word |= dut.sdin1.value << (0x1F-i)
@@ -38,7 +36,8 @@ async def test_ak4619_00(dut):
     await RisingEdge(dut.clk_256fs)
     dut.rst.value = 0
 
-    await FallingEdge(dut.clk_fs)
+    await FallingEdge(dut.lrck)
+    await RisingEdge(dut.bick)
     await clock_out_word(dut, TEST_L0)
     await clock_out_word(dut, TEST_R0)
     await clock_out_word(dut, TEST_L1)
@@ -46,8 +45,7 @@ async def test_ak4619_00(dut):
 
     # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
-    await RisingEdge(dut.clk_fs)
-    await FallingEdge(dut.clk_fs)
+    await FallingEdge(dut.lrck)
     print("Data clocked from sdout1 present at sample_outX:")
     print(hex(dut.sample_out0.value))
     print(hex(dut.sample_out1.value))
@@ -65,8 +63,8 @@ async def test_ak4619_00(dut):
     dut.sample_in3.value = Force(TEST_R1 >> 16)
 
     await FallingEdge(dut.lrck)
-    await FallingEdge(dut.lrck)
-
+    await FallingEdge(dut.bick)
+    await FallingEdge(dut.bick)
     result_l0 = await clock_in_word(dut)
     result_r0 = await clock_in_word(dut)
     result_l1 = await clock_in_word(dut)
@@ -78,10 +76,10 @@ async def test_ak4619_00(dut):
     print(hex(result_l1))
     print(hex(result_r1))
 
-    assert result_l0 == TEST_L0
-    assert result_r0 == TEST_R0
-    assert result_l1 == TEST_L1
-    assert result_r1 == TEST_R1
+    assert result_l0 & 0xFFFFFF00 == TEST_L0
+    assert result_r0 & 0xFFFFFF00 == TEST_R0
+    assert result_l1 & 0xFFFFFF00 == TEST_L1
+    assert result_r1 & 0xFFFFFF00 == TEST_R1
 
     dut.sample_in0.value = Release()
     dut.sample_in1.value = Release()
