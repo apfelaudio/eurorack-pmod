@@ -38,7 +38,7 @@ async def test_i2cinit_00(dut):
             0x20, # Slave address and RW = 0
             0x00, # Start at register 0
             0x37, # 0x00 Power Management
-            0xAC  # 0x01 Audio I/F Format
+            0xAE  # 0x01 Audio I/F Format
     ]
 
     for i in range(4):
