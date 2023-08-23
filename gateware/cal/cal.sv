@@ -20,8 +20,8 @@ module cal #(
     parameter W = 16, // sample width
     parameter CAL_MEM_FILE = "cal/cal_mem.hex"
 )(
-    input clk, // 12Mhz
-    input sample_clk,
+    input clk_256fs,
+    input clk_fs,
     input [7:0] jack,
     input signed [W-1:0] in0,
     input signed [W-1:0] in1,
@@ -59,16 +59,16 @@ logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
 logic        [2:0]       ch      = 0;
 logic        [2:0]       state   = CAL_ST_ZERO;
-logic               l_sample_clk = 1'd0;
+logic               l_clk_fs = 1'd0;
 
 // Calibration memory for 8 channels stored as
 // 2 bytes shift, 2 bytes multiply * 8 channels.
 initial $readmemh(CAL_MEM_FILE, cal_mem);
 
-always_ff @(posedge clk) begin
+always_ff @(posedge clk_256fs) begin
 
-    // On rising sample_clk.
-    if (sample_clk && (l_sample_clk != sample_clk)) begin
+    // On rising clk_fs.
+    if (clk_fs && (l_clk_fs != clk_fs)) begin
         state <= CAL_ST_LATCH;
         ch <= 0;
     end else begin
@@ -122,7 +122,7 @@ always_ff @(posedge clk) begin
         end
     endcase
 
-    l_sample_clk <= sample_clk;
+    l_clk_fs <= clk_fs;
 end
 
 `ifdef COCOTB_SIM

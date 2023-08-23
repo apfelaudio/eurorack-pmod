@@ -7,7 +7,7 @@ def volts_to_freq(volts, a3_freq_hz=440.0):
     """Convert volts/oct (C3 == +3.0V) to frequency (Hz)."""
     return (a3_freq_hz / 8.0) * 2 ** (volts - 3.0/4.0)
 
-def volts_to_delta(volts, wavetable_n_samples=256, sample_rate_hz=93750):
+def volts_to_delta(volts, wavetable_n_samples=256, sample_rate_hz=46875):
     """Index delta (fractional) for wavetable per sample clock)."""
     return (wavetable_n_samples / sample_rate_hz) * volts_to_freq(volts)
 

@@ -18,10 +18,10 @@ def twos_comp_to_signed(n, numbits=16):
 @cocotb.test()
 async def test_cal_00(dut):
 
-    clock_24m = Clock(dut.clk, 40, units='ns')
-    cocotb.start_soon(clock_24m.start())
-    clock_sample = Clock(dut.sample_clk, 40*128, units='ns')
-    cocotb.start_soon(clock_sample.start())
+    clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
+    clk_fs = Clock(dut.clk_fs, 83*256, units='ns')
+    cocotb.start_soon(clk_256fs.start())
+    cocotb.start_soon(clk_fs.start(start_high=False))
 
     # Simulate all jacks connected so the cal core doesn't zero them
     dut.jack.value = Force(0xFF)
@@ -62,10 +62,10 @@ async def test_cal_00(dut):
             if expect >  32000: expect = 32000
             if expect < -32000: expect = -32000
             print(f"ch={channel}\t{int(value):6d}\t", end="")
-            await FallingEdge(dut.sample_clk)
-            await RisingEdge(dut.sample_clk)
-            await RisingEdge(dut.sample_clk)
-            await RisingEdge(dut.sample_clk)
+            await FallingEdge(dut.clk_fs)
+            await RisingEdge(dut.clk_fs)
+            await RisingEdge(dut.clk_fs)
+            await RisingEdge(dut.clk_fs)
             output = twos_comp_to_signed(cal_outx.value)
             print(f"=>\t{int(output):6d}\t(expect={expect})")
             cal_inx.value = Release()
