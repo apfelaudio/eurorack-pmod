@@ -24,10 +24,8 @@ module sysmgr (
 	reg [7:0] rst_cnt;
 	reg [7:0] clkdiv;
 
-	assign clk_256fs = clk_1x_i;
 	assign pll_reset_n = ~rst_in;
 	assign rst_i = rst_cnt[7];
-	assign clk_fs = clkdiv[7];
 
 	// PLL instance
 `ifndef VERILATOR_LINT_ONLY
@@ -76,6 +74,16 @@ module sysmgr (
 	SB_GB rst_gbuf_I (
 		.USER_SIGNAL_TO_GLOBAL_BUFFER(rst_i),
 		.GLOBAL_BUFFER_OUTPUT(rst_out)
+	);
+
+	SB_GB clk_256fs_gbuf (
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(clk_1x_i),
+		.GLOBAL_BUFFER_OUTPUT(clk_256fs)
+	);
+
+	SB_GB clk_fs_gbuf (
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(clkdiv[7]),
+		.GLOBAL_BUFFER_OUTPUT(clk_fs)
 	);
 `endif
 
