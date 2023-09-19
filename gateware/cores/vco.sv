@@ -2,7 +2,7 @@
 //
 // Mapping:
 // - Input 0: V/Oct input, C3 is +3V
-// - Output 0: VCO output (from wavetable)
+// - Output 0-3: VCO output (from wavetable) phased at 0, 90, 120, 270deg.
 
 module vco #(
     parameter W = 16,
@@ -35,30 +35,31 @@ module vco #(
 logic [W-1:0] v_oct_lut [0:V_OCT_LUT_SIZE-1];
 initial $readmemh(V_OCT_LUT_PATH, v_oct_lut);
 
+logic [W-1:0] wavetable [0:WAVETABLE_SIZE-1];
+initial $readmemh(WAVETABLE_PATH, wavetable);
+
 // For < 0V input, clamp to bottom note.
-logic signed [W-1:0] lut_index = 0;
-logic signed [W-1:0] lut_index_clamp_lo = 0;
+logic signed [W-1:0] lut_index;
+logic [$clog2(V_OCT_LUT_SIZE)-1:0] lut_index_clamped;
+logic [31:0] wavetable_pos = 32'h0;
+
+assign lut_index = sample_in0 >>> 6;
+assign lut_index_clamped = $clog2(V_OCT_LUT_SIZE)'(lut_index < 0 ? W'(0) : lut_index);
 
 always_ff @(posedge sample_clk) begin
-    if (rst) begin
-        lut_index <= 0;
-        lut_index_clamp_lo <= 0;
-    end else begin
-        lut_index <= sample_in0 >>> 6;
-        lut_index_clamp_lo <= lut_index < 0 ? 0 : lut_index;
-    end
+    // TODO: linear interpolation between frequencies, silence oscillator
+    // whenever we are outside the LUT bounds.
+    wavetable_pos <= wavetable_pos + 32'(v_oct_lut[lut_index_clamped]);
 end
 
-wavetable_osc #(
-    .W(W),
-    .FRAC_BITS(10),
-    .WAVETABLE_PATH(WAVETABLE_PATH),
-    .WAVETABLE_SIZE(WAVETABLE_SIZE)
-) osc_0 (
-    .rst(rst),
-    .sample_clk(sample_clk),
-    .wavetable_inc(32'(v_oct_lut[$clog2(V_OCT_LUT_SIZE)'(lut_index_clamp_lo)])),
-    .out(sample_out0)
-);
+// Top 8 bits of the N.F fixed-point representation are index into wavetable.
+localparam BIT_START = 10 + FDIV;
+wire [$clog2(WAVETABLE_SIZE)-1:0] wavetable_idx =
+    wavetable_pos[BIT_START+$clog2(WAVETABLE_SIZE)-1:BIT_START];
+
+assign sample_out0 = wavetable[wavetable_idx];
+assign sample_out1 = wavetable[wavetable_idx+WAVETABLE_SIZE/4];
+assign sample_out2 = wavetable[wavetable_idx+WAVETABLE_SIZE/2];
+assign sample_out3 = wavetable[wavetable_idx+WAVETABLE_SIZE/2+WAVETABLE_SIZE/4];
 
 endmodule

@@ -18,7 +18,7 @@ $(BUILD)/%.json: %.v $(ADD_SRC) $(ADD_DEPS)
 	$(if $(PNR_SEED),--seed $(PNR_SEED))
 
 %.bin: %.config
-	ecppack --compress $< $@
+	ecppack $< $@
 
 .SECONDARY:
 .PHONY: all prog

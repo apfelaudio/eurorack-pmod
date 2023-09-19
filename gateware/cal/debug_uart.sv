@@ -11,7 +11,7 @@ module debug_uart #(
     parameter W = 16, // sample width
     parameter DIV = 12 // baud rate == CLK / DIV
 )(
-    input clk,
+    input clk, // 12Mhz
     input rst,
     output tx_o,
     input [7:0] eeprom_mfg,

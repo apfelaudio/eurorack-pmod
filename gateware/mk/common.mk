@@ -20,5 +20,4 @@ SRC_COMMON = eurorack_pmod.sv \
 		     cores/util/transpose.sv \
 		     cores/util/echo.sv \
 		     cores/util/delayline.sv \
-			 cores/util/dc_block.sv \
-			 cores/util/wavetable_osc.sv
+			 cores/util/dc_block.sv

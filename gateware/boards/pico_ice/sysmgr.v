@@ -2,20 +2,13 @@
 
 module sysmgr (
 	input  wire rst_in,
-	output wire clk_256fs,
-	output wire clk_fs,
+	output wire clk_12m,
 	output wire rst_out
 );
 
     wire clk_12m;
 	wire rst_i;
-
 	reg [7:0] rst_cnt = 8'h80;
-    reg [7:0] clkdiv;
-
-    assign clk_256fs = clk_12m;
-    assign clk_fs = clkdiv[7];
-	assign rst_i = rst_cnt[7];
 
 `ifndef VERILATOR_LINT_ONLY
 	// The Pico-Ice V3 examples seem to use the internal ICE40 HFOSC
@@ -28,18 +21,14 @@ module sysmgr (
     );
 `endif
 
-
+	// Logic reset generation
 	always @(posedge clk_12m or posedge rst_in)
 		if (rst_in)
 			rst_cnt <= 8'h80;
 		else if (rst_cnt[7])
 			rst_cnt <= rst_cnt + 1;
 
-    always @(posedge clk_256fs)
-        if (rst_i)
-            clkdiv <= 8'h00;
-        else
-            clkdiv <= clkdiv + 1;
+	assign rst_i = rst_cnt[7];
 
 `ifndef VERILATOR_LINT_ONLY
 	SB_GB rst_gbuf_I (
