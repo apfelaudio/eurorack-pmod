@@ -63,6 +63,11 @@ localparam I2C_DELAY1        = 0,
            I2C_JACK2         = 8, // >>--/
            I2C_IDLE          = 9;
 
+`ifdef COCOTB_SIM
+localparam STARTUP_DELAY_BIT = 4;
+`else
+localparam STARTUP_DELAY_BIT = 17;
+`endif
 
 logic [3:0] i2c_state = I2C_DELAY1;
 
@@ -109,7 +114,7 @@ always_ff @(posedge clk) begin
         if (ready && ~stb) begin
             case (i2c_state)
                 I2C_DELAY1: begin
-                    if(delay_cnt[17])
+                    if(delay_cnt[STARTUP_DELAY_BIT])
                         i2c_state <= I2C_EEPROM1;
                 end
                 I2C_EEPROM1: begin
@@ -296,13 +301,5 @@ i2c_master #(.DW(4)) i2c_master_inst(
     .clk(clk),
     .rst(rst)
 );
-
-`ifdef COCOTB_SIM
-initial begin
-  $dumpfile ("pmod_i2c_master.vcd");
-  $dumpvars;
-  #1;
-end
-`endif
 
 endmodule

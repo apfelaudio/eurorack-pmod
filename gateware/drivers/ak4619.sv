@@ -56,20 +56,24 @@ assign lrck        = clkdiv[7];
 assign channel     = clkdiv[7:6]; // 0, 1, 2, 3 == L, R, L, R
 assign bit_counter = clkdiv[5:1];
 
-always_ff @(negedge clk_fs) begin
-    dac_words = {sample_in3, sample_in2,
-                 sample_in1, sample_in0};
-    sample_out0  <= adc_words[0];
-    sample_out1  <= adc_words[1];
-    sample_out2  <= adc_words[2];
-    sample_out3  <= adc_words[3];
-end
-
 always_ff @(posedge clk_256fs) begin
     clkdiv <= clkdiv + 1;
     if (rst) begin
         clkdiv <= 8'h0;
+        sample_out0  <= 0;
+        sample_out1  <= 0;
+        sample_out2  <= 0;
+        sample_out3  <= 0;
     end else if (bick) begin // HI -> LO
+        if (channel == (N_CHANNELS-1) && bit_counter == (2*W-1)) begin
+            dac_words = {sample_in3, sample_in2,
+                         sample_in1, sample_in0};
+            sample_out0  <= adc_words[0];
+            sample_out1  <= adc_words[1];
+            sample_out2  <= adc_words[2];
+            sample_out3  <= adc_words[3];
+        end
+
         // Clock in W bits
         if (bit_counter == 0) begin
             adc_words[channel] <= 0;
@@ -92,12 +96,5 @@ always_ff @(posedge clk_256fs) begin
     end
 end
 
-`ifdef COCOTB_SIM
-initial begin
-  $dumpfile ("ak4619.vcd");
-  $dumpvars;
-  #1;
-end
-`endif
 
 endmodule

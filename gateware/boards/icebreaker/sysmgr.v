@@ -30,6 +30,7 @@ module sysmgr (
 	assign clk_fs = clkdiv[7];
 
 	// PLL instance
+`ifndef COCOTB_SIM
 `ifndef VERILATOR_LINT_ONLY
 	SB_PLL40_2F_PAD #(
 		.DIVR(4'b0000),
@@ -57,6 +58,9 @@ module sysmgr (
 		.SCLK(1'b0)
 	);
 `endif
+`else
+    assign clk_1x_i = clk_in;
+`endif
 
 	// Logic reset generation
 	always @(posedge clk_1x_i or negedge pll_lock)
@@ -72,11 +76,15 @@ module sysmgr (
             clkdiv <= clkdiv + 1;
 
 
+`ifndef COCOTB_SIM
 `ifndef VERILATOR_LINT_ONLY
 	SB_GB rst_gbuf_I (
 		.USER_SIGNAL_TO_GLOBAL_BUFFER(rst_i),
 		.GLOBAL_BUFFER_OUTPUT(rst_out)
 	);
+`endif
+`else
+    assign rst_out = rst_i;
 `endif
 
 endmodule // sysmgr

@@ -190,4 +190,13 @@ debug_uart #(
     .jack(jack)
 );
 
+`ifdef COCOTB_SIM
+initial begin
+  $dumpfile ("top.vcd");
+  $dumpvars;
+  #1;
+end
+`endif
+
+
 endmodule
