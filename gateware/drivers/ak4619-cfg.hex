@@ -1,9 +1,9 @@
 20 // I2C slave address (0x10<<1) and RW bit (W=0).
 00 // Register address to start at.
 37 // 0x00 Power Management
-AE // 0x01 Audio I/F Format
+AC // 0x01 Audio I/F Format
 1C // 0x02 Audio I/F Format
-00 // 0x03 System Clock Setting
+04 // 0x03 System Clock Setting
 22 // 0x04 MIC AMP Gain
 22 // 0x05 MIC AMP Gain
 30 // 0x06 ADC1 Lch Digital Volume

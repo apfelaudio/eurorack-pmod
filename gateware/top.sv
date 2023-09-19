@@ -28,8 +28,7 @@ module top #(
 );
 
 logic rst;
-logic clk_256fs;
-logic clk_fs; // FIXME: assign from PLL divider?
+logic clk_12mhz;
 
 // Button signal is used for resets, unless we are input calibration
 // mode in which case it is used for setting the output cal values.
@@ -41,6 +40,7 @@ assign button = RESET_BUTTON;
 `endif
 
 // Signals between eurorack_pmod instance and user-defined DSP core.
+logic sample_clk;
 logic signed [W-1:0] in0;
 logic signed [W-1:0] in1;
 logic signed [W-1:0] in2;
@@ -81,8 +81,7 @@ sysmgr sysmgr_instance (
     // For output calibration the button is used elsewhere.
     .rst_in(1'b0),
 `endif
-    .clk_256fs(clk_256fs),
-    .clk_fs(clk_fs),
+    .clk_12m(clk_12mhz),
     .rst_out(rst)
 );
 
@@ -92,8 +91,8 @@ sysmgr sysmgr_instance (
     .W(W)
 ) dsp_core_instance (
     .rst         (rst),
-    .clk         (clk_256fs),
-    .sample_clk  (clk_fs),
+    .clk         (clk_12mhz),
+    .sample_clk  (sample_clk),
     .sample_in0  (in0),
     .sample_in1  (in1),
     .sample_in2  (in2),
@@ -133,8 +132,7 @@ eurorack_pmod #(
     .W(W),
     .CAL_MEM_FILE("cal/cal_mem.hex")
 ) eurorack_pmod1 (
-    .clk_256fs(clk_256fs),
-    .clk_fs   (clk_fs),
+    .clk_12mhz(clk_12mhz),
     .rst(rst),
 
     .i2c_scl_oe(i2c_scl_oe),
@@ -148,6 +146,7 @@ eurorack_pmod #(
     .lrck   (PMOD_LRCK),
     .bick   (PMOD_BICK),
 
+    .sample_clk   (sample_clk),
     .cal_in0      (in0),
     .cal_in1      (in1),
     .cal_in2      (in2),
@@ -174,10 +173,8 @@ eurorack_pmod #(
 
 // Helper module to serialize some interesting state to a UART
 // for bringup and calibration purposes.
-debug_uart #(
-    .DIV(12) // WARN: baud rate is determined by clk_256fs / 12 !!
-) debug_uart_instance (
-    .clk (clk_256fs),
+debug_uart debug_uart_instance (
+    .clk (clk_12mhz),
     .rst (rst),
     .tx_o(UART_TX),
     .adc0(debug_adc0),
