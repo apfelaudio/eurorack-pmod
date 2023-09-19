@@ -20,6 +20,7 @@ module cal #(
     parameter W = 16, // sample width
     parameter CAL_MEM_FILE = "cal/cal_mem.hex"
 )(
+    input rst,
     input clk_256fs,
     input clk_fs,
     input [7:0] jack,
@@ -57,9 +58,9 @@ localparam int signed CLAMPH =  32'sd32000;
 
 logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
-logic        [2:0]       ch      = 0;
-logic        [2:0]       state   = CAL_ST_ZERO;
-logic               l_clk_fs = 1'd0;
+logic        [2:0]       ch;
+logic        [2:0]       state;
+logic                    l_clk_fs;
 
 // Calibration memory for 8 channels stored as
 // 2 bytes shift, 2 bytes multiply * 8 channels.
@@ -67,70 +68,87 @@ initial $readmemh(CAL_MEM_FILE, cal_mem);
 
 always_ff @(posedge clk_256fs) begin
 
-    // On rising clk_fs.
-    if (clk_fs && (l_clk_fs != clk_fs)) begin
-        state <= CAL_ST_LATCH;
+    if (rst) begin
+        l_clk_fs <= 0;
         ch <= 0;
+        state <= CAL_ST_LATCH;
+        out[0] <= 0;
+        out[1] <= 0;
+        out[2] <= 0;
+        out[3] <= 0;
+        out[4] <= 0;
+        out[5] <= 0;
+        out[6] <= 0;
+        out[7] <= 0;
     end else begin
-        ch <= ch + 1;
+
+        l_clk_fs <= clk_fs;
+
+        // On rising clk_fs.
+        if (clk_fs && (l_clk_fs != clk_fs)) begin
+            state <= CAL_ST_LATCH;
+            ch <= 0;
+        end else begin
+            ch <= ch + 1;
+        end
+
+        case (state)
+            CAL_ST_LATCH: begin
+                case (ch)
+                    0: out[0] <= 32'(in0);
+                    1: out[1] <= 32'(in1);
+                    2: out[2] <= 32'(in2);
+                    3: out[3] <= 32'(in3);
+                    4: out[4] <= 32'(in4);
+                    5: out[5] <= 32'(in5);
+                    6: out[6] <= 32'(in6);
+                    7: out[7] <= 32'(in7);
+                endcase
+                if (ch == LAST_CH_IX) state <= CAL_ST_ZERO;
+            end
+            CAL_ST_ZERO: begin
+                out[ch] <= (out[ch] - 32'(cal_mem[{ch, 1'b0}]));
+                if (ch == LAST_CH_IX) state <= CAL_ST_MULTIPLY;
+            end
+            CAL_ST_MULTIPLY: begin
+                out[ch] <= (out[ch] * cal_mem[{ch, 1'b1}]) >>> 10;
+                if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPL;
+            end
+            CAL_ST_CLAMPL: begin
+                out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
+                if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPH;
+            end
+            CAL_ST_CLAMPH: begin
+                out[ch] <= ((out[ch] > CLAMPH) ? CLAMPH : out[ch]);
+                if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
+            end
+            CAL_ST_OUT: begin
+                // Calibrated input samples are zeroed if jack disconnected.
+                out0  <= out[0][W-1:0];
+                out1  <= out[1][W-1:0];
+                out2  <= out[2][W-1:0];
+                out3  <= out[3][W-1:0];
+                out4  <= out[4][W-1:0];
+                out5  <= out[5][W-1:0];
+                out6  <= out[6][W-1:0];
+                out7  <= out[7][W-1:0];
+                state <= CAL_ST_HALT;
+            end
+            default: begin
+                // Halt and do nothing.
+            end
+        endcase
     end
-
-    case (state)
-        CAL_ST_LATCH: begin
-            case (ch)
-                0: out[0] <= 32'(in0);
-                1: out[1] <= 32'(in1);
-                2: out[2] <= 32'(in2);
-                3: out[3] <= 32'(in3);
-                4: out[4] <= 32'(in4);
-                5: out[5] <= 32'(in5);
-                6: out[6] <= 32'(in6);
-                7: out[7] <= 32'(in7);
-            endcase
-            if (ch == LAST_CH_IX) state <= CAL_ST_ZERO;
-        end
-        CAL_ST_ZERO: begin
-            out[ch] <= (out[ch] - 32'(cal_mem[{ch, 1'b0}]));
-            if (ch == LAST_CH_IX) state <= CAL_ST_MULTIPLY;
-        end
-        CAL_ST_MULTIPLY: begin
-            out[ch] <= (out[ch] * cal_mem[{ch, 1'b1}]) >>> 10;
-            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPL;
-        end
-        CAL_ST_CLAMPL: begin
-            out[ch] <= ((out[ch] < CLAMPL) ? CLAMPL : out[ch]);
-            if (ch == LAST_CH_IX) state <= CAL_ST_CLAMPH;
-        end
-        CAL_ST_CLAMPH: begin
-            out[ch] <= ((out[ch] > CLAMPH) ? CLAMPH : out[ch]);
-            if (ch == LAST_CH_IX) state <= CAL_ST_OUT;
-        end
-        CAL_ST_OUT: begin
-            // Calibrated input samples are zeroed if jack disconnected.
-            out0  <= jack[0] ? out[0][W-1:0] : 0;
-            out1  <= jack[1] ? out[1][W-1:0] : 0;
-            out2  <= jack[2] ? out[2][W-1:0] : 0;
-            out3  <= jack[3] ? out[3][W-1:0] : 0;
-            out4  <= out[4][W-1:0];
-            out5  <= out[5][W-1:0];
-            out6  <= out[6][W-1:0];
-            out7  <= out[7][W-1:0];
-            state <= CAL_ST_HALT;
-        end
-        default: begin
-            // Halt and do nothing.
-        end
-    endcase
-
-    l_clk_fs <= clk_fs;
 end
 
 `ifdef COCOTB_SIM
-initial begin
-  $dumpfile ("cal.vcd");
-  $dumpvars;
-  #1;
-end
+generate
+  genvar idx;
+  for(idx = 0; idx < 8; idx = idx+1) begin: register
+    wire [31:0] tmp;
+    assign tmp = out[idx];
+  end
+endgenerate
 `endif
 
 endmodule

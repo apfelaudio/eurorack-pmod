@@ -122,12 +122,5 @@ always_ff @(posedge clk_256fs) begin
     end
 end
 
-`ifdef COCOTB_SIM
-initial begin
-  $dumpfile ("ak4619.vcd");
-  $dumpvars;
-  #1;
-end
-`endif
 
 endmodule
