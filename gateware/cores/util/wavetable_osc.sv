@@ -1,29 +1,30 @@
 module wavetable_osc #(
     parameter W = 16,
-    parameter FRAC_BITS = 10,
     parameter WAVETABLE_PATH = "cores/util/vco/wavetable.hex",
-    parameter WAVETABLE_SIZE = 256
+    parameter WAVETABLE_SIZE = 256,
 )(
     input rst,
     input sample_clk,
     input [31:0] wavetable_inc,
-    output logic signed [W-1:0] out
+    output signed [W-1:0] out,
 );
 
 logic [W-1:0] wavetable [0:WAVETABLE_SIZE-1];
 initial $readmemh(WAVETABLE_PATH, wavetable);
 
-// Position in wavetable - N.F fixed-point where BIT_START is size of F.
-logic [31:0] wavetable_pos = 0;
+logic [31:0] wavetable_pos = 32'h0;
 
 always_ff @(posedge sample_clk) begin
-    if (rst) begin
-        wavetable_pos <= 0;
-    end else begin
-        wavetable_pos <= wavetable_pos + wavetable_inc;
-        // Take top N bits of wavetable_pos as output.
-        out <= wavetable[wavetable_pos[FRAC_BITS+$clog2(WAVETABLE_SIZE)-1:FRAC_BITS]];
-    end
+    // TODO: linear interpolation between frequencies, silence oscillator
+    // whenever we are outside the LUT bounds.
+    wavetable_pos <= wavetable_pos + wavetable_inc;
 end
+
+// Top 8 bits of the N.F fixed-point representation are index into wavetable.
+localparam BIT_START = 10;
+wire [$clog2(WAVETABLE_SIZE)-1:0] wavetable_idx =
+    wavetable_pos[BIT_START+$clog2(WAVETABLE_SIZE)-1:BIT_START];
+
+assign out = wavetable[wavetable_idx];
 
 endmodule
