@@ -1,4 +1,4 @@
 // Input calibration constants
 @00000000 0 400 0 400 0 400 0 400
 // Output calibration constants
-@00000008 0 400 0 400 0 400 0 400
+@00000008 0 200 0 200 0 200 0 200
