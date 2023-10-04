@@ -74,7 +74,7 @@ always_ff @(posedge clk_256fs) begin
         if (bit_counter == 0) begin
             adc_words[channel] <= 0;
         end
-        if (bit_counter <= W) begin
+        if (bit_counter < W) begin
             adc_words[channel][W - bit_counter - 1] <= sdout1;
         end
     end else begin
