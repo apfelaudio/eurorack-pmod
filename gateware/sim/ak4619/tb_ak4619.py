@@ -5,7 +5,6 @@ from cocotb.handle import Force, Release
 
 
 async def clock_out_word(dut, word):
-    await FallingEdge(dut.bick)
     for i in range(32):
         await RisingEdge(dut.bick)
         dut.sdout1.value = (word >> (0x1F-i)) & 1
