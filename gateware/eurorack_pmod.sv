@@ -100,17 +100,19 @@ cal #(
     .out7 (sample_dac3)
 );
 
-// CODEC ser-/deserialiser. Also derives sample clock.
+// CODEC ser-/deserialiser. Sample rate derived from these clocks.
 ak4619 ak4619_instance (
-    .clk_256fs     (clk_256fs),
-    .clk_fs  (clk_fs),
-    .rst     (rst),
-    .pdn     (pdn),
-    .mclk    (mclk),
-    .bick    (bick),
-    .lrck    (lrck),
-    .sdin1   (sdin1),
-    .sdout1  (sdout1),
+    .rst       (rst),
+    .clk_256fs (clk_256fs),
+    .clk_fs    (clk_fs),
+
+    .pdn       (pdn),
+    .mclk      (mclk),
+    .bick      (bick),
+    .lrck      (lrck),
+    .sdin1     (sdin1),
+    .sdout1    (sdout1),
+
     .sample_out0 (sample_adc0),
     .sample_out1 (sample_adc1),
     .sample_out2 (sample_adc2),
