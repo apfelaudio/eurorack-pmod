@@ -287,7 +287,7 @@ always_ff @(posedge clk) begin
                         end
                         2: begin
                             // Register pointer
-                            data_in <= 8'h0C;
+                            data_in <= 8'hAA;
                             cmd <= I2CMASTER_WRITE;
                             stb <= 1'b1;
                         end
@@ -320,7 +320,7 @@ always_ff @(posedge clk) begin
                             stb <= 1'b1;
                         end
                         10000: begin
-                            i2c_state <= I2C_JACK1;
+                            i2c_state <= I2C_LED1;
                             delay_cnt <= 0;
                         end
                         default: begin
