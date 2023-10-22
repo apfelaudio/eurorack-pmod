@@ -219,6 +219,7 @@ always_ff @(posedge clk) begin
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
+                /*
                 I2C_JACK1: begin
                     i2c_state <= I2C_JACK2;
                     i2c_config_pos <= 0;
@@ -266,6 +267,70 @@ always_ff @(posedge clk) begin
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
+                */
+                I2C_JACK1: begin
+                    i2c_state <= I2C_JACK2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_JACK2: begin
+                    case (i2c_config_pos)
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                            stb <= 1'b1;
+                        end
+
+                        1: begin
+                            // Slave address
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                            stb <= 1'b1;
+                        end
+                        2: begin
+                            // Register pointer
+                            data_in <= 8'h0C;
+                            cmd <= I2CMASTER_WRITE;
+                            stb <= 1'b1;
+                        end
+
+                        3: begin
+                            cmd <= I2CMASTER_STOP;
+                            stb <= 1'b1;
+                        end
+
+                        4000: begin
+                            cmd <= I2CMASTER_START;
+                            stb <= 1'b1;
+                        end
+
+                        4001: begin
+                            // Slave address
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                            stb <= 1'b1;
+                        end
+
+                        4002: begin
+                            cmd <= I2CMASTER_READ;
+                            stb <= 1'b1;
+                        end
+
+                        4003: begin
+                            jack <= data_out;
+                            cmd <= I2CMASTER_STOP;
+                            stb <= 1'b1;
+                        end
+                        10000: begin
+                            i2c_state <= I2C_JACK1;
+                            delay_cnt <= 0;
+                        end
+                        default: begin
+                            // do nothing
+                            stb <= 1'b0;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                end
                 default: begin
                     i2c_state <= I2C_IDLE;
                 end
@@ -276,7 +341,7 @@ always_ff @(posedge clk) begin
     end
 end
 
-i2c_master #(.DW(4)) i2c_master_inst(
+i2c_master #(.DW(5)) i2c_master_inst(
     .scl_oe(scl_oe),
     .scl_i(scl_i),
     .sda_oe(sda_oe),
