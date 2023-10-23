@@ -63,11 +63,13 @@ localparam I2C_DELAY1        = 0,
            I2C_INIT_TOUCH2   = 6,
            I2C_INIT_TOUCH3   = 7,
            I2C_INIT_TOUCH4   = 8,
-           I2C_LED1          = 9, // <<--\ LED/JACK re-runs indefinitely.
+           I2C_LED1          = 9, // <<--\ LED/JACK/TOUCH re-runs indefinitely.
            I2C_LED2          = 10, //     |
            I2C_JACK1         = 11, //     |
-           I2C_JACK2         = 12, // >>--/
-           I2C_IDLE          = 13;
+           I2C_JACK2         = 12, //     |
+           I2C_TOUCH5        = 13, //     |
+           I2C_TOUCH6        = 14, // >>--/
+           I2C_IDLE          = 15;
 
 
 logic [3:0] i2c_state = I2C_DELAY1;
@@ -399,13 +401,48 @@ always_ff @(posedge clk) begin
 
                         // 4) Save the result.
                         10: begin
-                            jack <= data_out;
+                            //jack <= data_out;
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_LED1;
+                            i2c_state <= I2C_TOUCH5;
                             delay_cnt <= 0;
                         end
                         default: begin
                             // do nothing
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_TOUCH5: begin
+                    i2c_state <= I2C_TOUCH6;
+                    i2c_config_pos <= 0;
+                end
+                I2C_TOUCH6: begin
+                    case (i2c_config_pos)
+                        // Set slave read pointer
+                        0: cmd <= I2CMASTER_START;
+                        1: begin
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: data_in <= 8'hAA;
+                        3: cmd <= I2CMASTER_STOP;
+
+                        // Read out the data
+                        4: cmd <= I2CMASTER_START;
+                        5: begin
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        6: begin
+                            cmd <= I2CMASTER_READ;
+                        end
+                        default: begin
+                            // do nothing
+                            jack <= data_out;
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_LED1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
