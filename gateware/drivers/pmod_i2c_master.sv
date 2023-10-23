@@ -16,7 +16,9 @@ module pmod_i2c_master #(
     parameter CODEC_CFG  = "drivers/ak4619-cfg.hex",
     parameter CODEC_CFG_BYTES = 16'd23,
     parameter LED_CFG  = "drivers/pca9635-cfg.hex",
-    parameter LED_CFG_BYTES = 16'd26
+    parameter LED_CFG_BYTES = 16'd26,
+    parameter TOUCH_CFG  = "drivers/touch-cfg.hex", // TODO
+    parameter TOUCH_CFG_BYTES = 16'd130 // 0x80 + 2
 )(
     input  clk,
     input  rst,
@@ -57,11 +59,15 @@ localparam I2C_DELAY1        = 0,
            I2C_EEPROM2       = 2,
            I2C_INIT_CODEC1   = 3,
            I2C_INIT_CODEC2   = 4,
-           I2C_LED1          = 5, // <<--\ LED/JACK re-runs indefinitely.
-           I2C_LED2          = 6, //     |
-           I2C_JACK1         = 7, //     |
-           I2C_JACK2         = 8, // >>--/
-           I2C_IDLE          = 9;
+           I2C_INIT_TOUCH1   = 5,
+           I2C_INIT_TOUCH2   = 6,
+           I2C_INIT_TOUCH3   = 7,
+           I2C_INIT_TOUCH4   = 8,
+           I2C_LED1          = 9, // <<--\ LED/JACK re-runs indefinitely.
+           I2C_LED2          = 10, //     |
+           I2C_JACK1         = 11, //     |
+           I2C_JACK2         = 12, // >>--/
+           I2C_IDLE          = 13;
 
 
 logic [3:0] i2c_state = I2C_DELAY1;
@@ -78,6 +84,10 @@ logic [7:0] led_config [0:LED_CFG_BYTES-1];
 initial $readmemh(LED_CFG, led_config);
 // Index at which PWM values start in the led config.
 localparam PCA9635_PWM0 = 4;
+
+// Logic for startup configuration of touch sensor IC over I2C.
+logic [7:0] touch_config [0:TOUCH_CFG_BYTES-1];
+initial $readmemh(TOUCH_CFG, touch_config);
 
 // Valid commands for `i2c_master` core.
 localparam [1:0] I2CMASTER_START = 2'b00,
@@ -176,8 +186,144 @@ always_ff @(posedge clk) begin
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_LED1;
+                        i2c_state <= I2C_INIT_TOUCH1;
                     end
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_INIT_TOUCH1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_TOUCH2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_INIT_TOUCH2: begin
+                    case (i2c_config_pos)
+                        default: begin
+                            data_in <= touch_config[5'(i2c_config_pos)];
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        1: begin
+                            // Make sure the first byte (address) is acknowledged. If it
+                            // isn't, restart the configuration process.
+                            if (ack_out) begin
+                                i2c_state <= I2C_INIT_TOUCH1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                data_in <= touch_config[5'(i2c_config_pos)];
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
+                        TOUCH_CFG_BYTES: begin
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+                        TOUCH_CFG_BYTES+1: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        TOUCH_CFG_BYTES+2: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+3: begin
+                            // Command register
+                            data_in <= 8'h86;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+4: begin
+                            // NVM write & reset command.
+                            data_in <= 8'h02;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+5: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_INIT_TOUCH3;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_INIT_TOUCH3: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_TOUCH4;
+                    i2c_config_pos <= 0;
+                end
+                I2C_INIT_TOUCH4: begin
+                    case (i2c_config_pos)
+                        // Write the slave register pointer
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        1: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            if (ack_out) begin
+                                // Wait until ack succeeds before continuing
+                                i2c_state <= I2C_INIT_TOUCH3;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                // Command register
+                                data_in <= 8'h86;
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
+                        3: begin
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+                        // Read the command register, retry if chip is busy
+                        4: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        5: begin
+                            // 0x37 << 1 | 1 (R)
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        6: begin
+                            cmd <= I2CMASTER_READ;
+                        end
+                        7: begin
+                            if (data_out != 8'h00) begin
+                                // Retry until command register is 0 before
+                                // issuing a reset.
+                                i2c_state <= I2C_INIT_TOUCH3;
+                            end
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+
+                        // Write the command register
+                        8: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        9: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        10: begin
+                            // Command register
+                            data_in <= 8'h86;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        11: begin
+                            // NVM write & reset command.
+                            data_in <= 8'hff;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        default: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_LED1;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
