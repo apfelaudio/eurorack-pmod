@@ -189,6 +189,17 @@ always_ff @(posedge clk) begin
                 end
                 I2C_LED2: begin
                     case (i2c_config_pos)
+                        1: begin
+                            // On first iteration after I2C address sent, ony
+                            // continue if the device actually ACK'd our TX.
+                            if (ack_out) begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_JACK1;
+                            end else begin
+                                data_in <= led_config[5'(i2c_config_pos)];
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
                         LED_CFG_BYTES: begin
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_JACK1;
@@ -249,7 +260,14 @@ always_ff @(posedge clk) begin
                             data_in <= 8'h31;
                             cmd <= I2CMASTER_WRITE;
                         end
-                        9: cmd <= I2CMASTER_READ;
+                        9: begin
+                            if (ack_out) begin
+                                i2c_state <= I2C_LED1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                cmd <= I2CMASTER_READ;
+                            end
+                        end
 
                         // 4) Save the result.
                         10: begin
