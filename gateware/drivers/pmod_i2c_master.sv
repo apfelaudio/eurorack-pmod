@@ -164,7 +164,7 @@ always_ff @(posedge clk) begin
                         11: begin
                             eeprom_serial[32-3*8-1:32-4*8] <= data_out;
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_INIT_CODEC1;
+                            i2c_state <= I2C_INIT_TOUCH1;
                             delay_cnt <= 0;
                         end
                         default: begin
@@ -188,7 +188,7 @@ always_ff @(posedge clk) begin
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_INIT_TOUCH1;
+                        i2c_state <= I2C_LED1;
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
@@ -322,7 +322,7 @@ always_ff @(posedge clk) begin
                         end
                         default: begin
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_LED1;
+                            i2c_state <= I2C_INIT_CODEC1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
