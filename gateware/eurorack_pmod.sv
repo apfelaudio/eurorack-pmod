@@ -138,14 +138,14 @@ pmod_i2c_master #(
 
     // LEDs directly linked to input/output sample values
     // for now, although they could do whatever we want.
-    .led0( cal_in0[W-1:W-8]),
-    .led1( cal_in1[W-1:W-8]),
-    .led2( cal_in2[W-1:W-8]),
-    .led3( cal_in3[W-1:W-8]),
-    .led4(force_dac_output == 0 ? cal_out0[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led5(force_dac_output == 0 ? cal_out1[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led6(force_dac_output == 0 ? cal_out2[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led7(force_dac_output == 0 ? cal_out3[W-1:W-8] : force_dac_output[W-1:W-8]),
+    .led0({jack[0], 5'b00000}),
+    .led1({jack[1], 5'b00000}),
+    .led2({jack[2], 5'b00000}),
+    .led3({jack[3], 5'b00000}),
+    .led4({jack[4], 5'b00000}),
+    .led5({jack[5], 5'b00000}),
+    .led6({jack[6], 5'b00000}),
+    .led7({jack[7], 5'b00000}),
 
     .jack(jack),
 
