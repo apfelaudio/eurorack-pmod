@@ -345,6 +345,15 @@ always_ff @(posedge clk) begin
                             data_in <= led_config[5'(i2c_config_pos)];
                             cmd <= I2CMASTER_WRITE;
                         end
+                        2: begin
+                            if (ack_out) begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_JACK1;
+                            end else begin
+                                data_in <= led_config[5'(i2c_config_pos)];
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
                         // Override PWM values from led configuration.
                         PCA9635_PWM0 +  0: data_in <= led0 > 0 ? 0 : -led0;
                         PCA9635_PWM0 +  1: data_in <= led0 > 0 ? led0 : 0;
@@ -436,10 +445,14 @@ always_ff @(posedge clk) begin
                             cmd <= I2CMASTER_WRITE;
                         end
                         6: begin
-                            cmd <= I2CMASTER_READ;
+                            if (ack_out == 1'b1) begin
+                                i2c_state <= I2C_LED1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                cmd <= I2CMASTER_READ;
+                            end
                         end
                         default: begin
-                            // do nothing
                             jack <= data_out;
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_LED1;
