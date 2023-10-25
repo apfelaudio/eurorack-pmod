@@ -9,7 +9,7 @@
 // Filename   : pitch_shift_migen.v
 // Device     : Unknown
 // LiteX sha1 : 2b8f895e
-// Date       : 2023-10-25 19:53:50
+// Date       : 2023-10-25 20:53:33
 //------------------------------------------------------------------------------
 
 `timescale 1ns / 1ps
@@ -84,7 +84,7 @@ wire signed  [31:0] testdsp_pitchshift01;
 reg  signed  [31:0] testdsp_pitchshift010 = 32'd0;
 reg  signed  [31:0] testdsp_pitchshift010_lowernext010 = 32'd0;
 reg           testdsp_pitchshift010_lowernext011 = 1'd0;
-wire   [15:0] testdsp_pitchshift02;
+wire signed  [15:0] testdsp_pitchshift02;
 reg  signed  [31:0] testdsp_pitchshift03 = 32'd0;
 reg  signed  [31:0] testdsp_pitchshift03_lowernext0_lowernext00 = 32'd0;
 reg           testdsp_pitchshift03_lowernext0_lowernext01 = 1'd0;
@@ -112,7 +112,7 @@ wire signed  [31:0] testdsp_pitchshift11;
 reg  signed  [31:0] testdsp_pitchshift110 = 32'd0;
 reg  signed  [31:0] testdsp_pitchshift110_lowernext110 = 32'd0;
 reg           testdsp_pitchshift110_lowernext111 = 1'd0;
-wire   [15:0] testdsp_pitchshift12;
+wire signed  [15:0] testdsp_pitchshift12;
 reg  signed  [31:0] testdsp_pitchshift13 = 32'd0;
 reg  signed  [31:0] testdsp_pitchshift13_lowernext1_lowernext10 = 32'd0;
 reg           testdsp_pitchshift13_lowernext1_lowernext11 = 1'd0;
@@ -216,10 +216,10 @@ reg     [8:0] testdsp_wrpointer = 9'd0;
 // Combinatorial Logic
 //------------------------------------------------------------------------------
 
-assign testdsp_pitchshift01 = 32'd4294934528;
+assign testdsp_pitchshift01 = (-32'd32768);
 assign testdsp_pitchshift02 = 9'd256;
 assign testdsp_pitchshift0_ready = 1'd1;
-assign testdsp_pitchshift11 = 16'd32768;
+assign testdsp_pitchshift11 = 32'd32768;
 assign testdsp_pitchshift12 = 9'd256;
 assign testdsp_pitchshift1_ready = 1'd1;
 assign testdsp1 = ((sample_clk != testdsp0) & sample_clk);
@@ -602,7 +602,7 @@ always @(*) begin
         end
     endcase
 end
-assign testdsp_pitchshift04 = (testdsp_pitchshift03 + $signed({1'd0, (testdsp_pitchshift02 <<< 5'd16)}));
+assign testdsp_pitchshift04 = (testdsp_pitchshift03 + (testdsp_pitchshift02 <<< 5'd16));
 always @(*) begin
     testdsp_fsm01 <= 3'd0;
     testdsp_fsm01 <= testdsp_fsm00;
@@ -804,11 +804,11 @@ always @(*) begin
         end
         default: begin
             if (testdsp_pitchshift00) begin
-                if (((testdsp_pitchshift03 + testdsp_pitchshift01) < $signed({1'd0, 1'd0}))) begin
-                    testdsp_pitchshift03_lowernext0_lowernext00 <= ((testdsp_pitchshift03 + testdsp_pitchshift01) + $signed({1'd0, (testdsp_pitchshift02 <<< 5'd16)}));
+                if ((testdsp_pitchshift03 < (-testdsp_pitchshift01))) begin
+                    testdsp_pitchshift03_lowernext0_lowernext00 <= ((testdsp_pitchshift03 + (testdsp_pitchshift02 <<< 5'd16)) + testdsp_pitchshift01);
                 end else begin
-                    if (((testdsp_pitchshift03 + testdsp_pitchshift01) > $signed({1'd0, (testdsp_pitchshift02 <<< 5'd16)}))) begin
-                        testdsp_pitchshift03_lowernext0_lowernext00 <= ((testdsp_pitchshift03 + testdsp_pitchshift01) - $signed({1'd0, (testdsp_pitchshift02 <<< 5'd16)}));
+                    if (((testdsp_pitchshift03 + testdsp_pitchshift01) > (testdsp_pitchshift02 <<< 5'd16))) begin
+                        testdsp_pitchshift03_lowernext0_lowernext00 <= ((testdsp_pitchshift03 + testdsp_pitchshift01) - (testdsp_pitchshift02 <<< 5'd16));
                     end else begin
                         testdsp_pitchshift03_lowernext0_lowernext00 <= (testdsp_pitchshift03 + testdsp_pitchshift01);
                     end
@@ -834,10 +834,10 @@ always @(*) begin
         end
         default: begin
             if (testdsp_pitchshift00) begin
-                if (((testdsp_pitchshift03 + testdsp_pitchshift01) < $signed({1'd0, 1'd0}))) begin
+                if ((testdsp_pitchshift03 < (-testdsp_pitchshift01))) begin
                     testdsp_pitchshift03_lowernext0_lowernext01 <= 1'd1;
                 end else begin
-                    if (((testdsp_pitchshift03 + testdsp_pitchshift01) > $signed({1'd0, (testdsp_pitchshift02 <<< 5'd16)}))) begin
+                    if (((testdsp_pitchshift03 + testdsp_pitchshift01) > (testdsp_pitchshift02 <<< 5'd16))) begin
                         testdsp_pitchshift03_lowernext0_lowernext01 <= 1'd1;
                     end else begin
                         testdsp_pitchshift03_lowernext0_lowernext01 <= 1'd1;
@@ -1182,7 +1182,7 @@ always @(*) begin
         end
     endcase
 end
-assign testdsp_pitchshift14 = (testdsp_pitchshift13 + $signed({1'd0, (testdsp_pitchshift12 <<< 5'd16)}));
+assign testdsp_pitchshift14 = (testdsp_pitchshift13 + (testdsp_pitchshift12 <<< 5'd16));
 always @(*) begin
     testdsp_fsm11 <= 3'd0;
     testdsp_fsm11 <= testdsp_fsm10;
@@ -1239,11 +1239,11 @@ always @(*) begin
         end
         default: begin
             if (testdsp_pitchshift10) begin
-                if (((testdsp_pitchshift13 + testdsp_pitchshift11) < $signed({1'd0, 1'd0}))) begin
-                    testdsp_pitchshift13_lowernext1_lowernext10 <= ((testdsp_pitchshift13 + testdsp_pitchshift11) + $signed({1'd0, (testdsp_pitchshift12 <<< 5'd16)}));
+                if ((testdsp_pitchshift13 < (-testdsp_pitchshift11))) begin
+                    testdsp_pitchshift13_lowernext1_lowernext10 <= ((testdsp_pitchshift13 + (testdsp_pitchshift12 <<< 5'd16)) + testdsp_pitchshift11);
                 end else begin
-                    if (((testdsp_pitchshift13 + testdsp_pitchshift11) > $signed({1'd0, (testdsp_pitchshift12 <<< 5'd16)}))) begin
-                        testdsp_pitchshift13_lowernext1_lowernext10 <= ((testdsp_pitchshift13 + testdsp_pitchshift11) - $signed({1'd0, (testdsp_pitchshift12 <<< 5'd16)}));
+                    if (((testdsp_pitchshift13 + testdsp_pitchshift11) > (testdsp_pitchshift12 <<< 5'd16))) begin
+                        testdsp_pitchshift13_lowernext1_lowernext10 <= ((testdsp_pitchshift13 + testdsp_pitchshift11) - (testdsp_pitchshift12 <<< 5'd16));
                     end else begin
                         testdsp_pitchshift13_lowernext1_lowernext10 <= (testdsp_pitchshift13 + testdsp_pitchshift11);
                     end
@@ -1269,10 +1269,10 @@ always @(*) begin
         end
         default: begin
             if (testdsp_pitchshift10) begin
-                if (((testdsp_pitchshift13 + testdsp_pitchshift11) < $signed({1'd0, 1'd0}))) begin
+                if ((testdsp_pitchshift13 < (-testdsp_pitchshift11))) begin
                     testdsp_pitchshift13_lowernext1_lowernext11 <= 1'd1;
                 end else begin
-                    if (((testdsp_pitchshift13 + testdsp_pitchshift11) > $signed({1'd0, (testdsp_pitchshift12 <<< 5'd16)}))) begin
+                    if (((testdsp_pitchshift13 + testdsp_pitchshift11) > (testdsp_pitchshift12 <<< 5'd16))) begin
                         testdsp_pitchshift13_lowernext1_lowernext11 <= 1'd1;
                     end else begin
                         testdsp_pitchshift13_lowernext1_lowernext11 <= 1'd1;
@@ -1576,6 +1576,26 @@ always @(*) begin
     endcase
 end
 always @(*) begin
+    testdsp_pitchshift1_valid <= 1'd0;
+    case (testdsp_fsm10)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+            testdsp_pitchshift1_valid <= 1'd1;
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
     testdsp_rrmux1_multiplexer1_endpoint5_payload_a <= 32'd0;
     case (testdsp_fsm10)
         1'd1: begin
@@ -1591,26 +1611,6 @@ always @(*) begin
             testdsp_rrmux1_multiplexer1_endpoint5_payload_a <= testdsp_pitchshift16;
         end
         3'd6: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    testdsp_pitchshift1_valid <= 1'd0;
-    case (testdsp_fsm10)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-            testdsp_pitchshift1_valid <= 1'd1;
         end
         default: begin
         end
@@ -1913,6 +1913,6 @@ assign testdsp_memory5 = mem_dat1;
 endmodule
 
 // -----------------------------------------------------------------------------
-//  Auto-Generated by LiteX on 2023-10-25 19:53:50.
+//  Auto-Generated by LiteX on 2023-10-25 20:53:33.
 //------------------------------------------------------------------------------
 

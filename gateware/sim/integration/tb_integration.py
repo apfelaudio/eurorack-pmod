@@ -40,13 +40,16 @@ async def test_integration_00(dut):
 
     dut = dut.eurorack_pmod1.ak4619_instance
 
-    N = 1000
+    N = 2000
 
     await FallingEdge(dut.lrck)
 
     for i in range(N):
 
-        v = signed_to_twos_comp(int(16000*math.sin((2*math.pi*i)/(N/10))))
+        v = signed_to_twos_comp(int(
+            2000*math.sin((2*math.pi*i)/(N/10)) +
+            2000*math.sin((2*math.pi*i)/(N/23))
+            ))
 
         await clock_out_word(dut, v << 16)
         await clock_out_word(dut, v << 16)
