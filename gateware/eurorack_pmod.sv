@@ -123,6 +123,15 @@ ak4619 ak4619_instance (
     .sample_in3 (force_dac_output == 0 ? sample_dac3 : force_dac_output)
 );
 
+logic [7:0] touch0;
+logic [7:0] touch1;
+logic [7:0] touch2;
+logic [7:0] touch3;
+logic [7:0] touch4;
+logic [7:0] touch5;
+logic [7:0] touch6;
+logic [7:0] touch7;
+
 // I2C transceiver and driver for all connected slaves.
 pmod_i2c_master #(
     .CODEC_CFG(CODEC_CFG_FILE),
@@ -136,16 +145,23 @@ pmod_i2c_master #(
     .sda_oe(i2c_sda_oe),
     .sda_i(i2c_sda_i),
 
-    // LEDs directly linked to input/output sample values
-    // for now, although they could do whatever we want.
-    .led0({jack[0], 5'b00000}),
-    .led1({jack[1], 5'b00000}),
-    .led2({jack[2], 5'b00000}),
-    .led3({jack[3], 5'b00000}),
-    .led4({jack[4], 5'b00000}),
-    .led5({jack[5], 5'b00000}),
-    .led6({jack[6], 5'b00000}),
-    .led7({jack[7], 5'b00000}),
+    .led0(touch0>>1),
+    .led1(touch1>>1),
+    .led2(touch2>>1),
+    .led3(touch3>>1),
+    .led4(touch4>>1),
+    .led5(touch5>>1),
+    .led6(touch6>>1),
+    .led7(touch7>>1),
+
+    .touch0(touch0),
+    .touch1(touch1),
+    .touch2(touch2),
+    .touch3(touch3),
+    .touch4(touch4),
+    .touch5(touch5),
+    .touch6(touch6),
+    .touch7(touch7),
 
     .jack(jack),
 

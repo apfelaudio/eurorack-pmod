@@ -28,14 +28,23 @@ def CY8CMBR3xxx_CalculateCrc(configuration):
 
 with open("touch-cfg.hex", "r") as f:
     xs = []
+    ix = 0
     for line in f.readlines():
         raw = line.strip()
         v = int(raw, 16)
-        print("hex", raw, "int", v)
+        if ix >= 2:
+            print("reg", hex(ix-2), "hex", raw, "int", v)
+        else:
+            print("hex", raw, "int", v)
         xs.append(v)
+        ix += 1
     print("total bytes in file", len(xs))
-    xs = xs[2:-2]
-    print("bytes to crc", len(xs))
-    crc = CY8CMBR3xxx_CalculateCrc(xs)
+    xs_crc = xs[2:-2]
+    print("bytes to crc", len(xs_crc))
+    crc = CY8CMBR3xxx_CalculateCrc(xs_crc)
     print("crc0", hex(crc & 0x00FF))
     print("crc1", hex((crc & 0xFF00)>>8))
+    if xs[-2] == crc & 0x00FF and xs[-1] == ((crc & 0xFF00) >> 8):
+        print("CRC OK")
+    else:
+        print("CRC NOT OK")

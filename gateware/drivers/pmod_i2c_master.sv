@@ -42,6 +42,15 @@ module pmod_i2c_master #(
     input signed [7:0] led6,
     input signed [7:0] led7,
 
+    output logic [7:0] touch0,
+    output logic [7:0] touch1,
+    output logic [7:0] touch2,
+    output logic [7:0] touch3,
+    output logic [7:0] touch4,
+    output logic [7:0] touch5,
+    output logic [7:0] touch6,
+    output logic [7:0] touch7,
+
     // Jack detection outputs, 1 == inserted. (bit 0 is input 0, bit 4 is output 0).
     output logic [7:0] jack,
 
@@ -57,12 +66,12 @@ module pmod_i2c_master #(
 localparam I2C_DELAY1        = 0,
            I2C_EEPROM1       = 1,
            I2C_EEPROM2       = 2,
-           I2C_INIT_CODEC1   = 3,
-           I2C_INIT_CODEC2   = 4,
-           I2C_INIT_TOUCH1   = 5,
-           I2C_INIT_TOUCH2   = 6,
-           I2C_INIT_TOUCH3   = 7,
-           I2C_INIT_TOUCH4   = 8,
+           I2C_INIT_TOUCH1   = 3,
+           I2C_INIT_TOUCH2   = 4,
+           I2C_INIT_TOUCH3   = 5,
+           I2C_INIT_TOUCH4   = 6,
+           I2C_INIT_CODEC1   = 7,
+           I2C_INIT_CODEC2   = 8,
            I2C_LED1          = 9, // <<--\ LED/JACK/TOUCH re-runs indefinitely.
            I2C_LED2          = 10, //     |
            I2C_JACK1         = 11, //     |
@@ -111,6 +120,8 @@ logic       ready;
 
 // Used for startup delay.
 logic [23:0] delay_cnt;
+
+logic [2:0] nsensor;
 
 always_ff @(posedge clk) begin
     if (rst) begin
@@ -171,26 +182,6 @@ always_ff @(posedge clk) begin
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
-                    stb <= 1'b1;
-                end
-                I2C_INIT_CODEC1: begin
-                    cmd <= I2CMASTER_START;
-                    stb <= 1'b1;
-                    i2c_state <= I2C_INIT_CODEC2;
-                    i2c_config_pos <= 0;
-                end
-                I2C_INIT_CODEC2: begin
-                    // Shift out all bytes in the CODEC configuration in
-                    // one long transaction until we are finished.
-                    if (i2c_config_pos != CODEC_CFG_BYTES) begin
-                        data_in <= codec_config[5'(i2c_config_pos)];
-                        cmd <= I2CMASTER_WRITE;
-                        i2c_config_pos <= i2c_config_pos + 1;
-                    end else begin
-                        cmd <= I2CMASTER_STOP;
-                        i2c_state <= I2C_LED1;
-                    end
-                    ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
                 I2C_INIT_TOUCH1: begin
@@ -311,9 +302,16 @@ always_ff @(posedge clk) begin
                             cmd <= I2CMASTER_WRITE;
                         end
                         10: begin
-                            // Command register
-                            data_in <= 8'h86;
-                            cmd <= I2CMASTER_WRITE;
+                            if (ack_out) begin
+                                // Wait until ack succeeds before continuing
+                                i2c_state <= I2C_INIT_TOUCH3;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                // Only issue reset if we got acknowledged
+                                // Command register
+                                data_in <= 8'h86;
+                                cmd <= I2CMASTER_WRITE;
+                            end
                         end
                         11: begin
                             // NVM write & reset command.
@@ -326,6 +324,26 @@ always_ff @(posedge clk) begin
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_INIT_CODEC1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_CODEC2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_INIT_CODEC2: begin
+                    // Shift out all bytes in the CODEC configuration in
+                    // one long transaction until we are finished.
+                    if (i2c_config_pos != CODEC_CFG_BYTES) begin
+                        data_in <= codec_config[5'(i2c_config_pos)];
+                        cmd <= I2CMASTER_WRITE;
+                        i2c_config_pos <= i2c_config_pos + 1;
+                    end else begin
+                        cmd <= I2CMASTER_STOP;
+                        i2c_state <= I2C_LED1;
+                    end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
@@ -406,14 +424,19 @@ always_ff @(posedge clk) begin
                             data_in <= 8'h31;
                             cmd <= I2CMASTER_WRITE;
                         end
-                        9: cmd <= I2CMASTER_READ;
-
+                        9: begin
+                            if (ack_out == 1'b0) begin
+                                cmd <= I2CMASTER_READ;
+                            end else begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_TOUCH5;
+                            end
+                        end
                         // 4) Save the result.
                         10: begin
-                            //jack <= data_out;
+                            jack <= data_out;
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_TOUCH5;
-                            delay_cnt <= 0;
                         end
                         default: begin
                             // do nothing
@@ -435,7 +458,19 @@ always_ff @(posedge clk) begin
                             data_in <= 8'h6E;
                             cmd <= I2CMASTER_WRITE;
                         end
-                        2: data_in <= 8'hAA;
+                        // Sensor 0 difference counts
+                        2: begin
+                            case (nsensor)
+                                0: data_in <= 8'hBA;
+                                1: data_in <= 8'hBC;
+                                2: data_in <= 8'hBE;
+                                3: data_in <= 8'hC0;
+                                4: data_in <= 8'hC2;
+                                5: data_in <= 8'hC4;
+                                6: data_in <= 8'hC6;
+                                7: data_in <= 8'hC8;
+                            endcase
+                        end
                         3: cmd <= I2CMASTER_STOP;
 
                         // Read out the data
@@ -446,20 +481,31 @@ always_ff @(posedge clk) begin
                         end
                         6: begin
                             if (ack_out == 1'b1) begin
-                                i2c_state <= I2C_LED1;
+                                i2c_state <= I2C_TOUCH5;
                                 cmd <= I2CMASTER_STOP;
                             end else begin
                                 cmd <= I2CMASTER_READ;
+                                ack_in <= 1'b0;
                             end
                         end
-                        default: begin
-                            jack <= data_out;
+                        7: begin
+                            case (nsensor)
+                                0: touch0 <= data_out;
+                                1: touch1 <= data_out;
+                                2: touch2 <= data_out;
+                                3: touch3 <= data_out;
+                                4: touch4 <= data_out;
+                                5: touch5 <= data_out;
+                                6: touch6 <= data_out;
+                                7: touch7 <= data_out;
+                            endcase
+                            ack_in <= 1'b1;
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_LED1;
+                            nsensor <= nsensor + 1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
-                    ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
                 default: begin

@@ -12,4 +12,4 @@ ADD_SRC = boards/icebreaker/sysmgr.v \
 		  $(SRC_COMMON)
 
 prog: $(BUILD)/$(PROJ).bin
-	iceprog $(BUILD)/$(PROJ).bin
+	sudo iceprog $(BUILD)/$(PROJ).bin
