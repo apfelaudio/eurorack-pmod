@@ -49,11 +49,17 @@ MP_N_BITS = 10
 # Set this to False for the latter case.
 CAL_OPEN_LOAD = True
 
-def twos_comp(val, bits):
+def twos_comp(val, bits=16):
     """compute the 2's complement of int value val"""
     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
+
+def bit_not(n, numbits=16):
+    return (1 << numbits) - 1 - n
+
+def signed_to_twos_comp(n, numbits=16):
+    return n if n >= 0 else bit_not(-n, numbits) + 1
 
 ser = serial.Serial(SERIAL_PORT, 1000000)
 
@@ -139,8 +145,8 @@ while True:
         print("Average raw ADC counts converted to voltages using current input calibration")
         cal_mem = [int(x, 16) for x in input_cal_string.strip().split(' ')[1:]]
         for channel in range(4):
-            calibrated = ((-adc_avg[channel] - cal_mem[channel*2]) *
-                         cal_mem[channel*2 + 1]) / (1 << MP_N_BITS)
+            calibrated = ((-adc_avg[channel] - twos_comp(cal_mem[channel*2])) *
+                         twos_comp(cal_mem[channel*2 + 1])) / (1 << MP_N_BITS)
             adc_calibrated_avg[channel] = calibrated
             print(f"in{channel}",round(calibrated / COUNT_PER_VOLT, ndigits=3), "V")
 
@@ -162,14 +168,17 @@ while True:
         shift_constant = (n5v_dac_fb_avg + p5v_dac_fb_avg)/2.
         shift_constant = shift_constant * range_constant
 
+    def conv(constant):
+        return hex(signed_to_twos_comp(int(constant))).replace('0x','')
+
     print()
     print("CALIBRATION MEMORY ('x' to exit, copy this to 'cal_mem.hex')\n")
     cal_string = None
     if np.isfinite(shift_constant).all() and np.isfinite(mp_constant).all():
         cal_string = f"@0000000{'0' if input_cal else '8'} "
         for i in range(4):
-            cal_string = cal_string + hex(int(shift_constant[i])).replace('0x','') + ' '
-            cal_string = cal_string + hex(int(mp_constant[i])).replace('0x','') + ' '
+            cal_string = cal_string + conv(shift_constant[i]) + ' '
+            cal_string = cal_string + conv(mp_constant[i]) + ' '
     if input_cal:
         input_cal_string = cal_string
     else:
