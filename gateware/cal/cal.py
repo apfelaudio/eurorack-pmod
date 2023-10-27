@@ -80,10 +80,12 @@ def decode_raw_samples(n, raw, array_avg):
     ch_tc_values = np.zeros(n)
     while ix != n:
         channel = ix
-        msb = raw[ix*2]
-        lsb = raw[ix*2+1]
-        value = (msb << 8) | lsb
-        value_tc = twos_comp(value, 16)
+        byte0 = raw[ix*4]
+        byte1 = raw[ix*4+1]
+        byte2 = raw[ix*4+2]
+        byte3 = raw[ix*4+3]
+        value = (byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3
+        value_tc = twos_comp(value, 32)
         alpha = 0.3
         array_avg[channel] = alpha*value_tc + (1-alpha)*array_avg[channel]
         print(channel, hex(value), value_tc, int(array_avg[channel]))
