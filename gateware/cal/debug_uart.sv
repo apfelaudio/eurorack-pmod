@@ -9,6 +9,7 @@
 
 module debug_uart #(
     parameter W = 16, // sample width
+    parameter WM = 32, // maximum sample width
     parameter DIV = 12 // baud rate == CLK / DIV
 )(
     input clk,
@@ -32,6 +33,16 @@ logic [7:0] dout;
 logic tx1_ack;
 logic [7:0] state;
 
+logic signed [WM-1:0] adc0_ex;
+logic signed [WM-1:0] adc1_ex;
+logic signed [WM-1:0] adc2_ex;
+logic signed [WM-1:0] adc3_ex;
+
+assign adc0_ex = adc0;
+assign adc1_ex = adc1;
+assign adc2_ex = adc2;
+assign adc3_ex = adc3;
+
 uart_tx utx (
     .tx(tx_o),
     .data(dout),
@@ -50,26 +61,35 @@ always_ff @(posedge clk) begin
     end else if(tx1_ack) begin
         tx1_valid <= 1'b1;
         case (state)
-            0:  dout <= MAGIC1;
-            1:  dout <= MAGIC2;
-            2:  dout <= eeprom_mfg;
-            3:  dout <= eeprom_dev;
-            4:  dout <= eeprom_serial[31      :32-1*8];
-            5:  dout <= eeprom_serial[32-1*8-1:32-2*8];
-            6:  dout <= eeprom_serial[32-2*8-1:32-3*8];
-            7:  dout <= eeprom_serial[32-3*8-1:     0];
-            8:  dout <= jack;
-            // Note: we're currently only sending 2 bytes per
-            // sample for calibration purposes. This should
-            // eventually be derived from the sample width.
-            9:  dout <= 8'((adc0 & 16'hFF00) >> 8);
-            10: dout <= 8'((adc0 & 16'h00FF));
-            11: dout <= 8'((adc1 & 16'hFF00) >> 8);
-            12: dout <= 8'((adc1 & 16'h00FF));
-            13: dout <= 8'((adc2 & 16'hFF00) >> 8);
-            14: dout <= 8'((adc2 & 16'h00FF));
-            15: dout <= 8'((adc3 & 16'hFF00) >> 8);
-            16: dout <= 8'((adc3 & 16'h00FF));
+            0:   dout <= MAGIC1;
+            1:   dout <= MAGIC2;
+            2:   dout <= eeprom_mfg;
+            3:   dout <= eeprom_dev;
+            4:   dout <= eeprom_serial[32    -1:32-1*8];
+            5:   dout <= eeprom_serial[32-1*8-1:32-2*8];
+            6:   dout <= eeprom_serial[32-2*8-1:32-3*8];
+            7:   dout <= eeprom_serial[32-3*8-1:     0];
+            8:   dout <= jack;
+            // Channel 0
+            9:   dout <= adc0_ex[WM    -1:WM-1*8];
+            10:  dout <= adc0_ex[WM-1*8-1:WM-2*8];
+            11:  dout <= adc0_ex[WM-2*8-1:WM-3*8];
+            12:  dout <= adc0_ex[WM-3*8-1:     0];
+            // Channel 1
+            13:  dout <= adc1_ex[WM    -1:WM-1*8];
+            14:  dout <= adc1_ex[WM-1*8-1:WM-2*8];
+            15:  dout <= adc1_ex[WM-2*8-1:WM-3*8];
+            16:  dout <= adc1_ex[WM-3*8-1:     0];
+            // Channel 2
+            17:  dout <= adc2_ex[WM    -1:WM-1*8];
+            18:  dout <= adc2_ex[WM-1*8-1:WM-2*8];
+            19:  dout <= adc2_ex[WM-2*8-1:WM-3*8];
+            20:  dout <= adc2_ex[WM-3*8-1:     0];
+            // Channel 3
+            21:  dout <= adc3_ex[WM    -1:WM-1*8];
+            22:  dout <= adc3_ex[WM-1*8-1:WM-2*8];
+            23:  dout <= adc3_ex[WM-2*8-1:WM-3*8];
+            24:  dout <= adc3_ex[WM-3*8-1:     0];
             default: begin
                 // Should never get here
             end
