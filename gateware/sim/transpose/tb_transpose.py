@@ -1,3 +1,4 @@
+import sys
 import pickle
 import cocotb
 import random
@@ -6,20 +7,14 @@ from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 from cocotb.handle import Force, Release
 
-def bit_not(n, numbits=16):
-    return (1 << numbits) - 1 - n
-
-def signed_to_twos_comp(n, numbits=16):
-    return n if n >= 0 else bit_not(-n, numbits) + 1
-
-def twos_comp_to_signed(n, numbits=16):
-    if (1 << (numbits-1) & n) > 0:
-        return -int(bit_not(n, numbits) + 1)
-    else:
-        return int(n)
+# Hack to import some helpers despite existing outside a package.
+sys.path.append("..")
+from util.i2s import *
 
 @cocotb.test()
 async def test_transpose_00(dut):
+
+    sample_width = 16
 
     clock = Clock(dut.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
@@ -47,8 +42,8 @@ async def test_transpose_00(dut):
 
         data_in = int(1000*math.sin(i / 100))
 
-        dut.sample_in.value = signed_to_twos_comp(data_in)
-        data_out = twos_comp_to_signed(dut.sample_out.value)
+        dut.sample_in.value = bits_from_signed(data_in, sample_width)
+        data_out = signed_from_bits(dut.sample_out.value, sample_width)
 
         print(f"i={i} in:", data_in)
         print(f"i={i} out:", data_out)

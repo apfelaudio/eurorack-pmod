@@ -76,6 +76,7 @@ cal #(
     .W(W),
     .CAL_MEM_FILE(CAL_MEM_FILE)
 )cal_instance (
+    .rst(rst),
     .clk_256fs (clk_256fs),
     .clk_fs (clk_fs),
     // Calibrated inputs are zeroed if jack is unplugged.
@@ -122,6 +123,7 @@ ak4619 ak4619_instance (
     .sample_in2 (force_dac_output == 0 ? sample_dac2 : force_dac_output),
     .sample_in3 (force_dac_output == 0 ? sample_dac3 : force_dac_output)
 );
+
 
 // I2C transceiver and driver for all connected slaves.
 pmod_i2c_master #(

@@ -96,9 +96,6 @@ always_ff @(posedge clk_256fs) begin
         // BICK transition HI -> LO: Clock in W bits
         // On HI -> LO both SDIN and SDOUT do not transition.
         // (determined by AK4619 transition polarity register BCKP)
-        if (bit_counter == 0) begin
-            adc_words[channel] <= 0;
-        end
         if (bit_counter < W) begin
             adc_words[channel][W - bit_counter - 1] <= sdout1;
         end
@@ -122,12 +119,25 @@ always_ff @(posedge clk_256fs) begin
     end
 end
 
+
 `ifdef COCOTB_SIM
+`ifdef UNIT_TEST
 initial begin
   $dumpfile ("ak4619.vcd");
   $dumpvars;
   #1;
 end
+`endif
+
+// Shadow fake wires so we can look inside verilog arrays in vcd trace.
+generate
+  genvar idx;
+  for(idx = 0; idx < N_CHANNELS; idx = idx+1) begin: register
+    wire [W-1:0] adc_dummy;
+    assign adc_dummy = adc_words[idx];
+  end
+endgenerate
+
 `endif
 
 endmodule

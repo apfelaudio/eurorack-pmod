@@ -1,23 +1,18 @@
+import sys
 import cocotb
 import random
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 from cocotb.handle import Force, Release
 
-def bit_not(n, numbits=16):
-    return (1 << numbits) - 1 - n
-
-def signed_to_twos_comp(n, numbits=16):
-    return n if n >= 0 else bit_not(-n, numbits) + 1
-
-def twos_comp_to_signed(n, numbits=16):
-    if (1 << (numbits-1) & n) > 0:
-        return -int(bit_not(n, numbits) + 1)
-    else:
-        return int(n)
+# Hack to import some helpers despite existing outside a package.
+sys.path.append("..")
+from util.i2s import *
 
 @cocotb.test()
 async def test_vca_00(dut):
+
+    sample_width=16
 
     clock = Clock(dut.sample_clk, 5, units='us')
     cocotb.start_soon(clock.start())
@@ -35,11 +30,11 @@ async def test_vca_00(dut):
         for inx in ins:
             random_sample = random.randint(-30000, 30000)
             data_in.append(random_sample)
-            inx.value = signed_to_twos_comp(random_sample)
+            inx.value = bits_from_signed(random_sample, sample_width)
 
         await RisingEdge(dut.sample_clk)
 
-        data_out = [twos_comp_to_signed(out.value) for out in outs]
+        data_out = [signed_from_bits(out.value, sample_width) for out in outs]
 
         print(f"i={i} stimulus:", data_in)
         print(f"i={i} response:", data_out)
