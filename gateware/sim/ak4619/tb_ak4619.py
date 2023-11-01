@@ -1,21 +1,12 @@
+import sys
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 from cocotb.handle import Force, Release
 
-
-async def clock_out_word(dut, word):
-    for i in range(32):
-        await RisingEdge(dut.bick)
-        dut.sdout1.value = (word >> (0x1F-i)) & 1
-
-async def clock_in_word(dut):
-    word = 0x00000000
-    await RisingEdge(dut.bick)
-    for i in range(32):
-        await FallingEdge(dut.bick)
-        word |= dut.sdin1.value << (0x1F-i)
-    return word
+# Hack to import some helpers despite existing outside a package.
+sys.path.append("..")
+from util.i2s import *
 
 @cocotb.test()
 async def test_ak4619_00(dut):
@@ -37,11 +28,11 @@ async def test_ak4619_00(dut):
     await RisingEdge(dut.clk_256fs)
     dut.rst.value = 0
 
-    await FallingEdge(dut.clk_fs)
-    await clock_out_word(dut, TEST_L0)
-    await clock_out_word(dut, TEST_R0)
-    await clock_out_word(dut, TEST_L1)
-    await clock_out_word(dut, TEST_R1)
+    await FallingEdge(dut.lrck)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_L0)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_R0)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_L1)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_R1)
 
     # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
@@ -66,10 +57,10 @@ async def test_ak4619_00(dut):
     await FallingEdge(dut.lrck)
     await FallingEdge(dut.lrck)
 
-    result_l0 = await clock_in_word(dut)
-    result_r0 = await clock_in_word(dut)
-    result_l1 = await clock_in_word(dut)
-    result_r1 = await clock_in_word(dut)
+    result_l0 = await i2s_clock_in_u32(dut.bick, dut.sdin1)
+    result_r0 = await i2s_clock_in_u32(dut.bick, dut.sdin1)
+    result_l1 = await i2s_clock_in_u32(dut.bick, dut.sdin1)
+    result_r1 = await i2s_clock_in_u32(dut.bick, dut.sdin1)
 
     print("Data clocked from sample_inX out to sdin1:")
     print(hex(result_l0))

@@ -1,32 +1,18 @@
+import sys
 import math
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 from cocotb.handle import Force, Release
 
-
-async def clock_out_word(dut, word):
-    await FallingEdge(dut.bick)
-    for i in range(32):
-        await RisingEdge(dut.bick)
-        dut.sdout1.value = (word >> (0x1F-i)) & 1
-
-async def clock_in_word(dut):
-    word = 0x00000000
-    await RisingEdge(dut.bick)
-    for i in range(32):
-        await FallingEdge(dut.bick)
-        word |= dut.sdin1.value << (0x1F-i)
-    return word
-
-def bit_not(n, numbits=16):
-    return (1 << numbits) - 1 - n
-
-def signed_to_twos_comp(n, numbits=16):
-    return n if n >= 0 else bit_not(-n, numbits) + 1
+# Hack to import some helpers despite existing outside a package.
+sys.path.append("..")
+from util.i2s import *
 
 @cocotb.test()
 async def test_integration_00(dut):
+
+    sample_width=16
 
     clk_256fs = Clock(dut.CLK, 83, units='ns')
     cocotb.start_soon(clk_256fs.start())
@@ -35,30 +21,33 @@ async def test_integration_00(dut):
     # Simulate all jacks connected so the cal core doesn't zero them
     dut.eurorack_pmod1.jack.value = Force(0xFF)
 
+    # The reset timer is downstream of the PLL lock.
+    # So if we toggle the PLL lock, we are triggering
+    # a reset from the highest-level part of the system.
     dut.sysmgr_instance.pll_lock.value = 0
     await RisingEdge(dut.clk_256fs)
     await RisingEdge(dut.clk_256fs)
     dut.sysmgr_instance.pll_lock.value = 1
 
-    dut = dut.eurorack_pmod1.ak4619_instance
+    ak4619 = dut.eurorack_pmod1.ak4619_instance
 
     N = 20
 
-    await FallingEdge(dut.lrck)
-
     for i in range(N):
 
-        v = signed_to_twos_comp(int(16000*math.sin((2*math.pi*i)/N)))
+        v = bits_from_signed(int(16000*math.sin((2*math.pi*i)/N)), sample_width)
 
-        await clock_out_word(dut, v << 16)
-        await clock_out_word(dut, v << 16)
-        await clock_out_word(dut, v << 16)
-        await clock_out_word(dut, v << 16)
+        await FallingEdge(ak4619.lrck)
+
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
 
         # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
         print("Data clocked from sdout1 present at sample_outX:")
-        print(hex(dut.sample_out0.value))
-        print(hex(dut.sample_out1.value))
-        print(hex(dut.sample_out2.value))
-        print(hex(dut.sample_out3.value))
+        print(hex(ak4619.sample_out0.value))
+        print(hex(ak4619.sample_out1.value))
+        print(hex(ak4619.sample_out2.value))
+        print(hex(ak4619.sample_out3.value))

@@ -1,22 +1,17 @@
+import sys
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, FallingEdge, RisingEdge, ClockCycles
 from cocotb.handle import Force, Release
 
-def bit_not(n, numbits=16):
-    return (1 << numbits) - 1 - n
-
-def signed_to_twos_comp(n, numbits=16):
-    return n if n >= 0 else bit_not(-n, numbits) + 1
-
-def twos_comp_to_signed(n, numbits=16):
-    if (1 << (numbits-1) & n) > 0:
-        return -int(bit_not(n, numbits) + 1)
-    else:
-        return n
+# Hack to import some helpers despite existing outside a package.
+sys.path.append("..")
+from util.i2s import *
 
 @cocotb.test()
 async def test_cal_00(dut):
+
+    sample_width = 16
 
     clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
     clk_fs = Clock(dut.clk_fs, 83*256, units='ns')
@@ -63,7 +58,7 @@ async def test_cal_00(dut):
             # values everywhere else in the input array.
             for i, o in all_ins_outs:
                 i.value = Force(0)
-            cal_inx.value = Force(signed_to_twos_comp(value))
+            cal_inx.value = Force(bits_from_signed(value, sample_width))
             if expect >  32000: expect = 32000
             if expect < -32000: expect = -32000
             print(f"ch={channel}\t{int(value):6d}\t", end="")
@@ -71,7 +66,7 @@ async def test_cal_00(dut):
             await RisingEdge(dut.clk_fs)
             await RisingEdge(dut.clk_fs)
             await RisingEdge(dut.clk_fs)
-            output = twos_comp_to_signed(cal_outx.value)
+            output = signed_from_bits(cal_outx.value, sample_width)
             print(f"=>\t{int(output):6d}\t(expect={expect})")
             cal_inx.value = Release()
             assert output == expect
