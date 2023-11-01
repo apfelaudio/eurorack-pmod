@@ -302,4 +302,14 @@ i2c_master #(.DW(4)) i2c_master_inst(
     .rst(rst)
 );
 
+`ifdef COCOTB_SIM
+`ifdef UNIT_TEST
+initial begin
+  $dumpfile ("pmod_i2c_master.vcd");
+  $dumpvars;
+  #1;
+end
+`endif
+`endif
+
 endmodule

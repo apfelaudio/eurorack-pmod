@@ -123,4 +123,24 @@ always_ff @(posedge clk_256fs) begin
 end
 
 
+`ifdef COCOTB_SIM
+`ifdef UNIT_TEST
+initial begin
+  $dumpfile ("ak4619.vcd");
+  $dumpvars;
+  #1;
+end
+`endif
+
+// Shadow fake wires so we can look inside verilog arrays in vcd trace.
+generate
+  genvar idx;
+  for(idx = 0; idx < N_CHANNELS; idx = idx+1) begin: register
+    wire [W-1:0] adc_dummy;
+    assign adc_dummy = adc_words[idx];
+  end
+endgenerate
+
+`endif
+
 endmodule

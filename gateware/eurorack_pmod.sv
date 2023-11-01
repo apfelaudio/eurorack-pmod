@@ -118,10 +118,10 @@ ak4619 ak4619_instance (
     .sample_out1 (sample_adc1),
     .sample_out2 (sample_adc2),
     .sample_out3 (sample_adc3),
-    .sample_in0 (sample_dac0),
-    .sample_in1 (sample_dac1),
-    .sample_in2 (sample_dac2),
-    .sample_in3 (sample_dac3)
+    .sample_in0 (force_dac_output == 0 ? sample_dac0 : force_dac_output),
+    .sample_in1 (force_dac_output == 0 ? sample_dac1 : force_dac_output),
+    .sample_in2 (force_dac_output == 0 ? sample_dac2 : force_dac_output),
+    .sample_in3 (force_dac_output == 0 ? sample_dac3 : force_dac_output)
 );
 
 

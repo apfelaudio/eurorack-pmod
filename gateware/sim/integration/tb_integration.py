@@ -32,6 +32,8 @@ async def test_integration_00(dut):
     cocotb.start_soon(clk_256fs.start())
 
     dut.eurorack_pmod1.ak4619_instance.sdout1.value = 0
+    # Simulate all jacks connected so the cal core doesn't zero them
+    dut.eurorack_pmod1.jack.value = Force(0xFF)
 
     dut.sysmgr_instance.pll_lock.value = 0
     await RisingEdge(dut.clk_256fs)

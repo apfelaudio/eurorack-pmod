@@ -46,18 +46,23 @@ async def test_cal_00(dut):
 
 
     channel = 0
-    for cal_inx, cal_outx in [(dut.in0, dut.out0),
-                              (dut.in1, dut.out1),
-                              (dut.in2, dut.out2),
-                              (dut.in3, dut.out3),
-                              (dut.in4, dut.out4),
-                              (dut.in5, dut.out5),
-                              (dut.in6, dut.out6),
-                              (dut.in7, dut.out7)]:
+    all_ins_outs = [(dut.in0, dut.out0),
+                    (dut.in1, dut.out1),
+                    (dut.in2, dut.out2),
+                    (dut.in3, dut.out3),
+                    (dut.in4, dut.out4),
+                    (dut.in5, dut.out5),
+                    (dut.in6, dut.out6),
+                    (dut.in7, dut.out7)]
+    for cal_inx, cal_outx in all_ins_outs:
 
         for value in test_values:
             expect = ((value - cal_mem[channel*2]) *
                       cal_mem[channel*2 + 1]) >> 10
+            # Default all inputs to zero so we don't have undefined
+            # values everywhere else in the input array.
+            for i, o in all_ins_outs:
+                i.value = Force(0)
             cal_inx.value = Force(signed_to_twos_comp(value))
             if expect >  32000: expect = 32000
             if expect < -32000: expect = -32000
