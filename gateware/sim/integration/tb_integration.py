@@ -12,7 +12,7 @@ from util.i2s import *
 @cocotb.test()
 async def test_integration_00(dut):
 
-    sample_width=16
+    sample_width=32
 
     clk_256fs = Clock(dut.CLK, 83, units='ns')
     cocotb.start_soon(clk_256fs.start())
@@ -35,14 +35,14 @@ async def test_integration_00(dut):
 
     for i in range(N):
 
-        v = bits_from_signed(int(16000*math.sin((2*math.pi*i)/N)), sample_width)
+        v = bits_from_signed(int(2**24*math.sin((2*math.pi*i)/N)), sample_width)
 
         await FallingEdge(ak4619.lrck)
 
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
 
         # Note: this edge is also where dac_words <= sample_in (sample.sv)
 

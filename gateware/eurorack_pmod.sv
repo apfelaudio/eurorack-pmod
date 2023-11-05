@@ -103,7 +103,7 @@ cal #(
 
 // CODEC ser-/deserialiser. Sample rate derived from these clocks.
 ak4619 #(
-    .W(W),
+    .W(W)
 ) ak4619_instance (
     .rst       (rst),
     .clk_256fs (clk_256fs),
