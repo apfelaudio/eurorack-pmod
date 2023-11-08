@@ -12,7 +12,7 @@ from util.i2s import *
 @cocotb.test()
 async def test_integration_00(dut):
 
-    sample_width=32
+    sample_width=16
 
     clk_256fs = Clock(dut.CLK, 83, units='ns')
     cocotb.start_soon(clk_256fs.start())

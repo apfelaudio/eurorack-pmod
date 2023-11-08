@@ -1,4 +1,4 @@
 // Input calibration constants
-@00000000 ff63 484 ff4a 485 40 48a ff74 485
+@00000000 11c0 650 10b2 64f 114a 650 1134 64f
 // Output calibration constants
-@00000008 fd3f 3e5 fda5 3e8 fdc8 3ee fd15 3ec
+@00000008 f6e 3ed e53 3ef f3d 3ee fa0 3ef

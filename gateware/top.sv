@@ -7,7 +7,7 @@
 //`define OUTPUT_CALIBRATION
 
 module top #(
-    parameter int W = 32 // sample width, bits
+    parameter int W = 16 // sample width, bits
 )(
 `ifndef INTERNAL_CLOCK
     input   CLK,
