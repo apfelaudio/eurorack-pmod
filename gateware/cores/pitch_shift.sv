@@ -11,7 +11,6 @@
 
 module pitch_shift #(
     parameter W = 16,
-    parameter FP_OFFSET = 2
 )(
     input rst,
     input clk,
@@ -27,7 +26,9 @@ module pitch_shift #(
     input [7:0] jack
 );
 
-transpose transpose_instance (
+transpose #(
+    .W(W)
+) transpose_instance (
     .sample_clk(sample_clk),
     .pitch(sample_in1),
     .sample_in(sample_in0),
