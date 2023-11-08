@@ -38,10 +38,10 @@ logic signed [WM-1:0] adc1_ex;
 logic signed [WM-1:0] adc2_ex;
 logic signed [WM-1:0] adc3_ex;
 
-assign adc0_ex = adc0;
-assign adc1_ex = adc1;
-assign adc2_ex = adc2;
-assign adc3_ex = adc3;
+assign adc0_ex = WM'(adc0);
+assign adc1_ex = WM'(adc1);
+assign adc2_ex = WM'(adc2);
+assign adc3_ex = WM'(adc3);
 
 uart_tx utx (
     .tx(tx_o),

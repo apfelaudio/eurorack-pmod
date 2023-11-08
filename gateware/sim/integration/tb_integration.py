@@ -35,14 +35,14 @@ async def test_integration_00(dut):
 
     for i in range(N):
 
-        v = bits_from_signed(int(2**24*math.sin((2*math.pi*i)/N)), sample_width)
+        v = bits_from_signed(int(16000*math.sin((2*math.pi*i)/N)), sample_width)
 
         await FallingEdge(ak4619.lrck)
 
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
-        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
+        await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
 
         # Note: this edge is also where dac_words <= sample_in (sample.sv)
 

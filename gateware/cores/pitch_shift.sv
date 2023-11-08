@@ -10,7 +10,7 @@
 // - Output 2: Audio input (dry + transposed mixed)
 
 module pitch_shift #(
-    parameter W = 16,
+    parameter W = 16
 )(
     input rst,
     input clk,
