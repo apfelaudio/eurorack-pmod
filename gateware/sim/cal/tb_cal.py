@@ -21,11 +21,14 @@ async def test_cal_00(dut):
     # Simulate all jacks connected so the cal core doesn't zero them
     dut.jack.value = Force(0xFF)
 
+    clampl = -2**(sample_width-1) + 1
+    clamph =  2**(sample_width-1) - 1;
+
     test_values = [
             23173,
             -14928,
-            32000,
-            -32000
+            clamph,
+            -clampl
     ]
 
     cal_mem = []
@@ -59,8 +62,8 @@ async def test_cal_00(dut):
             for i, o in all_ins_outs:
                 i.value = Force(0)
             cal_inx.value = Force(bits_from_signed(value, sample_width))
-            if expect >  32000: expect = 32000
-            if expect < -32000: expect = -32000
+            if expect >  clamph: expect = clamph
+            if expect < clampl: expect = clampl
             print(f"ch={channel}\t{int(value):6d}\t", end="")
             await FallingEdge(dut.clk_fs)
             await RisingEdge(dut.clk_fs)

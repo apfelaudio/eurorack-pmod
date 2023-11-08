@@ -53,8 +53,8 @@ localparam CAL_ST_LATCH     = 3'd0,
            CAL_ST_OUT       = 3'd5,
            CAL_ST_HALT      = 3'd6;
 
-localparam int signed CLAMPL = -32'sd32000;
-localparam int signed CLAMPH =  32'sd32000;
+localparam int signed CLAMPL = -2**(W-1) + 1;
+localparam int signed CLAMPH =  2**(W-1) - 1;
 
 logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];

@@ -75,7 +75,7 @@ logic signed [W-1:0] sample_dac3;
 cal #(
     .W(W),
     .CAL_MEM_FILE(CAL_MEM_FILE)
-)cal_instance (
+) cal_instance (
     .rst(rst),
     .clk_256fs (clk_256fs),
     .clk_fs (clk_fs),
@@ -102,7 +102,9 @@ cal #(
 );
 
 // CODEC ser-/deserialiser. Sample rate derived from these clocks.
-ak4619 ak4619_instance (
+ak4619 #(
+    .W(W)
+) ak4619_instance (
     .rst       (rst),
     .clk_256fs (clk_256fs),
     .clk_fs    (clk_fs),

@@ -175,6 +175,7 @@ eurorack_pmod #(
 // Helper module to serialize some interesting state to a UART
 // for bringup and calibration purposes.
 debug_uart #(
+    .W(W),
     .DIV(12) // WARN: baud rate is determined by clk_256fs / 12 !!
 ) debug_uart_instance (
     .clk (clk_256fs),
