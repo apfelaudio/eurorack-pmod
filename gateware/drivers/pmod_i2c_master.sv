@@ -460,16 +460,21 @@ always_ff @(posedge clk) begin
                         end
                         // Sensor 0 difference counts
                         2: begin
-                            case (nsensor)
-                                0: data_in <= 8'hBA;
-                                1: data_in <= 8'hBC;
-                                2: data_in <= 8'hBE;
-                                3: data_in <= 8'hC0;
-                                4: data_in <= 8'hC2;
-                                5: data_in <= 8'hC4;
-                                6: data_in <= 8'hC6;
-                                7: data_in <= 8'hC8;
-                            endcase
+                            if (ack_out == 1'b1) begin
+                                i2c_state <= I2C_TOUCH5;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                case (nsensor)
+                                    0: data_in <= 8'hBA;
+                                    1: data_in <= 8'hBC;
+                                    2: data_in <= 8'hBE;
+                                    3: data_in <= 8'hC0;
+                                    4: data_in <= 8'hC2;
+                                    5: data_in <= 8'hC4;
+                                    6: data_in <= 8'hC6;
+                                    7: data_in <= 8'hC8;
+                                endcase
+                            end
                         end
                         3: cmd <= I2CMASTER_STOP;
 
