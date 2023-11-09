@@ -397,6 +397,7 @@ always_ff @(posedge clk) begin
                 I2C_JACK1: begin
                     i2c_state <= I2C_JACK2;
                     i2c_config_pos <= 0;
+                    stb <= 1'b0;
                 end
                 I2C_JACK2: begin
                     case (i2c_config_pos)
@@ -449,6 +450,7 @@ always_ff @(posedge clk) begin
                 I2C_TOUCH5: begin
                     i2c_state <= I2C_TOUCH6;
                     i2c_config_pos <= 0;
+                    stb <= 1'b0;
                 end
                 I2C_TOUCH6: begin
                     case (i2c_config_pos)
@@ -461,7 +463,7 @@ always_ff @(posedge clk) begin
                         // Sensor 0 difference counts
                         2: begin
                             if (ack_out == 1'b1) begin
-                                i2c_state <= I2C_TOUCH5;
+                                i2c_state <= I2C_LED1;
                                 cmd <= I2CMASTER_STOP;
                             end else begin
                                 case (nsensor)
@@ -486,11 +488,11 @@ always_ff @(posedge clk) begin
                         end
                         6: begin
                             if (ack_out == 1'b1) begin
-                                i2c_state <= I2C_TOUCH5;
+                                i2c_state <= I2C_LED1;
                                 cmd <= I2CMASTER_STOP;
                             end else begin
                                 cmd <= I2CMASTER_READ;
-                                ack_in <= 1'b0;
+                                ack_in <= 1'b1;
                             end
                         end
                         7: begin
@@ -504,7 +506,6 @@ always_ff @(posedge clk) begin
                                 6: touch6 <= data_out;
                                 7: touch7 <= data_out;
                             endcase
-                            ack_in <= 1'b1;
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_LED1;
                             nsensor <= nsensor + 1;
