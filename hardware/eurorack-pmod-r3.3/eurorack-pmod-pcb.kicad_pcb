@@ -91,7 +91,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory "../fab/rev_3_2/")
+      (outputdirectory "../fab/rev_3_3/")
     )
   )
 
