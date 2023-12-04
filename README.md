@@ -1,6 +1,7 @@
 # Eurorack PMOD
 
-**Assembled boards now available!** [get one **here :)**](https://lectronz.com/stores/apfelaudio)
+- ~~R3.1 hardware SOLD OUT~~
+- **R3.3 hardware coming soon!** [get notified **here :)**](https://apfelaudio.com/modules/pmod/)
 
 **Eurorack PMOD** makes it easy for you to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). It is an expansion board for FPGA development boards that allows them to interface with a Eurorack hardware synthesizer. This board exposes 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported, at a -8V to +8V swing, amongst many more features. R3.1 hardware looks like this:
 
