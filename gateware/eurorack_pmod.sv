@@ -51,6 +51,16 @@ module eurorack_pmod #(
     // Logic '1' == jack is inserted. Bit 0 is input 0.
     output [7:0] jack,
 
+    // Touch sense outputs
+    logic [7:0] touch0;
+    logic [7:0] touch1;
+    logic [7:0] touch2;
+    logic [7:0] touch3;
+    logic [7:0] touch4;
+    logic [7:0] touch5;
+    logic [7:0] touch6;
+    logic [7:0] touch7;
+
     // Signals used for bringup / debug / calibration.
     //
     // Raw samples from the CODEC ADCs
@@ -123,15 +133,6 @@ ak4619 ak4619_instance (
     .sample_in3 (force_dac_output == 0 ? sample_dac3 : force_dac_output)
 );
 
-logic [7:0] touch0;
-logic [7:0] touch1;
-logic [7:0] touch2;
-logic [7:0] touch3;
-logic [7:0] touch4;
-logic [7:0] touch5;
-logic [7:0] touch6;
-logic [7:0] touch7;
-
 // I2C transceiver and driver for all connected slaves.
 pmod_i2c_master #(
     .CODEC_CFG(CODEC_CFG_FILE),
@@ -145,14 +146,14 @@ pmod_i2c_master #(
     .sda_oe(i2c_sda_oe),
     .sda_i(i2c_sda_i),
 
-    .led0(touch0>>1),
-    .led1(touch1>>1),
-    .led2(touch2>>1),
-    .led3(touch3>>1),
-    .led4(touch4>>1),
-    .led5(touch5>>1),
-    .led6(touch6>>1),
-    .led7(touch7>>1),
+    .led0(cal_in0[W-1:W-8]),
+    .led1(cal_in1[W-1:W-8]),
+    .led2(cal_in2[W-1:W-8]),
+    .led3(cal_in3[W-1:W-8]),
+    .led4(cal_out0[W-1:W-8]),
+    .led5(cal_out1[W-1:W-8]),
+    .led6(cal_out2[W-1:W-8]),
+    .led7(cal_out3[W-1:W-8]),
 
     .touch0(touch0),
     .touch1(touch1),
