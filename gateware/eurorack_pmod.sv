@@ -52,14 +52,14 @@ module eurorack_pmod #(
     output [7:0] jack,
 
     // Touch sense outputs
-    logic [7:0] touch0;
-    logic [7:0] touch1;
-    logic [7:0] touch2;
-    logic [7:0] touch3;
-    logic [7:0] touch4;
-    logic [7:0] touch5;
-    logic [7:0] touch6;
-    logic [7:0] touch7;
+    output [7:0] touch0,
+    output [7:0] touch1,
+    output [7:0] touch2,
+    output [7:0] touch3,
+    output [7:0] touch4,
+    output [7:0] touch5,
+    output [7:0] touch6,
+    output [7:0] touch7,
 
     // Signals used for bringup / debug / calibration.
     //
