@@ -105,11 +105,11 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 
 # Manufacturing
 
-**Assembled boards now available!** [get one **here :)**](https://lectronz.com/stores/apfelaudio)
+Update: R3.1 SOLD OUT, revision R3.3 will land in the next 1-2 months - [get notified **here :)**](https://apfelaudio.com/modules/pmod/)
 
-Update: R3.1 (first production release) is fully functional with 1 rework, see github issues for up-to-date information.
+~~Update: R3.1 (first production release) is fully functional with 1 rework, see github issues for up-to-date information.~~
 
-Note: I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.
+~~Note: I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.~~
 
 
 ## Known limitations
