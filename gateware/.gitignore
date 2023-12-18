@@ -8,3 +8,4 @@ sim/*/sim_build
 *.log
 *.config
 *.svf
+*.history

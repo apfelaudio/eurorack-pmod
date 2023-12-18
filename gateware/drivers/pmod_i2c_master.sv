@@ -501,10 +501,11 @@ always_ff @(posedge clk) begin
                                 1: touch1 <= data_out;
                                 2: touch2 <= data_out;
                                 3: touch3 <= data_out;
-                                4: touch4 <= data_out;
-                                5: touch5 <= data_out;
-                                6: touch6 <= data_out;
-                                7: touch7 <= data_out;
+                                // Warn R3.3 swaps last for to improve routing
+                                4: touch7 <= data_out;
+                                5: touch6 <= data_out;
+                                6: touch5 <= data_out;
+                                7: touch4 <= data_out;
                             endcase
                             cmd <= I2CMASTER_STOP;
                             i2c_state <= I2C_LED1;
