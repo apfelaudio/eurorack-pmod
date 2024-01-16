@@ -40,6 +40,20 @@ jobs:
           name: windows-build-icebreaker.bin
           path: gateware/build/icebreaker/top.bin
 
+  macos-build-icebreaker:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - run: git submodule update --init gateware/external/no2misc
+      - run: |
+          yosys --version
+          make BOARD=icebreaker CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: macos-build-icebreaker.bin
+          path: gateware/build/icebreaker/top.bin
+
   ubuntu-build-colorlight-i5:
     runs-on: ubuntu-latest
     steps:
