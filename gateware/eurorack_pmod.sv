@@ -9,7 +9,6 @@
 
 module eurorack_pmod #(
     parameter W = 16, // sample width, bits
-    parameter CAL_MEM_FILE = "cal/cal_mem.hex",
     parameter CODEC_CFG_FILE  = "drivers/ak4619-cfg.hex",
     parameter LED_CFG_FILE  = "drivers/pca9635-cfg.hex"
 )(
@@ -73,8 +72,7 @@ logic signed [W-1:0] sample_dac3;
 // Compensates for DC bias in CODEC, gain differences, resistor
 // tolerances and so on.
 cal #(
-    .W(W),
-    .CAL_MEM_FILE(CAL_MEM_FILE)
+    .W(W)
 ) cal_instance (
     .rst(rst),
     .clk_256fs (clk_256fs),

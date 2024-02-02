@@ -32,7 +32,7 @@ async def test_cal_00(dut):
     ]
 
     cal_mem = []
-    with open("cal/cal_mem.hex", "r") as f_cal_mem:
+    with open("cal/cal_mem_default_r31.hex", "r") as f_cal_mem:
         for line in f_cal_mem.readlines():
             if '//' in line:
                 continue
