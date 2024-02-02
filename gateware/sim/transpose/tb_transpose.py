@@ -49,10 +49,10 @@ async def test_transpose_00(dut):
         print(f"i={i} out:", data_out)
 
         if data_out_last is not None:
-            print(f"del0: {int(dut.delay_out0.value)}")
-            print(f"env0: {int(dut.env0.value)}")
-            print(f"del1: {int(dut.delay_out1.value)}")
-            print(f"env1: {int(dut.env1.value)}")
+            print(f"del0: {int(dut.delay_out0.value.integer)}")
+            print(f"env0: {int(dut.env0.value.integer)}")
+            print(f"del1: {int(dut.delay_out1.value.integer)}")
+            print(f"env1: {int(dut.env1.value.integer)}")
             if breaknext:
                 print("FOUND A DISCONTINUITY - failing...")
                 assert(False)

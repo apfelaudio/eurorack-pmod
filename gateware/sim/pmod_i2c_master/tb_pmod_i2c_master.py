@@ -7,7 +7,7 @@ async def i2c_clock_in_byte(sda, scl, invert):
     byte = 0x00
     for i in range(8):
         await (FallingEdge(scl) if invert else RisingEdge(scl))
-        sda_val = sda.value
+        sda_val = sda.value.integer
         if invert:
             sda_val = 0 if sda_val else 1
         byte |= sda_val << (8-i)
