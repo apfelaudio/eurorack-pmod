@@ -161,7 +161,12 @@ always_ff @(posedge clk) begin
                         11: begin
                             eeprom_serial[32-3*8-1:32-4*8] <= data_out;
                             cmd <= I2CMASTER_STOP;
+`ifdef HW_R33
                             i2c_state <= I2C_INIT_TOUCH1;
+`else
+                            // For R31, don't try initializing touch sense
+                            i2c_state <= I2C_INIT_CODEC1;
+`endif
                             delay_cnt <= 0;
                         end
                         default: begin
@@ -176,10 +181,11 @@ always_ff @(posedge clk) begin
                     i2c_state <= I2C_INIT_TOUCH2;
                     i2c_config_pos <= 0;
                 end
-                // Switch off the CY8CMBR3108 by default. It likes to --
-                //   1) Send random NACKs on the I2C bus which causes the LEDs
-                //      to flicker.
-                //   2) Increase noise in the audio chain.
+                // Switch off the CY8CMBR3108 by default, as it can cause the
+                // LEDs to flicker (due to NACKs) and increase noise in the
+                // audio chain, unless it is configured correctly (currently
+                // touch sensing prototyping is on a separate branch, let's
+                // keep it out of master for now)
                 I2C_INIT_TOUCH2: begin
                     case (i2c_config_pos)
                         0: begin

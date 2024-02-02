@@ -27,7 +27,7 @@ async def test_i2cinit_00(dut):
 
     dut.rst.value = 0
 
-    dut.i2c_state.value = 3 # Jump to I2C_INIT_CODEC1
+    dut.i2c_state.value = 5 # Jump to I2C_INIT_CODEC1
 
     await RisingEdge(dut.sda_oe)
 

@@ -3,14 +3,27 @@ name: build & test
 on: [push]
 
 jobs:
-  ubuntu-build-icebreaker:
+  ubuntu-build-icebreaker-r31:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=icebreaker CORE=mirror -C gateware
+      - run: make HW_REV=HW_R31 BOARD=icebreaker CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-build-icebreaker.bin
+          path: gateware/build/icebreaker/top.bin
+
+  ubuntu-build-icebreaker-r33:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make HW_REV=HW_R33 BOARD=icebreaker CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-icebreaker.bin
@@ -34,7 +47,7 @@ jobs:
           export PATH=$PATH:$RUNNER_TEMP/oss-cad-suite/bin
           export PATH=$PATH:$RUNNER_TEMP/oss-cad-suite/lib
           yosys --version
-          make BOARD=icebreaker CORE=mirror -C gateware
+          make HW_REV=HW_R33 BOARD=icebreaker CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: windows-build-icebreaker.bin
@@ -48,7 +61,7 @@ jobs:
       - run: git submodule update --init gateware/external/no2misc
       - run: |
           yosys --version
-          make BOARD=icebreaker CORE=mirror -C gateware
+          make HW_REV=HW_R33 BOARD=icebreaker CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: macos-build-icebreaker.bin
@@ -61,7 +74,7 @@ jobs:
       - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=colorlight_i5 CORE=mirror -C gateware
+      - run: make HW_REV=HW_R33 BOARD=colorlight_i5 CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-colorlight-i5.bin
@@ -74,7 +87,7 @@ jobs:
       - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=colorlight_i9 CORE=mirror -C gateware
+      - run: make HW_REV=HW_R33 BOARD=colorlight_i9 CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-colorlight-i9.bin
@@ -87,7 +100,7 @@ jobs:
       - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=ecpix5 CORE=mirror -C gateware
+      - run: make HW_REV=HW_R33 BOARD=ecpix5 CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-ecpix-5.bin
@@ -100,7 +113,7 @@ jobs:
       - uses: YosysHQ/setup-oss-cad-suite@v2
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
-      - run: make BOARD=pico_ice CORE=mirror -C gateware
+      - run: make HW_REV=HW_R33 BOARD=pico_ice CORE=mirror -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-pico-ice.bin
