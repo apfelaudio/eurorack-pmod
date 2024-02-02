@@ -1,4 +1,4 @@
-DEFINES = "$(ADD_DEFINES) -DECP5"
+DEFINES = "$(ADD_DEFINES) -DECP5 -D$(HW_REV)"
 
 all: $(BUILD)/$(PROJ).bin
 

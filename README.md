@@ -1,25 +1,38 @@
-# Eurorack PMOD
-
-- ~~R3.1 hardware SOLD OUT~~
-- **R3.3 hardware coming soon!** [get notified **here :)**](https://apfelaudio.com/modules/pmod/)
-
-**Eurorack PMOD** makes it easy for you to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). It is an expansion board for FPGA development boards that allows them to interface with a Eurorack hardware synthesizer. This board exposes 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported, at a -8V to +8V swing, amongst many more features. R3.1 hardware looks like this:
-
-![assembled eurorack-pmod module R3.0 (panel)](docs/img/panel.jpg)
-![assembled eurorack-pmod module R3.0 (top)](docs/img/pmod_top.jpg)
-
-
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
+# Eurorack PMOD
 
-For a high-level overview on R2.2 hardware, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project. Production hardware is named R3+ and has a few improvements (LEDs fully programmable, jack detection, calibration EEPROM).
+- **R3.3 hardware in stock!** [order **here :)**](https://apfelaudio.com/order/)
+- ~~R3.1 hardware SOLD OUT~~
 
-[Want one?](#manufacturing). More photos can be found [below](#photos). 
+**Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The **latest (R3.3) hardware looks like this**:
 
-### This project is:
-- The design for a Eurorack-compatible PCB and front-panel, including a [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector (compatible with most FPGA dev boards). PCB designed in [KiCAD](https://www.kicad.org/). Design is [certified open hardware](https://certification.oshwa.org/de000135.html).
-- Various [example cores](gateware/cores) (and calibration / driver cores for the audio CODEC) initially targeting an [iCEBreaker FPGA](https://1bitsquared.com/products/icebreaker) (iCE40 part) but many more boards are supported (see below). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
-- A [VCV Rack plugin](https://github.com/schnommus/verilog-vcvrack) so you can simulate your Verilog designs in a completely virtual modular system, no hardware required.
+![assembled eurorack-pmod module R3.3 (front)](docs/img/r33_panel.jpg)
+![assembled eurorack-pmod module R3.3 (top)](docs/img/r33_top.jpg)
+
+For a (now quite outdated) high-level overview on the motivation for this project and some of the design decisions, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project.
+
+## How does it work?
+- Plug eurorack-pmod into an FPGA development board of your choice. Here is a list of [boards already supported by the examples](gateware/boards).
+- Get started with some [example DSP cores](gateware/cores). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
+
+# R3.3 hardware details
+
+![labelled eurorack-pmod 3.3](docs/img/r33_labelled.png)
+
+- 3HP module compatible with modular synthesizer systems.
+    - Module depth is 35mm with both ribbon cables attached.
+- [PMOD](https://en.wikipedia.org/wiki/Pmod_Interface) connector compatible with many FPGA development boards.
+- 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported.
+- PWM-controlled, user-programmable red/green LEDs on each output channel.
+- Jack insertion detection on input & output jacks.
+- Calibration EEPROM for unique ID and storing calibration data.
+- [new!] Touch and proximity sensing on all unused jacks as an extra input method.
+    - Note: this is disabled by default, if you want to play with this feature some example gateware [is on a separate branch](https://github.com/apfelaudio/eurorack-pmod/commits/seb/touch-fsm-r33/). I'll merge it properly ASAP.
+
+**Compared to R3.1, the changes across R3.2 and R3.3 [are summarized here](https://github.com/apfelaudio/eurorack-pmod/issues/50)**
+
+[Want one?](#manufacturing). More photos can be found [below](#photos).
 
 ## Included examples
 This repository contains a bunch of example DSP cores which are continuously being updated:
@@ -45,21 +58,9 @@ The following development boards have been tested with `eurorack-pmod` and are s
 - Colorlight i9 (ECP5 based)
 - pico-ice from TinyVision (iCE40 based)
 
-## Hardware details
-
-![labelled eurorack-pmod 3.0](docs/img/labelled.jpg)
-
-- 3HP module compatible with modular synthesizer systems.
-    - Module depth is 47mm with both ribbon cables attached
-    - This fits nicely in e.g. a 4MS POD 48X (pictured below).
-- PMOD connector compatible with most FPGA development boards.
-- 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported.
-- PWM-controlled, user-programmable red/green LEDs on each output channel.
-- Jack insertion detection on input & output jacks.
-- Calibration EEPROM for unique ID and storing calibration data.
-- I/O is about +/- 8V capable, wider is possible with a resistor change.
-
 ## PMOD Pinout
+
+![assembled eurorack-pmod module R3.3 (bottom)](docs/img/r33_bottom.jpg)
 
 The PMOD pinout is on the silkscreen on the back side of the board. Details are below. Note that Pin 1 is the SQUARE pad.
 
@@ -76,13 +77,9 @@ The PMOD pinout is on the silkscreen on the back side of the board. Details are 
 11) 3V3 IN
 12) 3V3 IN
 
-## Gateware details
-- Examples based on iCE40 and ECP5 based FPGAs supported by open-source tools.
-- User-defined DSP logic is decoupled from rest of system (see [`gateware/cores`](gateware/cores) directory)
-
 ## Getting Started
 
-For now, I have tested builds on Linux and Windows (under MSYS2). Both are tested in CI.
+I have tested builds on Linux, Mac and Windows (under MSYS2). All are tested in CI.
 
 0. Install the [OSS FPGA CAD flow](https://github.com/yosyshq/oss-cad-suite-build).
     - You may be able to get yosys / verilator from other package managers but I recommend using the [releases from YosysHQ](https://github.com/yosyshq/oss-cad-suite-build) so you're using the same binaries that CI is using.
@@ -105,11 +102,42 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 
 # Manufacturing
 
-Update: R3.1 SOLD OUT, revision R3.3 will land in the next 1-2 months - [get notified **here :)**](https://apfelaudio.com/modules/pmod/)
+**R3.3 hardware is in stock** [order **here :)**](https://apfelaudio.com/)
+
+~~Update: R3.1 SOLD OUT, revision R3.3 will land in the next 1-2 months - [get notified **here :)**](https://apfelaudio.com/modules/pmod/)~~
 
 ~~Update: R3.1 (first production release) is fully functional with 1 rework, see github issues for up-to-date information.~~
 
 ~~Note: I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.~~
+
+# R3.1 Hardware (no longer manufactured)
+
+The above README focuses on R3.3, which is currently being manufactured.
+
+Revision R3.1 was sold out in 2023. It's no longer manufactured, however this repository still supports it if you use the `HW_REV=HW_R31` flag when building. I left some of the old photos here in case they are useful.
+
+From the gateware perspective, there is almost no difference between R3.1 and R3.3 and so any cores should be compatible with both (unless they use new features of R3.3 e.g. touch sensitive jacks).
+
+## R3.1 boards
+
+![assembled eurorack-pmod module R3.0 (panel)](docs/img/panel.jpg)
+![assembled eurorack-pmod module R3.0 (top)](docs/img/pmod_top.jpg)
+
+## R3.1 hardware details
+
+![labelled eurorack-pmod 3.0](docs/img/labelled.jpg)
+
+## R3.1 technical
+
+- 3HP module compatible with modular synthesizer systems.
+    - Module depth is 47mm with both ribbon cables attached
+    - This fits nicely in e.g. a 4MS POD 48X (pictured below).
+- PMOD connector compatible with most FPGA development boards.
+- 8 (4 in + 4 out) DC-coupled audio channels, 192KHz / 32bit sampling supported.
+- PWM-controlled, user-programmable red/green LEDs on each output channel.
+- Jack insertion detection on input & output jacks.
+- Calibration EEPROM for unique ID and storing calibration data.
+- I/O is about +/- 8V capable, wider is possible with a resistor change.
 
 
 ## Known limitations
@@ -117,10 +145,7 @@ Update: R3.1 SOLD OUT, revision R3.3 will land in the next 1-2 months - [get not
 
 # Photos
 
-## Assembled `eurorack-pmod` (front)
-![assembled eurorack-pmod module (front)](docs/img/leds_front.jpg)
-
-## `eurorack-pmod` connected to iCEBreaker
+## `eurorack-pmod` R3.1 connected to iCEBreaker
 ![assembled eurorack-pmod module (in system)](docs/img/pmod_insystem.jpg)
 
 # License

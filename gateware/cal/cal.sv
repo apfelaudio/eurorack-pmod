@@ -18,7 +18,11 @@
 
 module cal #(
     parameter W = 16, // sample width
-    parameter CAL_MEM_FILE = "cal/cal_mem.hex"
+`ifdef HW_R33
+    parameter CAL_MEM_FILE = "cal/cal_mem_default_r33.hex"
+`else
+    parameter CAL_MEM_FILE = "cal/cal_mem_default_r31.hex"
+`endif
 )(
     input rst,
     input clk_256fs,

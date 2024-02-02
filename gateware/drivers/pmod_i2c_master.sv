@@ -5,6 +5,8 @@
 //    - 24AA025UIDT I2C EEPROM with unique ID
 //    - PCA9635 I2C PWM LED controller
 //    - PCA9557 I2C GPIO expander (for jack detection)
+// For HW Rev 3.2+, we also have:
+//    - CY8CMBR3108 I2C touch/proximity sensor (experiment, off by default!)
 //
 // This kind of stateful stuff is often best suited for a softcore rather
 // than pure Verilog, however I wanted to make it possible to use all
@@ -55,13 +57,15 @@ module pmod_i2c_master #(
 localparam I2C_DELAY1        = 0,
            I2C_EEPROM1       = 1,
            I2C_EEPROM2       = 2,
-           I2C_INIT_CODEC1   = 3,
-           I2C_INIT_CODEC2   = 4,
-           I2C_LED1          = 5, // <<--\ LED/JACK re-runs indefinitely.
-           I2C_LED2          = 6, //     |
-           I2C_JACK1         = 7, //     |
-           I2C_JACK2         = 8, // >>--/
-           I2C_IDLE          = 9;
+           I2C_INIT_TOUCH1   = 3,
+           I2C_INIT_TOUCH2   = 4,
+           I2C_INIT_CODEC1   = 5,
+           I2C_INIT_CODEC2   = 6,
+           I2C_LED1          = 7,  // <<--\ LED/JACK re-runs indefinitely.
+           I2C_LED2          = 8,  //     |
+           I2C_JACK1         = 9,  //     |
+           I2C_JACK2         = 10, // >>--/
+           I2C_IDLE          = 11;
 
 `ifdef COCOTB_SIM
 localparam STARTUP_DELAY_BIT = 4;
@@ -157,13 +161,63 @@ always_ff @(posedge clk) begin
                         11: begin
                             eeprom_serial[32-3*8-1:32-4*8] <= data_out;
                             cmd <= I2CMASTER_STOP;
+`ifdef HW_R33
+                            i2c_state <= I2C_INIT_TOUCH1;
+`else
+                            // For R31, don't try initializing touch sense
                             i2c_state <= I2C_INIT_CODEC1;
+`endif
                             delay_cnt <= 0;
                         end
                         default: begin
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
+                    stb <= 1'b1;
+                end
+                I2C_INIT_TOUCH1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_TOUCH2;
+                    i2c_config_pos <= 0;
+                end
+                // Switch off the CY8CMBR3108 by default, as it can cause the
+                // LEDs to flicker (due to NACKs) and increase noise in the
+                // audio chain, unless it is configured correctly (currently
+                // touch sensing prototyping is on a separate branch, let's
+                // keep it out of master for now)
+                I2C_INIT_TOUCH2: begin
+                    case (i2c_config_pos)
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        1: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            if (ack_out == 1'b0) begin
+                                // Write to command register
+                                data_in <= 8'h86;
+                                cmd <= I2CMASTER_WRITE;
+                            end else begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_INIT_TOUCH1;
+                            end
+                        end
+                        3: begin
+                            // Disable + enter low-power mode.
+                            data_in <= 8'h07;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        4: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_INIT_CODEC1;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
                 I2C_INIT_CODEC1: begin

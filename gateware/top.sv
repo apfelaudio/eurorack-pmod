@@ -130,8 +130,7 @@ assign i2c_sda_i = PMOD_I2C_SDA;
 `endif
 
 eurorack_pmod #(
-    .W(W),
-    .CAL_MEM_FILE("cal/cal_mem.hex")
+    .W(W)
 ) eurorack_pmod1 (
     .clk_256fs(clk_256fs),
     .clk_fs   (clk_fs),

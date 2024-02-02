@@ -47,7 +47,7 @@ async def test_integration_00(dut):
         # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
         print("Data clocked from sdout1 present at sample_outX:")
-        print(hex(ak4619.sample_out0.value))
-        print(hex(ak4619.sample_out1.value))
-        print(hex(ak4619.sample_out2.value))
-        print(hex(ak4619.sample_out3.value))
+        print(hex(ak4619.sample_out0.value.integer))
+        print(hex(ak4619.sample_out1.value.integer))
+        print(hex(ak4619.sample_out2.value.integer))
+        print(hex(ak4619.sample_out3.value.integer))

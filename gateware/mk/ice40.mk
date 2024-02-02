@@ -1,4 +1,4 @@
-DEFINES = "$(ADD_DEFINES) -DICE40"
+DEFINES = "$(ADD_DEFINES) -DICE40 -D$(HW_REV)"
 
 all: $(BUILD)/$(PROJ).bin
 

@@ -16,7 +16,7 @@ async def i2s_clock_in_u32(bick, sdin):
     await RisingEdge(bick)
     for i in range(32):
         await FallingEdge(bick)
-        word |= sdin.value << (0x1F-i)
+        word |= sdin.value.integer << (0x1F-i)
     return word
 
 def bits_not(n, width):
@@ -29,6 +29,7 @@ def bits_from_signed(n, width):
 
 def signed_from_bits(n, width):
     """Signed integer from (2s complement) bits of `width`."""
+    n = n.integer
     if (1 << (width-1) & n) > 0:
         return -int(bits_not(n, width) + 1)
     else:

@@ -39,10 +39,10 @@ async def test_ak4619_00(dut):
     await RisingEdge(dut.clk_fs)
     await FallingEdge(dut.clk_fs)
     print("Data clocked from sdout1 present at sample_outX:")
-    print(hex(dut.sample_out0.value))
-    print(hex(dut.sample_out1.value))
-    print(hex(dut.sample_out2.value))
-    print(hex(dut.sample_out3.value))
+    print(hex(dut.sample_out0.value.integer))
+    print(hex(dut.sample_out1.value.integer))
+    print(hex(dut.sample_out2.value.integer))
+    print(hex(dut.sample_out3.value.integer))
 
     assert dut.sample_out0.value == TEST_L0 >> 16
     assert dut.sample_out1.value == TEST_R0 >> 16

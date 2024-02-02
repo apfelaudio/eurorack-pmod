@@ -7,7 +7,7 @@ async def i2c_clock_in_byte(sda, scl, invert):
     byte = 0x00
     for i in range(8):
         await (FallingEdge(scl) if invert else RisingEdge(scl))
-        sda_val = sda.value
+        sda_val = sda.value.integer
         if invert:
             sda_val = 0 if sda_val else 1
         byte |= sda_val << (8-i)
@@ -27,7 +27,7 @@ async def test_i2cinit_00(dut):
 
     dut.rst.value = 0
 
-    dut.i2c_state.value = 3 # Jump to I2C_INIT_CODEC1
+    dut.i2c_state.value = 5 # Jump to I2C_INIT_CODEC1
 
     await RisingEdge(dut.sda_oe)
 
@@ -41,7 +41,11 @@ async def test_i2cinit_00(dut):
             0xAE  # 0x01 Audio I/F Format
     ]
 
+    bytes_out = []
     for i in range(4):
         byte = await i2c_clock_in_byte(dut.sda_oe, dut.scl_oe, invert=True)
         print(f"i2cinit clocked out {hex(byte)}")
-        assert byte == test_bytes[i]
+        bytes_out.append(byte)
+
+    for i in range(4):
+        assert bytes_out[i] == test_bytes[i]
