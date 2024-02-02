@@ -41,7 +41,11 @@ async def test_i2cinit_00(dut):
             0xAE  # 0x01 Audio I/F Format
     ]
 
+    bytes_out = []
     for i in range(4):
         byte = await i2c_clock_in_byte(dut.sda_oe, dut.scl_oe, invert=True)
         print(f"i2cinit clocked out {hex(byte)}")
-        assert byte == test_bytes[i]
+        bytes_out.append(byte)
+
+    for i in range(4):
+        assert bytes_out[i] == test_bytes[i]
