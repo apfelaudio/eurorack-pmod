@@ -1,14 +1,17 @@
 ALL_BOARDS = $(shell ls boards)
 ALL_CORES = $(shell basename --suffix=.sv -- cores/*.sv)
 ALL_HW_REV = "HW_R31 HW_R33"
+ALL_TOUCH = "TOUCH_SENSE_DISABLED TOUCH_SENSE_ENABLED"
 
 CORE ?= mirror
+TOUCH ?= TOUCH_SENSE_DISABLED
 
 all prog:
 ifeq ($(BOARD),)
 	@echo "Valid HW_REV values are: $(ALL_HW_REV)".
 	@echo "Valid BOARD values are: $(ALL_BOARDS)".
 	@echo "Valid CORE values are: $(ALL_CORES)".
+	@echo "Valid TOUCH values are: $(ALL_TOUCH) (default disabled, valid for R3.3+ only)".
 	@echo "For example:"
 	@echo "  $$ make clean"
 	@echo "  $$ # Build bitstream with specific core and program it"
@@ -33,7 +36,7 @@ endif
 	mkdir -p build/$(BOARD)
 	# For now we always force a re-build since we can pass different DSP cores
 	# through environment vars and we need a re-build to happen in this case.
-	$(MAKE) -B -f boards/$(BOARD)/Makefile BUILD=build/$(BOARD) CORE=$(CORE) $(MAKECMDGOALS)
+	$(MAKE) -B -f boards/$(BOARD)/Makefile BUILD=build/$(BOARD) CORE=$(CORE) TOUCH=$(TOUCH) $(MAKECMDGOALS)
 
 clean:
 	rm -rf build/

@@ -15,10 +15,14 @@
 `default_nettype none
 
 module pmod_i2c_master #(
-    parameter CODEC_CFG  = "drivers/ak4619-cfg.hex",
-    parameter CODEC_CFG_BYTES = 16'd23,
-    parameter LED_CFG  = "drivers/pca9635-cfg.hex",
-    parameter LED_CFG_BYTES = 16'd26
+      parameter CODEC_CFG  = "drivers/ak4619-cfg.hex"
+    , parameter CODEC_CFG_BYTES = 16'd23
+    , parameter LED_CFG  = "drivers/pca9635-cfg.hex"
+    , parameter LED_CFG_BYTES = 16'd26
+`ifdef TOUCH_SENSE_ENABLED
+    , parameter TOUCH_CFG  = "drivers/cy8cmbr3108-cfg.hex"
+    , parameter TOUCH_CFG_BYTES = 16'd130 // 0x80 + 2
+`endif
 )(
     input  clk,
     input  rst,
@@ -42,6 +46,17 @@ module pmod_i2c_master #(
     input signed [7:0] led6,
     input signed [7:0] led7,
 
+`ifdef TOUCH_SENSE_ENABLED
+    output logic [7:0] touch0,
+    output logic [7:0] touch1,
+    output logic [7:0] touch2,
+    output logic [7:0] touch3,
+    output logic [7:0] touch4,
+    output logic [7:0] touch5,
+    output logic [7:0] touch6,
+    output logic [7:0] touch7,
+`endif // TOUCH_SENSE_ENABLED
+
     // Jack detection outputs, 1 == inserted. (bit 0 is input 0, bit 4 is output 0).
     output logic [7:0] jack,
 
@@ -52,20 +67,24 @@ module pmod_i2c_master #(
 );
 
 // Overall state machine of this core.
-// Basically we bring up the EEPROM and CODEC, and then proceed to
+// Basically we bring up the EEPROM, touch sensing and CODEC, and then proceed to
 // update the LED outputs and read the jack insertion GPIOS in a loop.
 localparam I2C_DELAY1        = 0,
            I2C_EEPROM1       = 1,
            I2C_EEPROM2       = 2,
            I2C_INIT_TOUCH1   = 3,
            I2C_INIT_TOUCH2   = 4,
-           I2C_INIT_CODEC1   = 5,
-           I2C_INIT_CODEC2   = 6,
-           I2C_LED1          = 7,  // <<--\ LED/JACK re-runs indefinitely.
-           I2C_LED2          = 8,  //     |
-           I2C_JACK1         = 9,  //     |
-           I2C_JACK2         = 10, // >>--/
-           I2C_IDLE          = 11;
+           I2C_INIT_TOUCH3   = 5,
+           I2C_INIT_TOUCH4   = 6,
+           I2C_INIT_CODEC1   = 7,
+           I2C_INIT_CODEC2   = 8,
+           I2C_LED1          = 9,  // <<--\ LED/JACK/TOUCH re-runs indefinitely.
+           I2C_LED2          = 10, //     |
+           I2C_JACK1         = 11, //     |
+           I2C_JACK2         = 12, //     |
+           I2C_TOUCH_SCAN1   = 13, //     |  | these 2 only if TOUCH is enabled
+           I2C_TOUCH_SCAN2   = 14, // >>--/  |
+           I2C_IDLE          = 15;
 
 `ifdef COCOTB_SIM
 localparam STARTUP_DELAY_BIT = 4;
@@ -87,6 +106,15 @@ logic [7:0] led_config [0:LED_CFG_BYTES-1];
 initial $readmemh(LED_CFG, led_config);
 // Index at which PWM values start in the led config.
 localparam PCA9635_PWM0 = 4;
+
+`ifdef TOUCH_SENSE_ENABLED
+// Logic for startup configuration of touch sensor IC over I2C.
+logic [7:0] touch_config [0:TOUCH_CFG_BYTES-1];
+initial $readmemh(TOUCH_CFG, touch_config);
+
+// Which touch sensor we are currently reading
+logic [2:0] nsensor;
+`endif
 
 // Valid commands for `i2c_master` core.
 localparam [1:0] I2CMASTER_START = 2'b00,
@@ -181,11 +209,152 @@ always_ff @(posedge clk) begin
                     i2c_state <= I2C_INIT_TOUCH2;
                     i2c_config_pos <= 0;
                 end
-                // Switch off the CY8CMBR3108 by default, as it can cause the
-                // LEDs to flicker (due to NACKs) and increase noise in the
-                // audio chain, unless it is configured correctly (currently
-                // touch sensing prototyping is on a separate branch, let's
-                // keep it out of master for now)
+`ifdef TOUCH_SENSE_ENABLED
+                // If touch sensing is enabled, send out one long transaction
+                // with configuration data, then issue a SAVE_CHECK_CRC cmd.
+                I2C_INIT_TOUCH2: begin
+                    case (i2c_config_pos)
+                        default: begin
+                            data_in <= touch_config[i2c_config_pos];
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        1: begin
+                            // Make sure the first byte (address) is acknowledged. If it
+                            // isn't, restart the configuration process.
+                            if (ack_out) begin
+                                i2c_state <= I2C_INIT_TOUCH1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                data_in <= touch_config[i2c_config_pos];
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
+                        TOUCH_CFG_BYTES: begin
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+                        TOUCH_CFG_BYTES+1: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        TOUCH_CFG_BYTES+2: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+3: begin
+                            // Command register
+                            data_in <= 8'h86;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+4: begin
+                            // SAVE_CHECK_CRC.
+                            data_in <= 8'h02;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        TOUCH_CFG_BYTES+5: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_INIT_TOUCH3;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_INIT_TOUCH3: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_TOUCH4;
+                    i2c_config_pos <= 0;
+                end
+                // Finally we issue a SW_RESET command to reset the touch
+                // sense IC and apply all the settings we just sent.
+                I2C_INIT_TOUCH4: begin
+                    case (i2c_config_pos)
+                        // Write the slave register pointer
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        1: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            if (ack_out) begin
+                                // Wait until ack succeeds before continuing
+                                i2c_state <= I2C_INIT_TOUCH3;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                // Command register
+                                data_in <= 8'h86;
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
+                        3: begin
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+                        // Read the command register, retry if chip is busy
+                        4: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        5: begin
+                            // 0x37 << 1 | 1 (R)
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        6: begin
+                            cmd <= I2CMASTER_READ;
+                        end
+                        7: begin
+                            if (data_out != 8'h00) begin
+                                // Retry until command register is 0 before
+                                // issuing a reset.
+                                i2c_state <= I2C_INIT_TOUCH3;
+                            end
+                            cmd <= I2CMASTER_STOP;
+                        end
+
+
+                        // Write the command register
+                        8: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        9: begin
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        10: begin
+                            if (ack_out) begin
+                                // Wait until ack succeeds before continuing
+                                i2c_state <= I2C_INIT_TOUCH3;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                // Only issue reset if we got acknowledged
+                                // Command register
+                                data_in <= 8'h86;
+                                cmd <= I2CMASTER_WRITE;
+                            end
+                        end
+                        11: begin
+                            // NVM write & reset command.
+                            data_in <= 8'hff;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        default: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_INIT_CODEC1;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+`else
+                // If touch sensing is not enabled, we disable the touch sense
+                // IC. This also improves noise performance a little, so might
+                // be desired for some audio scenarios.
                 I2C_INIT_TOUCH2: begin
                     case (i2c_config_pos)
                         0: begin
@@ -220,6 +389,7 @@ always_ff @(posedge clk) begin
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
+`endif // TOUCH_SENSE_ENABLED
                 I2C_INIT_CODEC1: begin
                     cmd <= I2CMASTER_START;
                     stb <= 1'b1;
@@ -308,13 +478,23 @@ always_ff @(posedge clk) begin
                             data_in <= 8'h31;
                             cmd <= I2CMASTER_WRITE;
                         end
-                        9: cmd <= I2CMASTER_READ;
-
+                        9: begin
+                            if (ack_out == 1'b0) begin
+                                cmd <= I2CMASTER_READ;
+                            end else begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_TOUCH_SCAN1;
+                            end
+                        end
                         // 4) Save the result.
                         10: begin
                             jack <= data_out;
                             cmd <= I2CMASTER_STOP;
+`ifdef TOUCH_SENSE_ENABLED
+                            i2c_state <= I2C_TOUCH_SCAN1;
+`else
                             i2c_state <= I2C_LED1;
+`endif // TOUCH_SENSE_ENABLED
                             delay_cnt <= 0;
                         end
                         default: begin
@@ -325,6 +505,76 @@ always_ff @(posedge clk) begin
                     ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
+`ifdef TOUCH_SENSE_ENABLED
+                I2C_TOUCH_SCAN1: begin
+                    i2c_state <= I2C_TOUCH_SCAN2;
+                    i2c_config_pos <= 0;
+                    stb <= 1'b0;
+                end
+                I2C_TOUCH_SCAN2: begin
+                    case (i2c_config_pos)
+                        // Set slave read pointer
+                        0: cmd <= I2CMASTER_START;
+                        1: begin
+                            data_in <= 8'h6E;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        // Sensor 0 difference counts
+                        2: begin
+                            if (ack_out == 1'b1) begin
+                                i2c_state <= I2C_LED1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                case (nsensor)
+                                    0: data_in <= 8'hBA;
+                                    1: data_in <= 8'hBC;
+                                    2: data_in <= 8'hBE;
+                                    3: data_in <= 8'hC0;
+                                    4: data_in <= 8'hC2;
+                                    5: data_in <= 8'hC4;
+                                    6: data_in <= 8'hC6;
+                                    7: data_in <= 8'hC8;
+                                endcase
+                            end
+                        end
+                        3: cmd <= I2CMASTER_STOP;
+
+                        // Read out the data
+                        4: cmd <= I2CMASTER_START;
+                        5: begin
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        6: begin
+                            if (ack_out == 1'b1) begin
+                                i2c_state <= I2C_LED1;
+                                cmd <= I2CMASTER_STOP;
+                            end else begin
+                                cmd <= I2CMASTER_READ;
+                                ack_in <= 1'b1;
+                            end
+                        end
+                        7: begin
+                            case (nsensor)
+                                0: touch0 <= data_out;
+                                1: touch1 <= data_out;
+                                2: touch2 <= data_out;
+                                3: touch3 <= data_out;
+                                // R3.3 hw swaps last four vs R3.2 to improve PCB routing
+                                4: touch7 <= data_out;
+                                5: touch6 <= data_out;
+                                6: touch5 <= data_out;
+                                7: touch4 <= data_out;
+                            endcase
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_LED1;
+                            nsensor <= nsensor + 1;
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    stb <= 1'b1;
+                end
+`endif // TOUCH_SENSE_ENABLED
                 default: begin
                     i2c_state <= I2C_IDLE;
                 end
