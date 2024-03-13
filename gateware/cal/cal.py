@@ -112,9 +112,17 @@ class CalibrationTool:
                 "eeprom_dev": raw[3],
                 "eeprom_serial": int.from_bytes(raw[4:8], "big"),
                 "jack": raw[8],
+                "touch0": raw[9],
+                "touch1": raw[10],
+                "touch2": raw[11],
+                "touch3": raw[12],
+                "touch4": raw[13],
+                "touch5": raw[14],
+                "touch6": raw[15],
+                "touch7": raw[16],
             }
             [print(k, hex(v)) for k, v in values.items()]
-            self._decode_raw_samples(raw[9:])
+            self._decode_raw_samples(raw[17:])
             self._handle_user_input()
             self._calculate_calibration_strings()
             time.sleep(0.1)
