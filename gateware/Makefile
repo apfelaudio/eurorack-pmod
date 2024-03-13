@@ -11,7 +11,7 @@ ifeq ($(BOARD),)
 	@echo "Valid HW_REV values are: $(ALL_HW_REV)".
 	@echo "Valid BOARD values are: $(ALL_BOARDS)".
 	@echo "Valid CORE values are: $(ALL_CORES)".
-	@echo "Valid TOUCH values are: $(ALL_TOUCH) (default disabled, valid for R3.3+ only)".
+	@echo "Valid TOUCH values are: $(ALL_TOUCH) (default disabled, valid for R3.3+ only, required for any examples that use touch)".
 	@echo "For example:"
 	@echo "  $$ make clean"
 	@echo "  $$ # Build bitstream with specific core and program it"

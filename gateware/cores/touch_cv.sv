@@ -2,6 +2,11 @@
 // Touch-to-CV. Touches on input jacks 1-4 are
 // translated into CV outputs on outputs 1-4.
 //
+// When building with touch sensing, be sure to build with
+// TOUCH=TOUCH_SENSE_ENABLED, for example:
+//
+// $ make CORE=touch_cv HW_REV=HW_R33 TOUCH=TOUCH_SENSE_ENABLED
+//
 
 `default_nettype none
 
