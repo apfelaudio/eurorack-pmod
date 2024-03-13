@@ -110,7 +110,15 @@ sysmgr sysmgr_instance (
     .sample_out1 (out1),
     .sample_out2 (out2),
     .sample_out3 (out3),
-    .jack        (jack)
+    .jack        (jack),
+    .touch0      (touch0),
+    .touch1      (touch1),
+    .touch2      (touch2),
+    .touch3      (touch3),
+    .touch4      (touch4),
+    .touch5      (touch5),
+    .touch6      (touch6),
+    .touch7      (touch7)
 );
 
 `ifdef ECP5
