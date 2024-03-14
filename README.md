@@ -28,7 +28,7 @@ For a (now quite outdated) high-level overview on the motivation for this projec
 - Jack insertion detection on input & output jacks.
 - Calibration EEPROM for unique ID and storing calibration data.
 - [new!] Touch and proximity sensing on all unused jacks as an extra input method.
-    - Note: this is disabled by default, if you want to play with this feature some example gateware [is on a separate branch](https://github.com/apfelaudio/eurorack-pmod/commits/seb/touch-fsm-r33/). I'll merge it properly ASAP.
+    - See the `gateware/cores/touch_cv.sv` core for an example of how to use this.
 
 **Compared to R3.1, the changes across R3.2 and R3.3 [are summarized here](https://github.com/apfelaudio/eurorack-pmod/issues/50)**
 
@@ -36,15 +36,16 @@ For a (now quite outdated) high-level overview on the motivation for this projec
 
 ## Included examples
 This repository contains a bunch of example DSP cores which are continuously being updated:
-- Bitcrusher
-- Filter (high pass / low pass / band pass)
-- Clock divider
-- .wav sampler
-- Pitch shifter
-- Sequential routing switch
-- Echo/delay effect
-- VCA (voltage controlled amplifier)
-- VCO (voltage controlled oscillator)
+- `gateware/cores/pitch_shift.sv` - Pitch shifter
+- `gateware/cores/filter.sv` - Filter (low pass + resonance)
+- `gateware/cores/touch_cv.sv` - Touch sensing to CV converter
+- `gateware/cores/clkdiv.sv` - Clock divider
+- `gateware/cores/sampler.sv` - .wav sampler
+- `gateware/cores/seqswitch.sv` - Sequential routing switch
+- `gateware/cores/stereo_echo.sv` - Echo / decimating delay effect
+- `gateware/cores/vca.sv` - VCA (voltage controlled amplifier)
+- `gateware/cores/vco.sv` - VCO (voltage controlled oscillator)
+- `gateware/cores/bitcrush.sv` - Bitcrusher
 
 These examples can all run out of the box on the development boards listed below.
 
