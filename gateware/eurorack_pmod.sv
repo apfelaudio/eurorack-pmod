@@ -49,6 +49,16 @@ module eurorack_pmod #(
     // Jack detection inputs read constantly over I2C.
     // Logic '1' == jack is inserted. Bit 0 is input 0.
     output [7:0] jack,
+    // Touch sense outputs, one per channel.
+    // If touch sensing is disabled these are just zeroes.
+    output logic [7:0] touch0,
+    output logic [7:0] touch1,
+    output logic [7:0] touch2,
+    output logic [7:0] touch3,
+    output logic [7:0] touch4,
+    output logic [7:0] touch5,
+    output logic [7:0] touch6,
+    output logic [7:0] touch7,
 
     // Signals used for bringup / debug / calibration.
     //
@@ -67,6 +77,18 @@ logic signed [W-1:0] sample_dac0;
 logic signed [W-1:0] sample_dac1;
 logic signed [W-1:0] sample_dac2;
 logic signed [W-1:0] sample_dac3;
+
+`ifndef TOUCH_SENSE_ENABLED
+assign touch0 = 0;
+assign touch1 = 0;
+assign touch2 = 0;
+assign touch3 = 0;
+assign touch4 = 0;
+assign touch5 = 0;
+assign touch6 = 0;
+assign touch7 = 0;
+`endif
+
 
 // Raw sample calibrator, both for input and output channels.
 // Compensates for DC bias in CODEC, gain differences, resistor
@@ -148,6 +170,17 @@ pmod_i2c_master #(
     .led5(force_dac_output == 0 ? cal_out1[W-1:W-8] : force_dac_output[W-1:W-8]),
     .led6(force_dac_output == 0 ? cal_out2[W-1:W-8] : force_dac_output[W-1:W-8]),
     .led7(force_dac_output == 0 ? cal_out3[W-1:W-8] : force_dac_output[W-1:W-8]),
+
+`ifdef TOUCH_SENSE_ENABLED
+    .touch0(touch0),
+    .touch1(touch1),
+    .touch2(touch2),
+    .touch3(touch3),
+    .touch4(touch4),
+    .touch5(touch5),
+    .touch6(touch6),
+    .touch7(touch7),
+`endif // TOUCH_SENSE_ENABLED
 
     .jack(jack),
 

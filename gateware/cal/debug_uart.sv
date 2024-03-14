@@ -19,6 +19,14 @@ module debug_uart #(
     input [7:0] eeprom_dev,
     input [31:0] eeprom_serial,
     input [7:0] jack,
+    input [7:0] touch0,
+    input [7:0] touch1,
+    input [7:0] touch2,
+    input [7:0] touch3,
+    input [7:0] touch4,
+    input [7:0] touch5,
+    input [7:0] touch6,
+    input [7:0] touch7,
     input signed [W-1:0] adc0,
     input signed [W-1:0] adc1,
     input signed [W-1:0] adc2,
@@ -70,31 +78,39 @@ always_ff @(posedge clk) begin
             6:   dout <= eeprom_serial[32-2*8-1:32-3*8];
             7:   dout <= eeprom_serial[32-3*8-1:     0];
             8:   dout <= jack;
+            9:   dout <= touch0;
+            10:  dout <= touch1;
+            11:  dout <= touch2;
+            12:  dout <= touch3;
+            13:  dout <= touch4;
+            14:  dout <= touch5;
+            15:  dout <= touch6;
+            16:  dout <= touch7;
             // Channel 0
-            9:   dout <= adc0_ex[WM    -1:WM-1*8];
-            10:  dout <= adc0_ex[WM-1*8-1:WM-2*8];
-            11:  dout <= adc0_ex[WM-2*8-1:WM-3*8];
-            12:  dout <= adc0_ex[WM-3*8-1:     0];
+            17:   dout <= adc0_ex[WM    -1:WM-1*8];
+            18:  dout <= adc0_ex[WM-1*8-1:WM-2*8];
+            19:  dout <= adc0_ex[WM-2*8-1:WM-3*8];
+            20:  dout <= adc0_ex[WM-3*8-1:     0];
             // Channel 1
-            13:  dout <= adc1_ex[WM    -1:WM-1*8];
-            14:  dout <= adc1_ex[WM-1*8-1:WM-2*8];
-            15:  dout <= adc1_ex[WM-2*8-1:WM-3*8];
-            16:  dout <= adc1_ex[WM-3*8-1:     0];
+            21:  dout <= adc1_ex[WM    -1:WM-1*8];
+            22:  dout <= adc1_ex[WM-1*8-1:WM-2*8];
+            23:  dout <= adc1_ex[WM-2*8-1:WM-3*8];
+            24:  dout <= adc1_ex[WM-3*8-1:     0];
             // Channel 2
-            17:  dout <= adc2_ex[WM    -1:WM-1*8];
-            18:  dout <= adc2_ex[WM-1*8-1:WM-2*8];
-            19:  dout <= adc2_ex[WM-2*8-1:WM-3*8];
-            20:  dout <= adc2_ex[WM-3*8-1:     0];
+            25:  dout <= adc2_ex[WM    -1:WM-1*8];
+            26:  dout <= adc2_ex[WM-1*8-1:WM-2*8];
+            27:  dout <= adc2_ex[WM-2*8-1:WM-3*8];
+            28:  dout <= adc2_ex[WM-3*8-1:     0];
             // Channel 3
-            21:  dout <= adc3_ex[WM    -1:WM-1*8];
-            22:  dout <= adc3_ex[WM-1*8-1:WM-2*8];
-            23:  dout <= adc3_ex[WM-2*8-1:WM-3*8];
-            24:  dout <= adc3_ex[WM-3*8-1:     0];
+            29:  dout <= adc3_ex[WM    -1:WM-1*8];
+            30:  dout <= adc3_ex[WM-1*8-1:WM-2*8];
+            31:  dout <= adc3_ex[WM-2*8-1:WM-3*8];
+            32:  dout <= adc3_ex[WM-3*8-1:     0];
             default: begin
                 // Should never get here
             end
         endcase
-        if (state != 24) state <= state + 1;
+        if (state != 32) state <= state + 1;
         else state <= 0;
     end
 end
