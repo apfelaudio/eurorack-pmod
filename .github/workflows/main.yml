@@ -6,8 +6,8 @@ jobs:
   ubuntu-build-icebreaker-r31:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R31 BOARD=icebreaker CORE=mirror -C gateware
@@ -19,11 +19,24 @@ jobs:
   ubuntu-build-icebreaker-r33:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R33 BOARD=icebreaker CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-build-icebreaker.bin
+          path: gateware/build/icebreaker/top.bin
+
+  ubuntu-build-icebreaker-r33-touch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make HW_REV=HW_R33 BOARD=icebreaker CORE=touch_cv TOUCH=TOUCH_SENSE_ENABLED -C gateware
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-build-icebreaker.bin
@@ -40,8 +53,8 @@ jobs:
           install: >-
             git
             make
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: |
           export PATH=$PATH:$RUNNER_TEMP/oss-cad-suite/bin
@@ -56,8 +69,8 @@ jobs:
   macos-build-icebreaker:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: |
           yosys --version
@@ -70,8 +83,8 @@ jobs:
   ubuntu-build-colorlight-i5:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R33 BOARD=colorlight_i5 CORE=mirror -C gateware
@@ -83,8 +96,8 @@ jobs:
   ubuntu-build-colorlight-i9:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R33 BOARD=colorlight_i9 CORE=mirror -C gateware
@@ -96,8 +109,8 @@ jobs:
   ubuntu-build-ecpix-5:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R33 BOARD=ecpix5 CORE=mirror -C gateware
@@ -109,8 +122,8 @@ jobs:
   ubuntu-build-pico-ice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: yosys --version
       - run: make HW_REV=HW_R33 BOARD=pico_ice CORE=mirror -C gateware
@@ -122,8 +135,8 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: cocotb-config -v
       - run: cd gateware/sim && ./00_run.sh
@@ -131,8 +144,8 @@ jobs:
   run-linter:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: YosysHQ/setup-oss-cad-suite@v2
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
       - run: verilator --version
       - run: cd gateware && scripts/verilator_lint.sh
