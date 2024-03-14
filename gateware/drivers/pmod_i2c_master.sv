@@ -215,7 +215,7 @@ always_ff @(posedge clk) begin
                 I2C_INIT_TOUCH2: begin
                     case (i2c_config_pos)
                         default: begin
-                            data_in <= touch_config[i2c_config_pos];
+                            data_in <= touch_config[8'(i2c_config_pos)];
                             cmd <= I2CMASTER_WRITE;
                         end
                         1: begin
@@ -225,7 +225,7 @@ always_ff @(posedge clk) begin
                                 i2c_state <= I2C_INIT_TOUCH1;
                                 cmd <= I2CMASTER_STOP;
                             end else begin
-                                data_in <= touch_config[i2c_config_pos];
+                                data_in <= touch_config[8'(i2c_config_pos)];
                                 cmd <= I2CMASTER_WRITE;
                             end
                         end

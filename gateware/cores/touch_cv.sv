@@ -35,9 +35,9 @@ module touch_cv #(
     input [7:0] touch7
 );
 
-assign sample_out0 = W'(touch0 <<< (W-10));
-assign sample_out1 = W'(touch1 <<< (W-10));
-assign sample_out2 = W'(touch2 <<< (W-10));
-assign sample_out3 = W'(touch3 <<< (W-10));
+assign sample_out0 = W'(touch0) <<< (W-10);
+assign sample_out1 = W'(touch1) <<< (W-10);
+assign sample_out2 = W'(touch2) <<< (W-10);
+assign sample_out3 = W'(touch3) <<< (W-10);
 
 endmodule

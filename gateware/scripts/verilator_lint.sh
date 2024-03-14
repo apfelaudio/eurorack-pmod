@@ -28,6 +28,21 @@ verilator --lint-only -DVERILATOR_LINT_ONLY \
     -Wno-INITIALDLY \
     top.sv
 
+# Lint an entire ICE40 design with touch scanning enabled.
+verilator --lint-only -DVERILATOR_LINT_ONLY \
+    -DICE40 \
+    -DSELECTED_DSP_CORE=touch_cv \
+    -DTOUCH_SENSE_ENABLED \
+    -Iboards/icebreaker \
+    -Ical \
+    -Idrivers \
+    -Iexternal \
+    -Iexternal/no2misc/rtl \
+    -Icores \
+    -Icores/util \
+    -Wno-INITIALDLY \
+    top.sv
+
 # Lint each core which can be selected
 verilator --lint-only -Icores mirror.sv
 verilator --lint-only -Icores bitcrush.sv
@@ -35,6 +50,7 @@ verilator --lint-only -Icores clkdiv.sv
 verilator --lint-only -Icores sampler.sv
 verilator --lint-only -Icores seqswitch.sv
 verilator --lint-only -Icores vca.sv
+verilator --lint-only -Icores touch_cv.sv
 verilator --lint-only -Icores -Icores/util vco.sv
 verilator --lint-only cores/util/filter/karlsen_lpf.sv
 verilator --lint-only cores/util/filter/karlsen_lpf_pipelined.sv

@@ -99,26 +99,28 @@ sysmgr sysmgr_instance (
 `SELECTED_DSP_CORE #(
     .W(W)
 ) dsp_core_instance (
-    .rst         (rst),
-    .clk         (clk_256fs),
-    .sample_clk  (clk_fs),
-    .sample_in0  (in0),
-    .sample_in1  (in1),
-    .sample_in2  (in2),
-    .sample_in3  (in3),
-    .sample_out0 (out0),
-    .sample_out1 (out1),
-    .sample_out2 (out2),
-    .sample_out3 (out3),
-    .jack        (jack),
-    .touch0      (touch0),
-    .touch1      (touch1),
-    .touch2      (touch2),
-    .touch3      (touch3),
-    .touch4      (touch4),
-    .touch5      (touch5),
-    .touch6      (touch6),
-    .touch7      (touch7)
+      .rst         (rst)
+    , .clk         (clk_256fs)
+    , .sample_clk  (clk_fs)
+    , .sample_in0  (in0)
+    , .sample_in1  (in1)
+    , .sample_in2  (in2)
+    , .sample_in3  (in3)
+    , .sample_out0 (out0)
+    , .sample_out1 (out1)
+    , .sample_out2 (out2)
+    , .sample_out3 (out3)
+    , .jack        (jack)
+`ifdef TOUCH_SENSE_ENABLED
+    , .touch0      (touch0)
+    , .touch1      (touch1)
+    , .touch2      (touch2)
+    , .touch3      (touch3)
+    , .touch4      (touch4)
+    , .touch5      (touch5)
+    , .touch6      (touch6)
+    , .touch7      (touch7)
+`endif
 );
 
 `ifdef ECP5
