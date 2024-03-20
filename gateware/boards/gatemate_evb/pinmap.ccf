@@ -1,11 +1,15 @@
 Pin_in   "CLK"           Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true; # 10MHz CLKIN
 Pin_in   "RESET_BUTTON"  Loc = "IO_EB_B0"; # SW3
-Pin_out  "UART_TX"       Loc = "IO_NB_A4"; # UART on PMODB, pin 1
+
+# UART on PMODB, pin 1. Unfortunately we can't easily re-use the
+# existing FTDI on the board as it's wired up to JTAG/SPI.
+Pin_out  "UART_TX"       Loc = "IO_NB_A4";
 
 # This pinout assumes a ribbon cable IS used and the PMOD is
 # connected through an IDC ribbon to the dev board.
 
-# PMODA
+# eurorack-pmod on PMODA
+
 Pin_out     "PMOD_SDIN1" Loc = "IO_NB_A0";
 Pin_in     "PMOD_SDOUT1" Loc = "IO_NB_A1";
 Pin_out      "PMOD_LRCK" Loc = "IO_NB_A2";
