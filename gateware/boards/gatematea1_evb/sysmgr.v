@@ -41,7 +41,7 @@ CC_PLL #(
 `endif
 
 always @(posedge clk_in)
-    if (rst_in)
+    if (rst_in || ~usr_pll_lock_stdy)
         rst_cnt <= 8'h0;
     else if (~rst_cnt[7])
         rst_cnt <= rst_cnt + 1;
