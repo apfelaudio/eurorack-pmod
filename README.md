@@ -58,7 +58,7 @@ The following development boards have been tested with `eurorack-pmod` and are s
 - Colorlight i5 (ECP5 based)
 - Colorlight i9 (ECP5 based)
 - pico-ice from TinyVision (iCE40 based)
-- CCGM1A1 Gatemate EVB from CologneChip - [`gateware/boards/gatemate_evb/README.md`](experimental! see here)
+- CCGM1A1 Gatemate EVB from CologneChip - [**experimental!** see here](gateware/boards/gatemate_evb/README.md)
 
 ## PMOD Pinout
 
