@@ -1,3 +1,4 @@
+build/
 sim/*/*.vcd
 sim/*/__pycache__/
 sim/*/*.xml
