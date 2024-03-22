@@ -26,7 +26,7 @@ module cal #(
 )(
     input rst,
     input clk_256fs,
-    input clk_fs,
+    input strobe,
     input [7:0] jack,
     input signed [W-1:0] in0,
     input signed [W-1:0] in1,
@@ -64,7 +64,6 @@ logic signed [W-1:0]     cal_mem [0:(2*N_CHANNELS)-1];
 logic signed [(2*W)-1:0] out     [N_CHANNELS];
 logic        [2:0]       ch;
 logic        [2:0]       state;
-logic                    l_clk_fs;
 
 // Calibration memory for 8 channels stored as
 // 2 bytes shift, 2 bytes multiply * 8 channels.
@@ -73,7 +72,6 @@ initial $readmemh(CAL_MEM_FILE, cal_mem);
 always_ff @(posedge clk_256fs) begin
 
     if (rst) begin
-        l_clk_fs <= 0;
         ch <= 0;
         state <= CAL_ST_LATCH;
         out[0] <= 0;
@@ -86,10 +84,7 @@ always_ff @(posedge clk_256fs) begin
         out[7] <= 0;
     end else begin
 
-        l_clk_fs <= clk_fs;
-
-        // On rising clk_fs.
-        if (clk_fs && (l_clk_fs != clk_fs)) begin
+        if (strobe) begin
             state <= CAL_ST_LATCH;
             ch <= 0;
         end else begin

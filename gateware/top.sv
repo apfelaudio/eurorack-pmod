@@ -29,7 +29,17 @@ module top #(
 
 logic rst;
 logic clk_256fs;
-logic clk_fs; // FIXME: assign from PLL divider?
+logic strobe;
+logic [7:0] strobe_clkdiv;
+
+always_ff @(posedge clk_256fs) begin
+    if (rst) begin
+        strobe_clkdiv = 8'h0;
+    end else begin
+        strobe_clkdiv <= strobe_clkdiv + 1;
+    end
+    strobe <= (strobe_clkdiv == 8'h0);
+end
 
 // Button signal is used for resets, unless we are input calibration
 // mode in which case it is used for setting the output cal values.
@@ -90,7 +100,6 @@ sysmgr sysmgr_instance (
     .rst_in(1'b0),
 `endif
     .clk_256fs(clk_256fs),
-    .clk_fs(clk_fs),
     .rst_out(rst)
 );
 
@@ -101,7 +110,7 @@ sysmgr sysmgr_instance (
 ) dsp_core_instance (
       .rst         (rst)
     , .clk         (clk_256fs)
-    , .sample_clk  (clk_fs)
+    , .strobe      (strobe)
     , .sample_in0  (in0)
     , .sample_in1  (in1)
     , .sample_in2  (in2)
@@ -151,7 +160,7 @@ eurorack_pmod #(
     .W(W)
 ) eurorack_pmod1 (
     .clk_256fs(clk_256fs),
-    .clk_fs   (clk_fs),
+    .strobe   (strobe),
     .rst(rst),
 
     .i2c_scl_oe(i2c_scl_oe),
