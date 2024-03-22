@@ -1,12 +1,10 @@
 // Driver for AK4619 CODEC.
 //
 // Usage:
-// - `clk_256fs` and `clk_fs` determine the hardware sample rate.
+// - `clk_256fs` determines the hardware sample rate.
 // - Once CODEC is initialized over I2C, samples can be streamed.
-// - `sample_in` is latched on falling `clk_fs`.
-// - `sample_out` transitions on falling `clk_fs`.
-// - As a result, users of this core should latch sample_out (and transition
-// sample_in) on rising `clk_fs`.
+// - `sample_in` is latched on `strobe`.
+// - `sample_out` transitions on `strobe`.
 //
 // This core assumes the device is configured in the audio
 // interface mode specified in ak4619-cfg.hex. This happens
@@ -28,7 +26,7 @@ module ak4619 #(
 )(
     input  rst,
     input  clk_256fs,
-    input  clk_fs,
+    input  strobe,
 
     // Route these straight out to the CODEC pins.
     output pdn,
@@ -38,13 +36,13 @@ module ak4619 #(
     output reg sdin1,
     input  sdout1,
 
-    // Transitions on falling `clk_fs`.
+    // Transitions with `strobe`.
     output reg signed [W-1:0] sample_out0,
     output reg signed [W-1:0] sample_out1,
     output reg signed [W-1:0] sample_out2,
     output reg signed [W-1:0] sample_out3,
 
-    // Latches on falling `clk_fs`.
+    // Latches with `strobe`.
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -56,7 +54,6 @@ localparam int N_CHANNELS = 4;
 logic signed [(W*N_CHANNELS)-1:0] dac_words;
 logic signed [W-1:0] adc_words [N_CHANNELS];
 
-logic last_fs;
 logic [7:0] clkdiv;
 
 logic [1:0] channel;
@@ -74,16 +71,15 @@ assign bit_counter = clkdiv[5:1];
 
 always_ff @(posedge clk_256fs) begin
     if (rst) begin
-        last_fs <= 0;
         clkdiv <= 0;
         dac_words = 0;
         sample_out0 <= 0;
         sample_out1 <= 0;
         sample_out2 <= 0;
         sample_out3 <= 0;
-    end else if (last_fs && ~clk_fs) begin
-        // Synchronize clkdiv to the incoming sample clock, latching
-        // our inputs and outputs at the falling edge of clk_fs.
+    end else if (strobe) begin
+        // Synchronize clkdiv to the incoming sample strobe, latching
+        // our inputs and outputs in the clock cycle that `strobe` is high.
         clkdiv <= 8'h0;
         dac_words = {sample_in3, sample_in2,
                      sample_in1, sample_in0};
@@ -91,7 +87,7 @@ always_ff @(posedge clk_256fs) begin
         sample_out1  <= adc_words[1];
         sample_out2  <= adc_words[2];
         sample_out3  <= adc_words[3];
-        last_fs <= clk_fs;
+        sdin1 <= dac_words[(1*W)-1];
     end else if (bick) begin
         // BICK transition HI -> LO: Clock in W bits
         // On HI -> LO both SDIN and SDOUT do not transition.
@@ -100,7 +96,6 @@ always_ff @(posedge clk_256fs) begin
             adc_words[channel][W - bit_counter - 1] <= sdout1;
         end
         clkdiv <= clkdiv + 1;
-        last_fs <= clk_fs;
     end else begin // BICK: LO -> HI
         // BICK transition LO -> HI: Clock out W bits
         // On LO -> HI both SDIN and SDOUT transition.
@@ -115,7 +110,6 @@ always_ff @(posedge clk_256fs) begin
             sdin1 <= 0;
         end
         clkdiv <= clkdiv + 1;
-        last_fs <= clk_fs;
     end
 end
 

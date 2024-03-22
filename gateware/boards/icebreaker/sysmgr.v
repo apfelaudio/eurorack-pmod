@@ -8,7 +8,6 @@ module sysmgr (
     // but we leave all this PLL logic here as you might need to scale
     // the clock down to 12m on different boards.
 	output wire clk_256fs,
-	output wire clk_fs,
 	output wire rst_out
 );
 
@@ -22,12 +21,10 @@ module sysmgr (
 	wire rst_i;
 
 	reg [7:0] rst_cnt;
-	reg [7:0] clkdiv;
 
 	assign clk_256fs = clk_1x_i;
 	assign pll_reset_n = ~rst_in;
 	assign rst_i = rst_cnt[7];
-	assign clk_fs = clkdiv[7];
 
 	// PLL instance
 `ifndef COCOTB_SIM
@@ -68,13 +65,6 @@ module sysmgr (
 			rst_cnt <= 8'h80;
 		else if (rst_cnt[7])
 			rst_cnt <= rst_cnt + 1;
-
-    always @(posedge clk_256fs)
-        if (rst_i)
-            clkdiv <= 8'h00;
-        else
-            clkdiv <= clkdiv + 1;
-
 
 `ifndef COCOTB_SIM
 `ifndef VERILATOR_LINT_ONLY
