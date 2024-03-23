@@ -11,33 +11,38 @@ from util.i2s import *
 @cocotb.test()
 async def test_ak4619_00(dut):
 
-    clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
-    clk_fs = Clock(dut.clk_fs, 83*256, units='ns')
-    cocotb.start_soon(clk_256fs.start())
-    cocotb.start_soon(clk_fs.start(start_high=False))
-
     TEST_L0 = 0xFC140000
     TEST_R0 = 0xAD0F0000
     TEST_L1 = 0xDEAD0000
     TEST_R1 = 0xBEEF0000
 
-    dut.sdout1.value = 0
+    clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
+    cocotb.start_soon(clk_256fs.start())
 
+    dut.strobe.value = 0
+    dut.sdout1.value = 0
     dut.rst.value = 1
+
+    async def strobe():
+        while True:
+            dut.strobe.value = 1
+            await ClockCycles(dut.clk_256fs, 1)
+            dut.strobe.value = 0
+            await ClockCycles(dut.clk_256fs, 255)
+
     await RisingEdge(dut.clk_256fs)
     await RisingEdge(dut.clk_256fs)
     dut.rst.value = 0
 
-    await FallingEdge(dut.lrck)
-    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_L0)
-    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_R0)
+    cocotb.start_soon(strobe())
     await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_L1)
     await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_R1)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_L0)
+    await i2s_clock_out_u32(dut.bick, dut.sdout1, TEST_R0)
 
     # Note: this edge is also where dac_words <= sample_in (sample.sv)
 
-    await RisingEdge(dut.clk_fs)
-    await FallingEdge(dut.clk_fs)
+    await RisingEdge(dut.clk_256fs)
     print("Data clocked from sdout1 present at sample_outX:")
     print(hex(dut.sample_out0.value.integer))
     print(hex(dut.sample_out1.value.integer))
