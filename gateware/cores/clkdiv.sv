@@ -19,7 +19,7 @@ module clkdiv #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -46,13 +46,15 @@ localparam OUT_LO     = `FROM_MV(0);
 logic last_state_hi = 1'b0;
 logic [3:0] div = 0;
 
-always_ff @(posedge sample_clk) begin
-    if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
-        last_state_hi <= 1'b1;
-        // Increment count on every rising edge.
-        div <= div + 1;
-    end else if (sample_in0 < SCHMITT_LO && last_state_hi) begin
-        last_state_hi <= 1'b0;
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
+            last_state_hi <= 1'b1;
+            // Increment count on every rising edge.
+            div <= div + 1;
+        end else if (sample_in0 < SCHMITT_LO && last_state_hi) begin
+            last_state_hi <= 1'b0;
+        end
     end
 end
 

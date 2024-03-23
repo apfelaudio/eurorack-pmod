@@ -14,7 +14,7 @@ module bitcrush #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -43,10 +43,12 @@ assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
               (sample_in0 > 4* 500) ? 16'b1110000000000000 :
                                       16'b1100000000000000;
 
-always_ff @(posedge sample_clk) begin
-    out1 <= sample_in1 & mask;
-    out2 <= sample_in2 & mask;
-    out3 <= sample_in3 & mask;
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        out1 <= sample_in1 & mask;
+        out2 <= sample_in2 & mask;
+        out3 <= sample_in3 & mask;
+    end
 end
 
 assign sample_out0 = sample_in0;

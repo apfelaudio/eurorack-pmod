@@ -33,7 +33,7 @@ module karlsen_lpf_pipelined #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     // See header comment for what these parameters mean.
     input signed [W-1:0] g,
     input signed [W-1:0] resonance,
@@ -49,7 +49,6 @@ localparam WMULT = 18; // Width of multiplier input
 localparam signed [WMULT-1:0] MAX = (2**(W-1))-1;
 localparam signed [WMULT-1:0] MIN = -(2**(W-1));
 
-logic prev_sample_clk;
 logic [3:0] state;
 
 logic signed [WMULT-1:0] in_ex;
@@ -72,7 +71,6 @@ assign resonance_ex = `CLAMP_POSITIVE(resonance) <<< 2;
 smul_shift_18x18 multiplier(.a(smul_a), .b(smul_b), .scale(smul_scale), .o(smul_out));
 
 always_ff @(posedge clk) begin
-    prev_sample_clk <= sample_clk;
     if (rst) begin
         state <= 0;
         a1 <= 0;
@@ -80,9 +78,8 @@ always_ff @(posedge clk) begin
         a3 <= 0;
         a4 <= 0;
         sample_out <= 0;
-        prev_sample_clk <= 0;
     end else begin
-        if (sample_clk != prev_sample_clk) begin
+        if (strobe) begin
             state <= 0;
         end else begin
             if (state < 8)

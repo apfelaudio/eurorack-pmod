@@ -13,7 +13,7 @@ module filter #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -28,7 +28,7 @@ module filter #(
 karlsen_lpf_pipelined #(.W(W)) lpf_inst(
     .rst(rst),
     .clk(clk),
-    .sample_clk(sample_clk),
+    .strobe(strobe),
     .sample_in(sample_in0),
     .sample_out(sample_out0),
     .g(sample_in1),

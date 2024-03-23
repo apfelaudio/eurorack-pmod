@@ -6,7 +6,8 @@ module delayline #(
     parameter W = 16,
     parameter MAX_DELAY = 1024
 )(
-    input sample_clk,
+    input clk,
+    input strobe,
     input [$clog2(MAX_DELAY)-1:0] delay,
     input signed [W-1:0] in,
     output logic signed [W-1:0] out
@@ -17,13 +18,15 @@ logic [$clog2(MAX_DELAY)-1:0] waddr = 0;
 
 logic signed [W-1:0] bram[MAX_DELAY];
 
-always_ff @(posedge sample_clk) begin
-    waddr <= waddr + 1;
-    // This subtraction wraps correctly as long as MAX_DELAY is
-    // a power of 2.
-    raddr <= waddr - delay;
-    bram[waddr] <= in;
-    out <= bram[raddr];
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        waddr <= waddr + 1;
+        // This subtraction wraps correctly as long as MAX_DELAY is
+        // a power of 2.
+        raddr <= waddr - delay;
+        bram[waddr] <= in;
+        out <= bram[raddr];
+    end
 end
 
 endmodule
