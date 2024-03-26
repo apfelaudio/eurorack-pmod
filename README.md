@@ -2,19 +2,28 @@
 
 # Eurorack PMOD
 
-- **R3.3 hardware in stock!** [order **here :)**](https://apfelaudio.com/order/)
-- ~~R3.1 hardware SOLD OUT~~
 
-**Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The **latest (R3.3) hardware looks like this**:
+**Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The latest (R3.3) hardware looks like this and can be ordered **[here](https://apfelaudio.com/order/)**.
 
 ![assembled eurorack-pmod module R3.3 (front)](docs/img/r33_panel.jpg)
 ![assembled eurorack-pmod module R3.3 (top)](docs/img/r33_top.jpg)
 
-For a (now quite outdated) high-level overview on the motivation for this project and some of the design decisions, **see [my FOSDEM '23 talk](https://youtu.be/Wbd-OfCWvKU)** on this project.
-
 ## How does it work?
 - Plug eurorack-pmod into an FPGA development board of your choice. Here is a list of [boards already supported by the examples](gateware/boards).
 - Get started with some [example DSP cores](gateware/cores). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
+
+
+## :notes: Project Showcase :sparkles:
+
+- **[FPGA-based neural-net waveshaper](https://matpalm.com/blog/wavenet_on_fpga/)** - (from [matpalm@](https://github.com/matpalm))
+- **[Daisy Seed TDM for Eurorack PMOD](https://github.com/heartwerker/daisy_seed_tdm_eurorack_pmod)** - (from [heartwerker@](https://github.com/heartwerker))
+- **[`apu_chord` core](https://github.com/proppy/eurorack-pmod/tree/apu_chord)** - (from [proppy@](https://github.com/proppy))
+
+A couple more from me:
+
+- **[8-channel USB2 soundcard](https://github.com/apfelaudio/eurorack-pmod-usb-soundcard)** - mostly in Amaranth.
+- **[Real-time DSP with Rust on LiteX](https://github.com/apfelaudio/eurorack-pmod-litex)** - mostly in Rust/Migen.
+
 
 # R3.3 hardware details
 
@@ -104,13 +113,7 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 
 # Manufacturing
 
-**R3.3 hardware is in stock** [order **here :)**](https://apfelaudio.com/)
-
-~~Update: R3.1 SOLD OUT, revision R3.3 will land in the next 1-2 months - [get notified **here :)**](https://apfelaudio.com/modules/pmod/)~~
-
-~~Update: R3.1 (first production release) is fully functional with 1 rework, see github issues for up-to-date information.~~
-
-~~Note: I gave some R3.0 (preproduction) units out at Hackaday Berlin '23. These are tested but NOT calibrated. They had 2 hacks applied. Some inductors are shorted with 0 ohm resistors as the wrong inductor was populated (means the board is a bit noiser than it should be - but still definitely useable). Also the reset line of the jack detect IO expander was routed incorrectly, so I manually shorted 2 pins of that chip. Functionally these boards are the same as R3.1, which fixes these issues.~~
+## **R3.3 hardware is in stock** [order **here :)**](https://apfelaudio.com/)
 
 # R3.1 Hardware (no longer manufactured)
 
