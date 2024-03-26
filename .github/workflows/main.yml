@@ -138,7 +138,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: YosysHQ/setup-oss-cad-suite@v3
       - run: git submodule update --init gateware/external/no2misc
-      - run: cocotb-config -v
+      - run: cocotb-config --version
       - run: cd gateware/sim && ./00_run.sh
 
   run-linter:
