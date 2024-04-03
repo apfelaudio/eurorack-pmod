@@ -13,6 +13,7 @@
 // functions of the board without having to resort to using a softcore.
 
 `default_nettype none
+`define HW_R33
 
 module pmod_i2c_master #(
       parameter CODEC_CFG  = "drivers/ak4619-cfg.hex"

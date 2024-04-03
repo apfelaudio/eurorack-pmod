@@ -6,6 +6,7 @@
 // handled by external user-defined logic.
 
 `default_nettype none
+`define HW_R33
 
 module eurorack_pmod #(
     parameter W = 16, // sample width, bits

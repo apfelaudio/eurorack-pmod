@@ -15,14 +15,10 @@
 // for any inputs for which a jack is not connected.
 
 `default_nettype none
+`define HW_R33
 
 module cal #(
     parameter W = 16, // sample width
-`ifdef HW_R33
-    parameter CAL_MEM_FILE = "cal/cal_mem_default_r33.hex"
-`else
-    parameter CAL_MEM_FILE = "cal/cal_mem_default_r31.hex"
-`endif
 )(
     input rst,
     input clk_256fs,
@@ -45,6 +41,8 @@ module cal #(
     output logic signed [W-1:0] out6,
     output logic signed [W-1:0] out7
 );
+
+localparam CAL_MEM_FILE = "/home/seb/dev/eurorack-pmod-litex/deps/eurorack-pmod/gateware/cal/cal_mem_default_r33.hex";
 
 localparam N_CHANNELS = 8;
 localparam LAST_CH_IX = 3'd7;
