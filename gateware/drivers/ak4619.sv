@@ -61,7 +61,7 @@ logic [4:0] bit_counter;
 
 assign pdn         = ~rst;
 assign bick        = clkdiv[0];
-assign mclk        = clk_256fs;
+assign mclk        = clkdiv[0];
 assign lrck        = clkdiv[7];
 
 // 0, 1, 2, 3 == L, R, L, R
