@@ -78,7 +78,18 @@ logic signed [W-1:0] sample_dac1;
 logic signed [W-1:0] sample_dac2;
 logic signed [W-1:0] sample_dac3;
 
-`ifndef TOUCH_SENSE_ENABLED
+// Calibrate samples from CODEC
+logic signed [W-1:0] cal_inner0;
+logic signed [W-1:0] cal_inner1;
+logic signed [W-1:0] cal_inner2;
+logic signed [W-1:0] cal_inner3;
+
+`ifdef TOUCH_SENSE_ENABLED
+assign cal_in0 = jack[0] ? cal_inner0 : (touch0 <<< 6);
+assign cal_in1 = jack[1] ? cal_inner1 : (touch1 <<< 6);
+assign cal_in2 = jack[2] ? cal_inner2 : (touch2 <<< 6);
+assign cal_in3 = jack[3] ? cal_inner3 : (touch3 <<< 6);
+`else
 assign touch0 = 0;
 assign touch1 = 0;
 assign touch2 = 0;
@@ -87,7 +98,13 @@ assign touch4 = 0;
 assign touch5 = 0;
 assign touch6 = 0;
 assign touch7 = 0;
+
+assign cal_in0 = cal_inner0;
+assign cal_in1 = cal_inner1;
+assign cal_in2 = cal_inner2;
+assign cal_in3 = cal_inner3;
 `endif
+
 
 
 // Raw sample calibrator, both for input and output channels.
@@ -111,10 +128,10 @@ cal #(
     .in5 (cal_out1),
     .in6 (cal_out2),
     .in7 (cal_out3),
-    .out0 (cal_in0),
-    .out1 (cal_in1),
-    .out2 (cal_in2),
-    .out3 (cal_in3),
+    .out0 (cal_inner0),
+    .out1 (cal_inner1),
+    .out2 (cal_inner2),
+    .out3 (cal_inner3),
     .out4 (sample_dac0),
     .out5 (sample_dac1),
     .out6 (sample_dac2),
@@ -162,10 +179,10 @@ pmod_i2c_master #(
 
     // LEDs directly linked to input/output sample values
     // for now, although they could do whatever we want.
-    .led0( cal_in0[W-1:W-8]),
-    .led1( cal_in1[W-1:W-8]),
-    .led2( cal_in2[W-1:W-8]),
-    .led3( cal_in3[W-1:W-8]),
+    .led0(cal_in0[W-1:W-8]),
+    .led1(cal_in1[W-1:W-8]),
+    .led2(cal_in2[W-1:W-8]),
+    .led3(cal_in3[W-1:W-8]),
     .led4(force_dac_output == 0 ? cal_out0[W-1:W-8] : force_dac_output[W-1:W-8]),
     .led5(force_dac_output == 0 ? cal_out1[W-1:W-8] : force_dac_output[W-1:W-8]),
     .led6(force_dac_output == 0 ? cal_out2[W-1:W-8] : force_dac_output[W-1:W-8]),
