@@ -69,24 +69,31 @@ module pmod_i2c_master #(
 // Overall state machine of this core.
 // Basically we bring up the EEPROM, touch sensing and CODEC, and then proceed to
 // update the LED outputs and read the jack insertion GPIOS in a loop.
-localparam I2C_DELAY1        = 0,
-           I2C_EEPROM1       = 1,
-           I2C_EEPROM2       = 2,
-           I2C_SKIP_TOUCH1   = 3,
-           I2C_SKIP_TOUCH2   = 4,
-           I2C_INIT_TOUCH1   = 5,
-           I2C_INIT_TOUCH2   = 6,
-           I2C_INIT_TOUCH3   = 7,
-           I2C_INIT_TOUCH4   = 8,
-           I2C_INIT_CODEC1   = 9,
-           I2C_INIT_CODEC2   = 10,
-           I2C_LED1          = 11, // <<--\ LED/JACK/TOUCH re-runs indefinitely.
-           I2C_LED2          = 12, //     |
-           I2C_JACK1         = 13, //     |
-           I2C_JACK2         = 14, //     |
-           I2C_TOUCH_SCAN1   = 15, //     |  | these 2 only if TOUCH is enabled
-           I2C_TOUCH_SCAN2   = 16, // >>--/  |
-           I2C_IDLE          = 17;
+localparam I2C_DELAY1             = 0,
+           I2C_EEPROM1            = 1,
+           I2C_EEPROM2            = 2,
+`ifdef TOUCH_SENSE_ENABLED
+           I2C_CHECK_CRC_TOUCH1   = 3,
+           I2C_CHECK_CRC_TOUCH2   = 4,
+           I2C_INIT_TOUCH1        = 5,
+           I2C_INIT_TOUCH2        = 6,
+           I2C_INIT_TOUCH3        = 7,
+           I2C_INIT_TOUCH4        = 8,
+`else
+           I2C_DISABLE_TOUCH1     = 9,
+           I2C_DISABLE_TOUCH2     = 10,
+`endif
+           I2C_INIT_CODEC1        = 11,
+           I2C_INIT_CODEC2        = 12,
+           I2C_LED1               = 13, // <<--\ LED/JACK/TOUCH re-runs indefinitely.
+           I2C_LED2               = 14, //     |
+           I2C_JACK1              = 15, //     |
+           I2C_JACK2              = 16, //     |
+`ifdef TOUCH_SENSE_ENABLED              //     |
+           I2C_TOUCH_SCAN1        = 17, //     |  | these 2 only if TOUCH is enabled
+           I2C_TOUCH_SCAN2        = 18, // >>--/  |
+`endif
+           I2C_IDLE               = 19;
 
 `ifdef COCOTB_SIM
 localparam STARTUP_DELAY_BIT = 4;
@@ -192,7 +199,11 @@ always_ff @(posedge clk) begin
                             eeprom_serial[32-3*8-1:32-4*8] <= data_out;
                             cmd <= I2CMASTER_STOP;
 `ifdef HW_R33
-                            i2c_state <= I2C_INIT_TOUCH1;
+    `ifdef TOUCH_SENSE_ENABLED
+                            i2c_state <= I2C_CHECK_CRC_TOUCH1;
+    `else
+                            i2c_state <= I2C_DISABLE_TOUCH1;
+    `endif
 `else
                             // For R31, don't try initializing touch sense
                             i2c_state <= I2C_INIT_CODEC1;
@@ -205,13 +216,14 @@ always_ff @(posedge clk) begin
                     i2c_config_pos <= i2c_config_pos + 1;
                     stb <= 1'b1;
                 end
-                I2C_SKIP_TOUCH1: begin
+`ifdef TOUCH_SENSE_ENABLED
+                I2C_CHECK_CRC_TOUCH1: begin
                     cmd <= I2CMASTER_START;
                     stb <= 1'b1;
-                    i2c_state <= I2C_INIT_TOUCH2;
+                    i2c_state <= I2C_CHECK_CRC_TOUCH2;
                     i2c_config_pos <= 0;
                 end
-                I2C_SKIP_TOUCH2: begin
+                I2C_CHECK_CRC_TOUCH2: begin
                     case (i2c_config_pos)
                         0: begin
                             cmd <= I2CMASTER_START;
@@ -228,7 +240,7 @@ always_ff @(posedge clk) begin
                                 cmd <= I2CMASTER_READ;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
-                                i2c_state <= I2C_SKIP_TOUCH1;
+                                i2c_state <= I2C_CHECK_CRC_TOUCH1;
                             end
                         end
                         3: begin
@@ -245,8 +257,6 @@ always_ff @(posedge clk) begin
                                 i2c_state <= I2C_INIT_TOUCH1;
                             end else begin
                                 // CRC matches, skip touch init completely.
-                                // Warn: this also bypasses powerdown on scan
-                                // disable.
                                 cmd <= I2CMASTER_STOP;
                                 i2c_state <= I2C_INIT_CODEC1;
                             end
@@ -262,7 +272,6 @@ always_ff @(posedge clk) begin
                     i2c_state <= I2C_INIT_TOUCH2;
                     i2c_config_pos <= 0;
                 end
-`ifdef TOUCH_SENSE_ENABLED
                 // If touch sensing is enabled, send out one long transaction
                 // with configuration data, then issue a SAVE_CHECK_CRC cmd.
                 I2C_INIT_TOUCH2: begin
@@ -405,10 +414,16 @@ always_ff @(posedge clk) begin
                     stb <= 1'b1;
                 end
 `else
+                I2C_DISABLE_TOUCH1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_DISABLE_TOUCH2;
+                    i2c_config_pos <= 0;
+                end
                 // If touch sensing is not enabled, we disable the touch sense
                 // IC. This also improves noise performance a little, so might
                 // be desired for some audio scenarios.
-                I2C_INIT_TOUCH2: begin
+                I2C_DISABLE_TOUCH2: begin
                     case (i2c_config_pos)
                         0: begin
                             cmd <= I2CMASTER_START;
@@ -425,7 +440,7 @@ always_ff @(posedge clk) begin
                                 cmd <= I2CMASTER_WRITE;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
-                                i2c_state <= I2C_INIT_TOUCH1;
+                                i2c_state <= I2C_DISABLE_TOUCH1;
                             end
                         end
                         3: begin
@@ -536,7 +551,11 @@ always_ff @(posedge clk) begin
                                 cmd <= I2CMASTER_READ;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
+`ifdef TOUCH_SENSE_ENABLED
                                 i2c_state <= I2C_TOUCH_SCAN1;
+`else
+                                i2c_state <= I2C_LED1;
+`endif // TOUCH_SENSE_ENABLED
                             end
                         end
                         // 4) Save the result.
