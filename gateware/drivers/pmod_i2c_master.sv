@@ -72,19 +72,21 @@ module pmod_i2c_master #(
 localparam I2C_DELAY1        = 0,
            I2C_EEPROM1       = 1,
            I2C_EEPROM2       = 2,
-           I2C_INIT_TOUCH1   = 3,
-           I2C_INIT_TOUCH2   = 4,
-           I2C_INIT_TOUCH3   = 5,
-           I2C_INIT_TOUCH4   = 6,
-           I2C_INIT_CODEC1   = 7,
-           I2C_INIT_CODEC2   = 8,
-           I2C_LED1          = 9,  // <<--\ LED/JACK/TOUCH re-runs indefinitely.
-           I2C_LED2          = 10, //     |
-           I2C_JACK1         = 11, //     |
-           I2C_JACK2         = 12, //     |
-           I2C_TOUCH_SCAN1   = 13, //     |  | these 2 only if TOUCH is enabled
-           I2C_TOUCH_SCAN2   = 14, // >>--/  |
-           I2C_IDLE          = 15;
+           I2C_SKIP_TOUCH1   = 3,
+           I2C_SKIP_TOUCH2   = 4,
+           I2C_INIT_TOUCH1   = 5,
+           I2C_INIT_TOUCH2   = 6,
+           I2C_INIT_TOUCH3   = 7,
+           I2C_INIT_TOUCH4   = 8,
+           I2C_INIT_CODEC1   = 9,
+           I2C_INIT_CODEC2   = 10,
+           I2C_LED1          = 11, // <<--\ LED/JACK/TOUCH re-runs indefinitely.
+           I2C_LED2          = 12, //     |
+           I2C_JACK1         = 13, //     |
+           I2C_JACK2         = 14, //     |
+           I2C_TOUCH_SCAN1   = 15, //     |  | these 2 only if TOUCH is enabled
+           I2C_TOUCH_SCAN2   = 16, // >>--/  |
+           I2C_IDLE          = 17;
 
 `ifdef COCOTB_SIM
 localparam STARTUP_DELAY_BIT = 4;
@@ -92,7 +94,7 @@ localparam STARTUP_DELAY_BIT = 4;
 localparam STARTUP_DELAY_BIT = 17;
 `endif
 
-logic [3:0] i2c_state = I2C_DELAY1;
+logic [4:0] i2c_state = I2C_DELAY1;
 
 // Index into i2c config memories
 logic [15:0] i2c_config_pos = 0;
@@ -201,6 +203,57 @@ always_ff @(posedge clk) begin
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
+                    stb <= 1'b1;
+                end
+                I2C_SKIP_TOUCH1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_INIT_TOUCH2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_SKIP_TOUCH2: begin
+                    case (i2c_config_pos)
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        1: begin
+                            // 0x37 << 1 | 1 (R)
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            if (ack_out == 1'b0) begin
+                                // Read from CONFIG_CRC
+                                data_in <= 8'h7e;
+                                cmd <= I2CMASTER_READ;
+                            end else begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_SKIP_TOUCH1;
+                            end
+                        end
+                        3: begin
+                            if (data_out != touch_config[TOUCH_CFG_BYTES-2]) begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_INIT_TOUCH1;
+                            end else begin
+                                cmd <= I2CMASTER_READ;
+                            end
+                        end
+                        4: begin
+                            if (data_out != touch_config[TOUCH_CFG_BYTES-1]) begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_INIT_TOUCH1;
+                            end else begin
+                                // CRC matches, skip touch init completely.
+                                // Warn: this also bypasses powerdown on scan
+                                // disable.
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_INIT_CODEC1;
+                            end
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
                     stb <= 1'b1;
                 end
                 I2C_INIT_TOUCH1: begin
