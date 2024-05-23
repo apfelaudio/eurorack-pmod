@@ -252,7 +252,7 @@ always_ff @(posedge clk) begin
                                 i2c_state <= I2C_LED1;
                             end
                         end
-                        // FIXME: test second byte of CRC?
+                        // FIXME: test second byte of CRC? must ack to incr
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
                     ack_in <= 1'b1;
