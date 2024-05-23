@@ -198,16 +198,7 @@ always_ff @(posedge clk) begin
                         11: begin
                             eeprom_serial[32-3*8-1:32-4*8] <= data_out;
                             cmd <= I2CMASTER_STOP;
-`ifdef HW_R33
-    `ifdef TOUCH_SENSE_ENABLED
-                            i2c_state <= I2C_CHECK_CRC_TOUCH1;
-    `else
-                            i2c_state <= I2C_DISABLE_TOUCH1;
-    `endif
-`else
-                            // For R31, don't try initializing touch sense
                             i2c_state <= I2C_INIT_CODEC1;
-`endif
                             delay_cnt <= 0;
                         end
                         default: begin
@@ -229,38 +220,39 @@ always_ff @(posedge clk) begin
                             cmd <= I2CMASTER_START;
                         end
                         1: begin
-                            // 0x37 << 1 | 1 (R)
-                            data_in <= 8'h6F;
+                            // 0x37 << 1 | 0 (W)
+                            data_in <= 8'h6E;
                             cmd <= I2CMASTER_WRITE;
                         end
                         2: begin
                             if (ack_out == 1'b0) begin
                                 // Read from CONFIG_CRC
                                 data_in <= 8'h7e;
-                                cmd <= I2CMASTER_READ;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
                                 i2c_state <= I2C_CHECK_CRC_TOUCH1;
                             end
                         end
-                        3: begin
-                            if (data_out != touch_config[TOUCH_CFG_BYTES-2]) begin
-                                cmd <= I2CMASTER_STOP;
-                                i2c_state <= I2C_INIT_TOUCH1;
-                            end else begin
-                                cmd <= I2CMASTER_READ;
-                            end
+                        3: cmd <= I2CMASTER_STOP;
+
+                        4: cmd <= I2CMASTER_START;
+                        5: begin
+                            // 0x37 << 1 | 1 (R)
+                            data_in <= 8'h6F;
+                            cmd <= I2CMASTER_WRITE;
                         end
-                        4: begin
-                            if (data_out != touch_config[TOUCH_CFG_BYTES-1]) begin
+                        6: cmd <= I2CMASTER_READ;
+                        7: begin
+                            if (data_out != touch_config[TOUCH_CFG_BYTES-2]) begin
                                 cmd <= I2CMASTER_STOP;
                                 i2c_state <= I2C_INIT_TOUCH1;
                             end else begin
                                 // CRC matches, skip touch init completely.
                                 cmd <= I2CMASTER_STOP;
-                                i2c_state <= I2C_INIT_CODEC1;
+                                i2c_state <= I2C_LED1;
                             end
                         end
+                        // FIXME: test second byte of CRC?
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
                     ack_in <= 1'b1;
@@ -406,7 +398,7 @@ always_ff @(posedge clk) begin
                         end
                         default: begin
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_INIT_CODEC1;
+                            i2c_state <= I2C_LED1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
@@ -450,7 +442,7 @@ always_ff @(posedge clk) begin
                         end
                         4: begin
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_INIT_CODEC1;
+                            i2c_state <= I2C_LED1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
@@ -473,7 +465,15 @@ always_ff @(posedge clk) begin
                         i2c_config_pos <= i2c_config_pos + 1;
                     end else begin
                         cmd <= I2CMASTER_STOP;
+`ifdef HW_R33
+    `ifdef TOUCH_SENSE_ENABLED
+                        i2c_state <= I2C_CHECK_CRC_TOUCH1;
+    `else
+                        i2c_state <= I2C_DISABLE_TOUCH1;
+    `endif
+`else
                         i2c_state <= I2C_LED1;
+`endif
                     end
                     ack_in <= 1'b1;
                     stb <= 1'b1;
@@ -562,11 +562,18 @@ always_ff @(posedge clk) begin
                         10: begin
                             jack <= data_out;
                             cmd <= I2CMASTER_STOP;
+                            if (jack != data_out) begin
+                                // Restart touch IC if a jack is
+                                // plugged/unplugged
+                                // TODO: add maybe 100ms delay here
+                                i2c_state <= I2C_INIT_TOUCH3;
+                            end else begin
 `ifdef TOUCH_SENSE_ENABLED
-                            i2c_state <= I2C_TOUCH_SCAN1;
+                                i2c_state <= I2C_TOUCH_SCAN1;
 `else
-                            i2c_state <= I2C_LED1;
+                                i2c_state <= I2C_LED1;
 `endif // TOUCH_SENSE_ENABLED
+                            end
                             delay_cnt <= 0;
                         end
                         default: begin
@@ -657,7 +664,7 @@ always_ff @(posedge clk) begin
     end
 end
 
-i2c_master #(.DW(4)) i2c_master_inst(
+i2c_master #(.DW(6)) i2c_master_inst(
     .scl_oe(scl_oe),
     .scl_i(scl_i),
     .sda_oe(sda_oe),
