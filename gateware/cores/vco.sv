@@ -15,7 +15,7 @@ module vco #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -39,13 +39,15 @@ initial $readmemh(V_OCT_LUT_PATH, v_oct_lut);
 logic signed [W-1:0] lut_index = 0;
 logic signed [W-1:0] lut_index_clamp_lo = 0;
 
-always_ff @(posedge sample_clk) begin
-    if (rst) begin
-        lut_index <= 0;
-        lut_index_clamp_lo <= 0;
-    end else begin
-        lut_index <= sample_in0 >>> 6;
-        lut_index_clamp_lo <= lut_index < 0 ? 0 : lut_index;
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        if (rst) begin
+            lut_index <= 0;
+            lut_index_clamp_lo <= 0;
+        end else begin
+            lut_index <= sample_in0 >>> 6;
+            lut_index_clamp_lo <= lut_index < 0 ? 0 : lut_index;
+        end
     end
 end
 
@@ -55,8 +57,9 @@ wavetable_osc #(
     .WAVETABLE_PATH(WAVETABLE_PATH),
     .WAVETABLE_SIZE(WAVETABLE_SIZE)
 ) osc_0 (
-    .rst(rst),
-    .sample_clk(sample_clk),
+    .rst,
+    .clk,
+    .strobe,
     .wavetable_inc(32'(v_oct_lut[$clog2(V_OCT_LUT_SIZE)'(lut_index_clamp_lo)])),
     .out(sample_out0)
 );

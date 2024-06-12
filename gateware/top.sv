@@ -34,7 +34,7 @@ logic [7:0] strobe_clkdiv;
 
 always_ff @(posedge clk_256fs) begin
     if (rst) begin
-        strobe_clkdiv = 8'h0;
+        strobe_clkdiv <= 8'h0;
     end else begin
         strobe_clkdiv <= strobe_clkdiv + 1;
     end

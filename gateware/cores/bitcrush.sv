@@ -27,6 +27,7 @@ module bitcrush #(
 );
 
 logic signed [W-1:0] mask;
+logic signed [W-1:0] out0;
 logic signed [W-1:0] out1;
 logic signed [W-1:0] out2;
 logic signed [W-1:0] out3;
@@ -45,13 +46,14 @@ assign mask = (sample_in0 > 4*5000) ? 16'b1111111111111111 :
 
 always_ff @(posedge clk) begin
     if (strobe) begin
+        out0 <= sample_in0;
         out1 <= sample_in1 & mask;
         out2 <= sample_in2 & mask;
         out3 <= sample_in3 & mask;
     end
 end
 
-assign sample_out0 = sample_in0;
+assign sample_out0 = out0;
 assign sample_out1 = out1;
 assign sample_out2 = out2;
 assign sample_out3 = out3;
