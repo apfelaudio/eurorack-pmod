@@ -14,17 +14,25 @@ async def test_vca_00(dut):
 
     sample_width=16
 
-    clock = Clock(dut.sample_clk, 5, units='us')
-    cocotb.start_soon(clock.start())
-    clock = Clock(dut.clk, 83, units='ns')
-    cocotb.start_soon(clock.start())
+    clk_256fs = Clock(dut.clk, 83, units='ns')
+    cocotb.start_soon(clk_256fs.start())
+
+    # Add 1/256 sample strobe
+    dut.strobe.value = 0
+    async def strobe():
+        while True:
+            dut.strobe.value = 1
+            await ClockCycles(dut.clk, 1)
+            dut.strobe.value = 0
+            await ClockCycles(dut.clk, 255)
+    cocotb.start_soon(strobe())
 
     ins  = [dut.sample_in0,  dut.sample_in1,  dut.sample_in2,  dut.sample_in3]
     outs = [dut.sample_out0, dut.sample_out1, dut.sample_out2, dut.sample_out3]
 
     for i in range(10):
 
-        await RisingEdge(dut.sample_clk)
+        await RisingEdge(dut.strobe)
 
         data_in = []
         for inx in ins:
@@ -32,7 +40,7 @@ async def test_vca_00(dut):
             data_in.append(random_sample)
             inx.value = bits_from_signed(random_sample, sample_width)
 
-        await RisingEdge(dut.sample_clk)
+        await RisingEdge(dut.strobe)
 
         data_out = [signed_from_bits(out.value, sample_width) for out in outs]
 

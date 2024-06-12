@@ -29,18 +29,15 @@ async def test_integration_00(dut):
     await RisingEdge(dut.clk_256fs)
     dut.sysmgr_instance.pll_lock.value = 1
 
-    await FallingEdge(dut.strobe)
-    await FallingEdge(dut.strobe)
-
     ak4619 = dut.eurorack_pmod1.ak4619_instance
+
+    await FallingEdge(dut.strobe)
 
     N = 20
 
     for i in range(N):
 
-        v = bits_from_signed(0x00FF, sample_width)#int(16000*math.sin((2*math.pi*i)/N)), sample_width)
-
-        await FallingEdge(ak4619.lrck)
+        v = bits_from_signed(int(16000*math.sin((2*math.pi*i)/N)), sample_width)
 
         await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)
         await i2s_clock_out_u32(ak4619.bick, ak4619.sdout1, v << 16)

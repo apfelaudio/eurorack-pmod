@@ -14,12 +14,23 @@ async def test_cal_00(dut):
     sample_width = 16
 
     clk_256fs = Clock(dut.clk_256fs, 83, units='ns')
-    clk_fs = Clock(dut.clk_fs, 83*256, units='ns')
     cocotb.start_soon(clk_256fs.start())
-    cocotb.start_soon(clk_fs.start(start_high=False))
 
     # Simulate all jacks connected so the cal core doesn't zero them
     dut.jack.value = Force(0xFF)
+
+    # Add 1/256 sample strobe
+    dut.strobe.value = 0
+    async def strobe():
+        while True:
+            dut.strobe.value = 1
+            await ClockCycles(dut.clk_256fs, 1)
+            dut.strobe.value = 0
+            await ClockCycles(dut.clk_256fs, 255)
+    await RisingEdge(dut.clk_256fs)
+    await RisingEdge(dut.clk_256fs)
+    dut.rst.value = 0
+    cocotb.start_soon(strobe())
 
     clampl = -2**(sample_width-1) + 1
     clamph =  2**(sample_width-1) - 1;
@@ -65,10 +76,8 @@ async def test_cal_00(dut):
             if expect >  clamph: expect = clamph
             if expect < clampl: expect = clampl
             print(f"ch={channel}\t{int(value):6d}\t", end="")
-            await FallingEdge(dut.clk_fs)
-            await RisingEdge(dut.clk_fs)
-            await RisingEdge(dut.clk_fs)
-            await RisingEdge(dut.clk_fs)
+            await RisingEdge(dut.strobe)
+            await RisingEdge(dut.strobe)
             output = signed_from_bits(cal_outx.value, sample_width)
             print(f"=>\t{int(output):6d}\t(expect={expect})")
             cal_inx.value = Release()

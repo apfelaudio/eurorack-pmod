@@ -71,18 +71,19 @@ assign bit_counter = clkdiv[5:1];
 
 always_ff @(posedge clk_256fs) begin
     if (rst) begin
+        sdin1 <= 0;
         clkdiv <= 0;
-        dac_words = 0;
-        sample_out0 <= 0;
-        sample_out1 <= 0;
-        sample_out2 <= 0;
-        sample_out3 <= 0;
+        adc_words[0] <= 0;
+        adc_words[1] <= 0;
+        adc_words[2] <= 0;
+        adc_words[3] <= 0;
+        dac_words <= 0;
     end else if (strobe) begin
         // Synchronize clkdiv to the incoming sample strobe, latching
         // our inputs and outputs in the clock cycle that `strobe` is high.
         clkdiv <= 8'h0;
-        dac_words = {sample_in3, sample_in2,
-                     sample_in1, sample_in0};
+        dac_words <= {sample_in3, sample_in2,
+                      sample_in1, sample_in0};
         sample_out0  <= adc_words[0];
         sample_out1  <= adc_words[1];
         sample_out2  <= adc_words[2];
