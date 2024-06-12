@@ -10,7 +10,7 @@
 module digital_echo #(
     parameter W = 16,
     // Length of the echo buffers in samples.
-    parameter ECHO_LEN = 4096,
+    parameter ECHO_LEN = 4096
 )(
     input rst,
     input clk,

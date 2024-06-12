@@ -5,7 +5,6 @@ module sysmgr (
 	input  wire clk_in,
 	input  wire rst_in,
 	output wire clk_256fs,
-	output wire clk_fs,
 	output wire rst_out
 );
 
@@ -15,12 +14,10 @@ wire pll_reset;
 wire rst_i;
 
 reg [7:0] rst_cnt;
-reg [7:0] clkdiv;
 
 assign rst_i = ~rst_cnt[7];
 assign rst_out = rst_i;
 assign pll_reset = rst_in;
-assign clk_fs = clkdiv[7];
 
 `ifndef VERILATOR_LINT_ONLY
 
@@ -70,11 +67,5 @@ always @(posedge clk_in)
         rst_cnt <= 8'h0;
     else if (~rst_cnt[7])
         rst_cnt <= rst_cnt + 1;
-
-always @(posedge clk_256fs)
-    if (rst_i)
-        clkdiv <= 8'h00;
-    else
-        clkdiv <= clkdiv + 1;
 
 endmodule // sysmgr
