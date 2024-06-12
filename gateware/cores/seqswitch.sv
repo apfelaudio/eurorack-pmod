@@ -18,7 +18,7 @@ module seqswitch #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -43,43 +43,44 @@ logic last_state_hi = 1'b0;
 // Current routing state of the sequential switch.
 logic [1:0] switch_state = 2'b00;
 
-always_ff @(posedge sample_clk) begin
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        // Rising edge of clock.
+        if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
+            last_state_hi <= 1'b1;
 
-    // Rising edge of clock.
-    if (sample_in0 > SCHMITT_HI && !last_state_hi) begin
-        last_state_hi <= 1'b1;
+            // Update switch routing on a rising edge.
+            if (switch_state == 2'b10) switch_state <= 2'b00;
+            else switch_state <= switch_state + 1;
+        end
 
-        // Update switch routing on a rising edge.
-        if (switch_state == 2'b10) switch_state <= 2'b00;
-        else switch_state <= switch_state + 1;
+        // Falling edge of clock.
+        if (sample_in0 < SCHMITT_LO && last_state_hi) begin
+            last_state_hi <= 1'b0;
+        end
+
+        // Samples mirrored at audio rate based on current routing.
+        case (switch_state)
+            2'b00: begin
+                sample_out1 <= sample_in1;
+                sample_out2 <= sample_in2;
+                sample_out3 <= sample_in3;
+            end
+            2'b01: begin
+                sample_out1 <= sample_in2;
+                sample_out2 <= sample_in3;
+                sample_out3 <= sample_in1;
+            end
+            2'b10: begin
+                sample_out1 <= sample_in3;
+                sample_out2 <= sample_in1;
+                sample_out3 <= sample_in2;
+            end
+            default: begin
+                // State is never entered
+            end
+        endcase
     end
-
-    // Falling edge of clock.
-    if (sample_in0 < SCHMITT_LO && last_state_hi) begin
-        last_state_hi <= 1'b0;
-    end
-
-    // Samples mirrored at audio rate based on current routing.
-    case (switch_state)
-        2'b00: begin
-            sample_out1 <= sample_in1;
-            sample_out2 <= sample_in2;
-            sample_out3 <= sample_in3;
-        end
-        2'b01: begin
-            sample_out1 <= sample_in2;
-            sample_out2 <= sample_in3;
-            sample_out3 <= sample_in1;
-        end
-        2'b10: begin
-            sample_out1 <= sample_in3;
-            sample_out2 <= sample_in1;
-            sample_out3 <= sample_in2;
-        end
-        default: begin
-            // State is never entered
-        end
-    endcase
 end
 
 assign sample_out0 = sample_in0;

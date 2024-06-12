@@ -16,12 +16,18 @@ async def test_transpose_00(dut):
 
     sample_width = 16
 
-    clock = Clock(dut.sample_clk, 5, units='us')
-    cocotb.start_soon(clock.start())
+    clk_256fs = Clock(dut.clk, 83, units='ns')
+    cocotb.start_soon(clk_256fs.start())
 
-    # Not needed at the moment as we aren't pipelining things
-    #clock = Clock(dut.clk, 83, units='ns')
-    #cocotb.start_soon(clock.start())
+    # Add 1/256 sample strobe
+    dut.strobe.value = 0
+    async def strobe():
+        while True:
+            dut.strobe.value = 1
+            await ClockCycles(dut.clk, 1)
+            dut.strobe.value = 0
+            await ClockCycles(dut.clk, 255)
+    cocotb.start_soon(strobe())
 
     dut.sample_in.value = 0
     dut.pitch.value = 5000*4
@@ -29,7 +35,7 @@ async def test_transpose_00(dut):
     # Clock in some zeroes so the delay lines are full of zeroes.
 
     for i in range(1024):
-        await RisingEdge(dut.sample_clk)
+        await RisingEdge(dut.strobe)
 
     # Stimulate the pitch shifter with a sine wave and make sure
     # the output does not have any discontinuities
@@ -38,7 +44,7 @@ async def test_transpose_00(dut):
     breaknext = False
 
     for i in range(2048):
-        await RisingEdge(dut.sample_clk)
+        await RisingEdge(dut.strobe)
 
         data_in = int(1000*math.sin(i / 100))
 

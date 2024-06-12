@@ -13,7 +13,7 @@ module eurorack_pmod #(
     parameter LED_CFG_FILE  = "drivers/pca9635-cfg.hex"
 )(
     input clk_256fs,
-    input clk_fs,
+    input strobe,
     input rst,
 
     // Signals to/from eurorack-pmod hardware.
@@ -98,7 +98,7 @@ cal #(
 ) cal_instance (
     .rst(rst),
     .clk_256fs (clk_256fs),
-    .clk_fs (clk_fs),
+    .strobe (strobe),
     // Calibrated inputs are zeroed if jack is unplugged.
     .jack (jack),
     // Note: inputs samples are inverted by analog frontend
@@ -127,7 +127,7 @@ ak4619 #(
 ) ak4619_instance (
     .rst       (rst),
     .clk_256fs (clk_256fs),
-    .clk_fs    (clk_fs),
+    .strobe    (strobe),
 
     .pdn       (pdn),
     .mclk      (mclk),

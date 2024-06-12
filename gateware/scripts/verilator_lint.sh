@@ -56,6 +56,6 @@ verilator --lint-only cores/util/filter/karlsen_lpf.sv
 verilator --lint-only cores/util/filter/karlsen_lpf_pipelined.sv
 verilator --lint-only -Icores -Icores/util/filter filter.sv
 verilator --lint-only -Icores -Icores/util pitch_shift.sv
-verilator --lint-only -Icores -Icores/util stereo_echo.sv
+verilator --lint-only -Icores -Icores/util digital_echo.sv
 verilator --lint-only -Icores -Icores/util dc_block.sv
 verilator --lint-only -Icores -Icores/util wavetable_osc.sv

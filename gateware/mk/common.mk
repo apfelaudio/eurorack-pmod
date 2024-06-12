@@ -13,7 +13,7 @@ SRC_COMMON = eurorack_pmod.sv \
 		     cores/vca.sv \
 		     cores/vco.sv \
 		     cores/pitch_shift.sv \
-		     cores/stereo_echo.sv \
+		     cores/digital_echo.sv \
 		     cores/filter.sv \
 		     cores/touch_cv.sv \
 		     cores/util/filter/karlsen_lpf_pipelined.sv \

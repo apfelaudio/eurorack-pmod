@@ -18,7 +18,7 @@ module sampler #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -46,21 +46,23 @@ logic [$clog2(N_SAMPLES):0] sample_pos = 0;
 // Value of the last sample at sample_pos, synchronized to sample_clk.
 logic [W-1:0] cur_sample = 16'h0;
 
-always_ff @(posedge sample_clk) begin
-    sclkdiv <= sclkdiv + 1;
-    if (sclkdiv % 2 == 0 && sample_pos <= N_SAMPLES) begin
-        sample_pos <= sample_pos + 1;
-    end
-    if (sample_in0 < TRIGGER_HI) begin
-        // Hold first sample as long as we have no trigger. As
-        // soon as it goes high, we 'allow' playback.
-        sample_pos <= 0;
-    end
-    if (sample_pos < N_SAMPLES) begin
-        cur_sample <= wav_samples[sample_pos[$clog2(N_SAMPLES)-1:0]];
-    end else begin
-        // If we go past the end of the sample, hold 0V at the output.
-        cur_sample <= 16'h0;
+always_ff @(posedge clk) begin
+    if (strobe) begin
+        sclkdiv <= sclkdiv + 1;
+        if (sclkdiv % 2 == 0 && sample_pos <= N_SAMPLES) begin
+            sample_pos <= sample_pos + 1;
+        end
+        if (sample_in0 < TRIGGER_HI) begin
+            // Hold first sample as long as we have no trigger. As
+            // soon as it goes high, we 'allow' playback.
+            sample_pos <= 0;
+        end
+        if (sample_pos < N_SAMPLES) begin
+            cur_sample <= wav_samples[sample_pos[$clog2(N_SAMPLES)-1:0]];
+        end else begin
+            // If we go past the end of the sample, hold 0V at the output.
+            cur_sample <= 16'h0;
+        end
     end
 end
 

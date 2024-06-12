@@ -14,7 +14,7 @@ module pitch_shift #(
 )(
     input rst,
     input clk,
-    input sample_clk,
+    input strobe,
     input signed [W-1:0] sample_in0,
     input signed [W-1:0] sample_in1,
     input signed [W-1:0] sample_in2,
@@ -29,7 +29,8 @@ module pitch_shift #(
 transpose #(
     .W(W)
 ) transpose_instance (
-    .sample_clk(sample_clk),
+    .clk,
+    .strobe,
     .pitch(sample_in1),
     .sample_in(sample_in0),
     .sample_out(sample_out1)

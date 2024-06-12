@@ -51,7 +51,7 @@ This repository contains a bunch of example DSP cores which are continuously bei
 - `gateware/cores/clkdiv.sv` - Clock divider
 - `gateware/cores/sampler.sv` - .wav sampler
 - `gateware/cores/seqswitch.sv` - Sequential routing switch
-- `gateware/cores/stereo_echo.sv` - Echo / decimating delay effect
+- `gateware/cores/digital_echo.sv` - Echo / delay effect
 - `gateware/cores/vca.sv` - VCA (voltage controlled amplifier)
 - `gateware/cores/vco.sv` - VCO (voltage controlled oscillator)
 - `gateware/cores/bitcrush.sv` - Bitcrusher
