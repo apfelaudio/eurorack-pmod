@@ -137,10 +137,29 @@ logic       ready;
 // Used for startup delay.
 logic [23:0] delay_cnt;
 
+// **Used for indicating POR failure of touch IC.**
+// Mitigation for `issues/59`: if CS2 of touch sense IC is shorted to ground
+// (jack 2 is connected) during a cold powerup, it will just NACK all transactions.
+//
+// So, instead of halting initialization completely, we time out on touch IC
+// initialization. This has the effect that if jack 2 is connected on a cold powerup,
+// the touch sensing will not work until jack 2 is re-plugged, but everything
+// else (CODEC/LED/Jackdet) will come up fine. Touch sensing will be instantly
+// restored after re-plugging jack 2, no power cycle or reset is required as the last
+// config written to the touch IC is fine as long as the eurorack-pmod has been
+// used at least once (EEPROM in touch IC written).
+//
+// All of this is only relevant when the +3V3 supply goes down (cold power up). Usually
+// if you're just re-flashing the FPGA (common use case), you won't hit this.
+//
+localparam TOUCH_INIT_RETRIES_BIT = 10;
+logic [15:0] touch_init_retries;
+
 always_ff @(posedge clk) begin
     if (rst) begin
         i2c_state <= I2C_DELAY1;
         delay_cnt <= 0;
+        touch_init_retries <= 0;
     end else begin
         delay_cnt <= delay_cnt + 1;
         if (ready && ~stb) begin
@@ -222,8 +241,13 @@ always_ff @(posedge clk) begin
                             // Make sure the first byte (address) is acknowledged. If it
                             // isn't, restart the configuration process.
                             if (ack_out) begin
-                                i2c_state <= I2C_INIT_TOUCH1;
                                 cmd <= I2CMASTER_STOP;
+                                if (touch_init_retries[TOUCH_INIT_RETRIES_BIT]) begin
+                                    i2c_state <= I2C_INIT_CODEC1;
+                                end else begin
+                                    i2c_state <= I2C_INIT_TOUCH1;
+                                    touch_init_retries <= touch_init_retries + 1;
+                                end
                             end else begin
                                 data_in <= touch_config[8'(i2c_config_pos)];
                                 cmd <= I2CMASTER_WRITE;
@@ -372,7 +396,12 @@ always_ff @(posedge clk) begin
                                 cmd <= I2CMASTER_WRITE;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
-                                i2c_state <= I2C_INIT_TOUCH1;
+                                if (touch_init_retries[TOUCH_INIT_RETRIES_BIT]) begin
+                                    i2c_state <= I2C_INIT_CODEC1;
+                                end else begin
+                                    i2c_state <= I2C_INIT_TOUCH1;
+                                    touch_init_retries <= touch_init_retries + 1;
+                                end
                             end
                         end
                         3: begin
