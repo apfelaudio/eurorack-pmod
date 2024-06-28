@@ -61,8 +61,15 @@ logic [4:0] bit_counter;
 
 assign pdn         = ~rst;
 assign bick        = clkdiv[0];
-assign mclk        = clkdiv[0];
 assign lrck        = clkdiv[7];
+
+`ifdef AK4619_192KHZ
+// MCLK for 192KHz sample rate.
+assign mclk        = clkdiv[0];
+`else
+// MCLK for 8-48KHz sample rates.
+assign mclk        = clk_256fs;
+`endif
 
 // 0, 1, 2, 3 == L, R, L, R
 assign channel     = clkdiv[7:6];
