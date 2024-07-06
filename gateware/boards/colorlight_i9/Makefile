@@ -4,7 +4,8 @@ DEVICE = 45k
 PACKAGE = CABGA381
 SPEEDGRADE = 6
 PIN_DEF = ./boards/colorlight_i9/pinmap.lpf
-ADD_DEFINES = -DSELECTED_DSP_CORE=$(CORE)
+# UART: 1Mbaud
+ADD_DEFINES = -DSELECTED_DSP_CORE=$(CORE) -DDEBUG_UART_CLKDIV=12
 
 include ./mk/common.mk
 include ./mk/ecp5.mk

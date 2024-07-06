@@ -15,7 +15,7 @@ ifeq ($(BOARD),)
 	@echo "For example:"
 	@echo "  $$ make clean"
 	@echo "  $$ # Build bitstream with specific core and program it"
-	@echo "  $$ make HW_REV=HW_R33 BOARD=icebreaker CORE=stereo_echo prog"
+	@echo "  $$ make HW_REV=HW_R33 BOARD=icebreaker CORE=mirror prog"
 	@exit 1
 endif
 ifeq ($(wildcard ./boards/$(BOARD)/Makefile),)

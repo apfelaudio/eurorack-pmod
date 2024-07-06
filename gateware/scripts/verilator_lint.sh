@@ -4,6 +4,7 @@
 verilator --lint-only -DVERILATOR_LINT_ONLY \
     -DICE40 \
     -DSELECTED_DSP_CORE=mirror \
+    -DDEBUG_UART_CLKDIV=12 \
     -Iboards/icebreaker \
     -Ical \
     -Idrivers \
@@ -18,6 +19,7 @@ verilator --lint-only -DVERILATOR_LINT_ONLY \
 verilator --lint-only -DVERILATOR_LINT_ONLY \
     -DECP5 \
     -DSELECTED_DSP_CORE=mirror \
+    -DDEBUG_UART_CLKDIV=12 \
     -Iboards/colorlight_i5 \
     -Ical \
     -Idrivers \
@@ -33,6 +35,7 @@ verilator --lint-only -DVERILATOR_LINT_ONLY \
     -DICE40 \
     -DSELECTED_DSP_CORE=touch_cv \
     -DTOUCH_SENSE_ENABLED \
+    -DDEBUG_UART_CLKDIV=12 \
     -Iboards/icebreaker \
     -Ical \
     -Idrivers \

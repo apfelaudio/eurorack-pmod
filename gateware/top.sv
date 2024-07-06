@@ -210,7 +210,7 @@ eurorack_pmod #(
 // for bringup and calibration purposes.
 debug_uart #(
     .W(W),
-    .DIV(12) // WARN: baud rate is determined by clk_256fs / 12 !!
+    .DIV(`DEBUG_UART_CLKDIV) // WARN: baud rate is determined by clk_256fs / CLKDIV !!
 ) debug_uart_instance (
     .clk (clk_256fs),
     .rst (rst),

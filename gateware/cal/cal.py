@@ -251,7 +251,8 @@ if __name__ == "__main__":
     args = CalibrationArguments()
     args = parse_args_with_defaults(args)
     if args.serial_port == "":
-        print("Nominal usage: ./cal.py --serial-port /dev/ttyUSBX")
+        print("Nominal usage: ./cal.py --serial-port /dev/ttyUSBX --serial-baud 1000000")
+        print("Warn: most boards are 1MBaud, check their Makefile to be sure!")
         sys.exit(0)  # Exit the program
     calibration_tool = CalibrationTool(args)
     calibration_tool.run_calibration()
