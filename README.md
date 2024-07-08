@@ -1,14 +1,13 @@
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
-# Eurorack PMOD
-
+# Eurorack PMOD (available [here](https://apfelaudio.com/order/))
 
 **Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The latest (R3.3) hardware looks like this and can be ordered **[here](https://apfelaudio.com/order/)**.
 
 ![assembled eurorack-pmod module R3.3 (front)](docs/img/r33_panel.jpg)
 ![assembled eurorack-pmod module R3.3 (top)](docs/img/r33_top.jpg)
 
-## How does it work?
+## How does it work? ([tutorial video](https://youtu.be/TcqFej9GK8U))
 - Plug eurorack-pmod into an FPGA development board of your choice. Here is a list of [boards already supported by the examples](gateware/boards).
 - Get started with some [example DSP cores](gateware/cores). Examples include calibration, sampling, effects, synthesis sources and so on. The design files can be synthesized to a bitstream using Yosys' [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build).
 
@@ -16,12 +15,10 @@
 ## :notes: Project Showcase :sparkles:
 
 - **[FPGA-based neural-net waveshaper](https://matpalm.com/blog/wavenet_on_fpga/)** - (from [matpalm@](https://github.com/matpalm))
+- **[Teensy 4.x I2S TDM w/ Eurorack PMOD](https://github.com/Lytrix/Teensy4-i2s-TDM)** - (from [lytrix@](https://github.com/Lytrix))
+- **[8-channel USB2 soundcard](https://github.com/apfelaudio/eurorack-pmod-usb-soundcard)** - mostly in Amaranth.
 - **[Daisy Seed TDM for Eurorack PMOD](https://github.com/heartwerker/daisy_seed_tdm_eurorack_pmod)** - (from [heartwerker@](https://github.com/heartwerker))
 - **[`apu_chord` core](https://github.com/proppy/eurorack-pmod/tree/apu_chord)** - (from [proppy@](https://github.com/proppy))
-
-A couple more from me:
-
-- **[8-channel USB2 soundcard](https://github.com/apfelaudio/eurorack-pmod-usb-soundcard)** - mostly in Amaranth.
 - **[Real-time DSP with Rust on LiteX](https://github.com/apfelaudio/eurorack-pmod-litex)** - mostly in Rust/Migen.
 
 
