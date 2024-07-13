@@ -60,6 +60,17 @@ module eurorack_pmod #(
     output logic [7:0] touch6,
     output logic [7:0] touch7,
 
+    // LED color values.
+    input [7:0] led_mode, // 1 == audio sample passthrough, 0 == manual set
+    input signed [7:0] led0,
+    input signed [7:0] led1,
+    input signed [7:0] led2,
+    input signed [7:0] led3,
+    input signed [7:0] led4,
+    input signed [7:0] led5,
+    input signed [7:0] led6,
+    input signed [7:0] led7,
+
     // Signals used for bringup / debug / calibration.
     //
     // Raw samples from the CODEC ADCs
@@ -179,14 +190,14 @@ pmod_i2c_master #(
 
     // LEDs directly linked to input/output sample values
     // for now, although they could do whatever we want.
-    .led0(cal_in0[W-1:W-8]),
-    .led1(cal_in1[W-1:W-8]),
-    .led2(cal_in2[W-1:W-8]),
-    .led3(cal_in3[W-1:W-8]),
-    .led4(force_dac_output == 0 ? cal_out0[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led5(force_dac_output == 0 ? cal_out1[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led6(force_dac_output == 0 ? cal_out2[W-1:W-8] : force_dac_output[W-1:W-8]),
-    .led7(force_dac_output == 0 ? cal_out3[W-1:W-8] : force_dac_output[W-1:W-8]),
+    .led0(led_mode[0] ?  cal_in0[W-1:W-8] : led0),
+    .led1(led_mode[1] ?  cal_in1[W-1:W-8] : led1),
+    .led2(led_mode[2] ?  cal_in2[W-1:W-8] : led2),
+    .led3(led_mode[3] ?  cal_in3[W-1:W-8] : led3),
+    .led4(led_mode[4] ? cal_out0[W-1:W-8] : led4),
+    .led5(led_mode[5] ? cal_out1[W-1:W-8] : led5),
+    .led6(led_mode[6] ? cal_out2[W-1:W-8] : led6),
+    .led7(led_mode[7] ? cal_out3[W-1:W-8] : led7),
 
 `ifdef TOUCH_SENSE_ENABLED
     .touch0(touch0),
