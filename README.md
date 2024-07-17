@@ -1,6 +1,6 @@
 ![ci workflow](https://github.com/schnommus/eurorack-pmod/actions/workflows/main.yml/badge.svg)
 
-# Eurorack PMOD (available [here](https://apfelaudio.com/order/))
+# Eurorack PMOD
 
 **Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The latest (R3.3) hardware looks like this and can be ordered **[here](https://apfelaudio.com/order/)**.
 
