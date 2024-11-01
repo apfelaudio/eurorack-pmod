@@ -1,0 +1,24 @@
+# 12 MHz clock
+set_io -nowarn	CLK		35
+set_frequency	CLK		12
+
+# UART should be attached though the iCELink STM32 processor, showing up
+# as /dev/ttyACM* on Linux. Otherwise it's on PMOD1 pin 2.
+set_io -nowarn	UART_TX		6
+
+# There's no momentary button hooked up to a pin on the IceSugar (the one
+# tactile switch drops SPI_VCCIO1 as a hard reset), so hook the soft reset
+# signal up to one of the onboard switches (S1/1, active low). It's not
+# useful, but it satisfies the design.
+set_io -nowarn	RESET_BUTTON	18
+
+# PMOD 2, assuming horizontal flip (ribbon cable between eurorack-pmod
+# and PMOD connector IS in place).
+set_io -nowarn	PMOD_SDIN1	46	# P2_1
+set_io -nowarn	PMOD_SDOUT1	44	# P2_2
+set_io -nowarn	PMOD_LRCK	42	# P2_3
+set_io -nowarn	PMOD_BICK	37	# P2_4
+set_io -nowarn	PMOD_MCLK	36	# P2_9
+set_io -nowarn	PMOD_PDN	38	# P2_10
+set_io -nowarn	PMOD_I2C_SDA	43	# P2_11
+set_io -nowarn	PMOD_I2C_SCL	45	# P2_12
