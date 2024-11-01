@@ -161,3 +161,9 @@ If you wish to license parts of this design in a commercial product without a re
 *Copyright (C) 2022,2023 Sebastian Holzapfel*
 
 The above LICENSE and copyright notice does NOT apply to imported artifacts in this repository (i.e datasheets, third-party footprints).
+
+# Derivative works
+
+If you create or manufacture your own derivative hardware, the name "apfelaudio", the names of any apfelaudio products and the names of the authors, are *not to be used in derivative hardware or marketing materials*, except where obligated for attribution and for retaining the above copyright notice.
+
+For example, your modified version of "apfelaudio SoldierCrab" could be called "Sandy Modular - Clawcruncher".
