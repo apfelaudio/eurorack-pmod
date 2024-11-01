@@ -29,6 +29,19 @@ jobs:
           name: ubuntu-build-icebreaker.bin
           path: gateware/build/icebreaker/top.bin
 
+  ubuntu-build-icesugar-r33:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: YosysHQ/setup-oss-cad-suite@v3
+      - run: git submodule update --init gateware/external/no2misc
+      - run: yosys --version
+      - run: make HW_REV=HW_R33 BOARD=icesugar CORE=mirror -C gateware
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-build-icesugar.bin
+          path: gateware/build/icesugar/top.bin
+
   ubuntu-build-icebreaker-r33-touch:
     runs-on: ubuntu-latest
     steps:
