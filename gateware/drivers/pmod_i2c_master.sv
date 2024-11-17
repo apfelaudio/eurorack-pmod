@@ -82,8 +82,8 @@ localparam I2C_DELAY1        = 0,
            I2C_LED2          = 10, //     |
            I2C_JACK1         = 11, //     |
            I2C_JACK2         = 12, //     |
-           I2C_TOUCH_SCAN1   = 13, //     |  | these 2 only if TOUCH is enabled
-           I2C_TOUCH_SCAN2   = 14, // >>--/  |
+           I2C_MUTE_CODEC1   = 13, //     |  | these 2 only if TOUCH is enabled
+           I2C_MUTE_CODEC2   = 14, // >>--/  |
            I2C_IDLE          = 15;
 
 `ifdef COCOTB_SIM
@@ -96,6 +96,8 @@ logic [3:0] i2c_state = I2C_DELAY1;
 
 // Index into i2c config memories
 logic [15:0] i2c_config_pos = 0;
+
+logic [31:0] big_cnt = 0;
 
 // Logic for startup configuration of CODEC over I2C.
 logic [7:0] codec_config [0:CODEC_CFG_BYTES-1];
@@ -160,13 +162,15 @@ always_ff @(posedge clk) begin
         i2c_state <= I2C_DELAY1;
         delay_cnt <= 0;
         touch_init_retries <= 0;
+        big_cnt <= 0;
     end else begin
+        big_cnt <= big_cnt + 1;
         delay_cnt <= delay_cnt + 1;
         if (ready && ~stb) begin
             case (i2c_state)
                 I2C_DELAY1: begin
                     if(delay_cnt[STARTUP_DELAY_BIT])
-                        i2c_state <= I2C_EEPROM1;
+                        i2c_state <= I2C_LED1;
                 end
                 I2C_EEPROM1: begin
                     i2c_state <= I2C_EEPROM2;
@@ -449,7 +453,10 @@ always_ff @(posedge clk) begin
                     case (i2c_config_pos)
                         LED_CFG_BYTES: begin
                             cmd <= I2CMASTER_STOP;
-                            i2c_state <= I2C_JACK1;
+                            if (big_cnt > 60000000)
+                                i2c_state <= I2C_MUTE_CODEC1;
+                            else
+                                i2c_state <= I2C_JACK1;
                         end
                         default: begin
                             data_in <= led_config[5'(i2c_config_pos)];
@@ -512,7 +519,9 @@ always_ff @(posedge clk) begin
                                 cmd <= I2CMASTER_READ;
                             end else begin
                                 cmd <= I2CMASTER_STOP;
+`ifdef TOUCH_SENSE_ENABLED
                                 i2c_state <= I2C_TOUCH_SCAN1;
+`endif // TOUCH_SENSE_ENABLED
                             end
                         end
                         // 4) Save the result.
@@ -528,6 +537,44 @@ always_ff @(posedge clk) begin
                         end
                         default: begin
                             // do nothing
+                        end
+                    endcase
+                    i2c_config_pos <= i2c_config_pos + 1;
+                    ack_in <= 1'b1;
+                    stb <= 1'b1;
+                end
+                I2C_MUTE_CODEC1: begin
+                    cmd <= I2CMASTER_START;
+                    stb <= 1'b1;
+                    i2c_state <= I2C_MUTE_CODEC2;
+                    i2c_config_pos <= 0;
+                end
+                I2C_MUTE_CODEC2: begin
+                    case (i2c_config_pos)
+                        0: begin
+                            cmd <= I2CMASTER_START;
+                        end
+                        1: begin
+                            data_in <= 8'h20;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        2: begin
+                            if (ack_out == 1'b0) begin
+                                data_in <= 8'h00;
+                                cmd <= I2CMASTER_WRITE;
+                            end else begin
+                                cmd <= I2CMASTER_STOP;
+                                i2c_state <= I2C_LED1;
+                            end
+                        end
+                        3: begin
+                            // MUTE
+                            data_in <= 8'h36;
+                            cmd <= I2CMASTER_WRITE;
+                        end
+                        4: begin
+                            cmd <= I2CMASTER_STOP;
+                            i2c_state <= I2C_LED1;
                         end
                     endcase
                     i2c_config_pos <= i2c_config_pos + 1;
