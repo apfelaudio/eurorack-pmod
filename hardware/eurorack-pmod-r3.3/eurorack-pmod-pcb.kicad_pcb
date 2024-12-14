@@ -9349,7 +9349,7 @@
   (gr_text "PMOD⇦" (at 1.456 1.728) (layer "F.SilkS") (tstamp 902e41e9-a925-4590-a979-e5759de2faad)
     (effects (font (size 1.2 1.2) (thickness 0.25)))
   )
-  (gr_text "github.com/apfelaudio/eurorack-pmod" (at 8.086 76.758 90) (layer "B.Mask") (tstamp 6539fe29-f4e9-4c84-88ad-bd83aa3e84f4)
+  (gr_text "github.com/apfaudio/eurorack-pmod" (at 8.086 76.758 90) (layer "B.Mask") (tstamp 6539fe29-f4e9-4c84-88ad-bd83aa3e84f4)
     (effects (font (size 0.7 0.6) (thickness 0.15) italic) (justify mirror))
   )
   (gr_text "PMOD" (at 9.966 72.648 90) (layer "F.Mask") (tstamp 34444d04-5259-43c3-ae53-bffb767633dc)
