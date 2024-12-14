@@ -2,7 +2,7 @@
 
 # Eurorack PMOD
 
-**Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The latest (R3.3) hardware looks like this and can be ordered **[here](https://apfelaudio.com/order/)**.
+**Eurorack PMOD** is a [certified open hardware](https://certification.oshwa.org/de000135.html) Eurorack module that plugs directly into many FPGA boards, which makes it easy to combine the world of FPGAs and [hardware electronic music synthesis](https://en.wikipedia.org/wiki/Eurorack). The latest (R3.3) hardware looks like this:
 
 ![assembled eurorack-pmod module R3.3 (front)](docs/img/r33_panel.jpg)
 ![assembled eurorack-pmod module R3.3 (top)](docs/img/r33_top.jpg)
@@ -16,10 +16,10 @@
 
 - **[FPGA-based neural-net waveshaper](https://matpalm.com/blog/wavenet_on_fpga/)** - (from [matpalm@](https://github.com/matpalm))
 - **[Teensy 4.x I2S TDM w/ Eurorack PMOD](https://github.com/Lytrix/Teensy4-i2s-TDM)** - (from [lytrix@](https://github.com/Lytrix))
-- **[8-channel USB2 soundcard](https://github.com/apfelaudio/eurorack-pmod-usb-soundcard)** - mostly in Amaranth.
+- **[8-channel USB2 soundcard](https://github.com/apfaudio/eurorack-pmod-usb-soundcard)** - mostly in Amaranth.
 - **[Daisy Seed TDM for Eurorack PMOD](https://github.com/heartwerker/daisy_seed_tdm_eurorack_pmod)** - (from [heartwerker@](https://github.com/heartwerker))
 - **[`apu_chord` core](https://github.com/proppy/eurorack-pmod/tree/apu_chord)** - (from [proppy@](https://github.com/proppy))
-- **[Real-time DSP with Rust on LiteX](https://github.com/apfelaudio/eurorack-pmod-litex)** - mostly in Rust/Migen.
+- **[Real-time DSP with Rust on LiteX](https://github.com/apfaudio/eurorack-pmod-litex)** - mostly in Rust/Migen.
 
 
 # R3.3 hardware details
@@ -36,7 +36,7 @@
 - [new!] Touch and proximity sensing on all unused jacks as an extra input method.
     - See the `gateware/cores/touch_cv.sv` core for an example of how to use this.
 
-**Compared to R3.1, the changes across R3.2 and R3.3 [are summarized here](https://github.com/apfelaudio/eurorack-pmod/issues/50)**
+**Compared to R3.1, the changes across R3.2 and R3.3 [are summarized here](https://github.com/apfaudio/eurorack-pmod/issues/50)**
 
 [Want one?](#manufacturing). More photos can be found [below](#photos).
 
@@ -110,8 +110,6 @@ The project is split into 2 directories, [`hardware`](hardware) for the PCB/pane
 - [`hardware/fab`](hardware/fab): gerber files and BOM for manufacturing the hardware.
 
 # Manufacturing
-
-## **R3.3 hardware is in stock** [order **here :)**](https://apfelaudio.com/)
 
 # R3.1 Hardware (no longer manufactured)
 
